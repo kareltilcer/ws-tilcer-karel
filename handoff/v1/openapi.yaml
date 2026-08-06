@@ -1,0 +1,1619 @@
+openapi: 3.1.0
+info:
+  title: karel (Personal Site & CMS) API
+  version: 0.1.0
+  description: >-
+    First-draft API for the `karel` service — Karel's bilingual (CZ/EN) personal
+    site and its small self-hosted CMS. Companion to PRD.md.
+
+
+    Auth: admin endpoints (`/api/admin/**`) use bearerAuth (JWT, 15-min) with
+    session-cookie fallback, via the shared auth backend (site id `karel`, Mode B).
+    Public read endpoints and the three public write endpoints (contact form,
+    minigame score, link-click) are unauthenticated; the two form endpoints are
+    guarded by a honeypot field + Cloudflare Turnstile token + per-IP rate limit.
+    Health probes are unauthenticated.
+
+
+    Bilingual content: translatable fields are returned/accepted as paired
+    `*_cs` / `*_en` properties so the frontend can switch language with no refetch.
+servers:
+  - url: https://karel.tilcer.cz
+    description: Production (Coolify). kaja.tilcer.cz 301-redirects here.
+
+tags:
+  - name: health
+    description: Liveness/readiness probes (baseline for every backend)
+  - name: content
+    description: Public read of published site content
+  - name: contact
+    description: Contact form (public submit) + inbox (admin)
+  - name: arcade
+    description: Minigame leaderboards (public) + moderation (admin)
+  - name: admin-projects
+    description: Manage projects (admin)
+  - name: admin-categories
+    description: Manage project categories (admin)
+  - name: admin-links
+    description: Manage linktree links (admin)
+  - name: admin-sections
+    description: Manage page sections & skills (admin)
+  - name: admin-business
+    description: Manage the OSVČ business disclosure (admin)
+  - name: admin-media
+    description: Media library (admin)
+
+paths:
+  # ------------------------------------------------------------------ health
+  /healthz:
+    get:
+      tags: [health]
+      summary: Liveness probe
+      security: []
+      responses:
+        "200":
+          description: Process is up
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /readyz:
+    get:
+      tags: [health]
+      summary: Readiness probe (includes SQLite check)
+      security: []
+      responses:
+        "200":
+          description: Ready to serve traffic
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+        "503":
+          description: Not ready (e.g. DB unavailable)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ------------------------------------------------------- public content read
+  /api/projects:
+    get:
+      tags: [content]
+      summary: List published projects
+      security: []
+      parameters:
+        - name: category
+          in: query
+          description: Filter by category slug
+          schema:
+            $ref: "#/components/schemas/Slug"
+        - name: featured
+          in: query
+          description: Only featured projects
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Published projects (ordered by sort_order, then date)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProjectSummary"
+
+  /api/projects/{slug}:
+    parameters:
+      - $ref: "#/components/parameters/SlugPath"
+    get:
+      tags: [content]
+      summary: Get a published project by slug
+      security: []
+      responses:
+        "200":
+          description: Project detail with gallery + out-links
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/categories:
+    get:
+      tags: [content]
+      summary: List visible project categories
+      security: []
+      responses:
+        "200":
+          description: Categories (ordered)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  /api/links:
+    get:
+      tags: [content]
+      summary: List visible linktree links
+      security: []
+      responses:
+        "200":
+          description: Visible links (ordered)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Link"
+
+  /api/sections/{key}:
+    parameters:
+      - $ref: "#/components/parameters/SectionKey"
+    get:
+      tags: [content]
+      summary: Get a page section (e.g. about, hero)
+      security: []
+      responses:
+        "200":
+          description: The section
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Section"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/skills:
+    get:
+      tags: [content]
+      summary: List visible skills
+      security: []
+      responses:
+        "200":
+          description: Skills (grouped by category, ordered)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Skill"
+
+  /api/business-info:
+    get:
+      tags: [content]
+      summary: Get the OSVČ business disclosure (Impressum)
+      security: []
+      responses:
+        "200":
+          description: Business/legal disclosure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessInfo"
+
+  /api/links/{id}/click:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      tags: [content]
+      summary: Register an outbound link click (best-effort counter)
+      description: >-
+        Public, fire-and-forget. Increments the link's click_count, per-IP
+        rate-limited. Never blocks navigation; unknown ids are ignored client-side.
+      security: []
+      responses:
+        "204":
+          description: Counted (or silently ignored)
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  # ---------------------------------------------------------- contact (public)
+  /api/contact:
+    post:
+      tags: [contact]
+      summary: Submit a contact message
+      description: >-
+        Public. Stores the message and emails CONTACT_TO via Resend (reply-to =
+        sender). Guarded by a honeypot field, a Cloudflare Turnstile token, and a
+        per-IP rate limit. A stored message is never lost even if the email send
+        fails (logged instead).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactSubmit"
+      responses:
+        "202":
+          description: Accepted (stored; email queued/sent)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResult"
+        "400":
+          $ref: "#/components/responses/SpamRejected"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  # ----------------------------------------------------------- arcade (public)
+  /api/arcade/{gameKey}/scores:
+    parameters:
+      - $ref: "#/components/parameters/GameKey"
+    get:
+      tags: [arcade]
+      summary: Get a game leaderboard (top N)
+      security: []
+      parameters:
+        - name: limit
+          in: query
+          description: Number of top scores to return
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: Top scores (desc)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScoreEntry"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      tags: [arcade]
+      summary: Submit a minigame score
+      description: >-
+        Public. The game key must match the code-defined game registry, and the
+        score is validated against that game's hardcoded plausible bound. Guarded
+        by honeypot + Turnstile + per-IP rate limit.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScoreSubmit"
+      responses:
+        "201":
+          description: Recorded; returns rank + current top
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoreSubmitResult"
+        "400":
+          $ref: "#/components/responses/SpamRejected"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  # ================================================================= ADMIN ===
+  # --------------------------------------------------------- admin: projects
+  /api/admin/projects:
+    get:
+      tags: [admin-projects]
+      summary: List all projects (incl. drafts)
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/PublishStatus"
+      responses:
+        "200":
+          description: Paginated projects
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ProjectDetail"
+                  next_cursor:
+                    type: [string, "null"]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [admin-projects]
+      summary: Create a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/admin/projects/reorder:
+    post:
+      tags: [admin-projects]
+      summary: Reorder projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderRequest"
+      responses:
+        "204":
+          description: Reordered
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/admin/projects/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      tags: [admin-projects]
+      summary: Update a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      tags: [admin-projects]
+      summary: Delete a project (detaches gallery joins)
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ------------------------------------------------------- admin: categories
+  /api/admin/categories:
+    get:
+      tags: [admin-categories]
+      summary: List all categories (incl. hidden)
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [admin-categories]
+      summary: Create a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/admin/categories/reorder:
+    post:
+      tags: [admin-categories]
+      summary: Reorder categories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderRequest"
+      responses:
+        "204":
+          description: Reordered
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/admin/categories/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      tags: [admin-categories]
+      summary: Update a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      tags: [admin-categories]
+      summary: Delete a category (blocked while projects reference it)
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Category is still referenced by one or more projects
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ------------------------------------------------------------- admin: links
+  /api/admin/links:
+    get:
+      tags: [admin-links]
+      summary: List all links (incl. hidden)
+      responses:
+        "200":
+          description: Links
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Link"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [admin-links]
+      summary: Create a link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LinkCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Link"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/admin/links/reorder:
+    post:
+      tags: [admin-links]
+      summary: Reorder links
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderRequest"
+      responses:
+        "204":
+          description: Reordered
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/admin/links/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      tags: [admin-links]
+      summary: Update a link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LinkUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Link"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      tags: [admin-links]
+      summary: Delete a link
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ------------------------------------------------- admin: sections & skills
+  /api/admin/sections/{key}:
+    parameters:
+      - $ref: "#/components/parameters/SectionKey"
+    put:
+      tags: [admin-sections]
+      summary: Upsert a page section (about, hero)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SectionUpdate"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Section"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/admin/skills:
+    post:
+      tags: [admin-sections]
+      summary: Create a skill
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SkillCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Skill"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/admin/skills/reorder:
+    post:
+      tags: [admin-sections]
+      summary: Reorder skills
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReorderRequest"
+      responses:
+        "204":
+          description: Reordered
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/admin/skills/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      tags: [admin-sections]
+      summary: Update a skill
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SkillUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Skill"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      tags: [admin-sections]
+      summary: Delete a skill
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------- admin: business
+  /api/admin/business-info:
+    put:
+      tags: [admin-business]
+      summary: Upsert the OSVČ business disclosure
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessInfoUpdate"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessInfo"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  # ------------------------------------------------------------- admin: media
+  /api/admin/media:
+    get:
+      tags: [admin-media]
+      summary: List media
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: Paginated media
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Media"
+                  next_cursor:
+                    type: [string, "null"]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [admin-media]
+      summary: Upload an image (SVG accepted, sanitized)
+      description: >-
+        Stores the object in the self-hosted S3 store under the media prefix and
+        returns metadata + public URL. SVGs are sanitized (scripts/handlers
+        stripped) before storage and served with restrictive headers.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                alt_cs:
+                  type: string
+                alt_en:
+                  type: string
+      responses:
+        "201":
+          description: Uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Media"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "413":
+          description: File too large
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "415":
+          description: Unsupported media type
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Invalid file (e.g. failed SVG sanitization)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/admin/media/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    delete:
+      tags: [admin-media]
+      summary: Delete media (blocked while referenced)
+      responses:
+        "204":
+          description: Deleted (object removed from S3)
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Media is still referenced by a project/section
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # --------------------------------------------------------- admin: contact
+  /api/admin/contact:
+    get:
+      tags: [contact]
+      summary: List contact messages (admin inbox)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/MessageStatus"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: Paginated messages (newest first)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ContactMessage"
+                  next_cursor:
+                    type: [string, "null"]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/admin/contact/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      tags: [contact]
+      summary: Update a message status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  $ref: "#/components/schemas/MessageStatus"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactMessage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      tags: [contact]
+      summary: Delete a message
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------- admin: arcade moderation
+  /api/admin/arcade/scores/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    delete:
+      tags: [arcade]
+      summary: Delete a single score
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/admin/arcade/{gameKey}/reset:
+    parameters:
+      - $ref: "#/components/parameters/GameKey"
+    post:
+      tags: [arcade]
+      summary: Clear a game's leaderboard
+      responses:
+        "204":
+          description: Board cleared
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Short-term FE→BE auth, 15-minute expiry (via auth backend, site `karel`, Mode B).
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Long-term FE→BE auth (own session cookie).
+
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    SlugPath:
+      name: slug
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Slug"
+    SectionKey:
+      name: key
+      in: path
+      required: true
+      schema:
+        type: string
+        examples: ["about", "hero"]
+    GameKey:
+      name: gameKey
+      in: path
+      required: true
+      description: A code-defined minigame key
+      schema:
+        type: string
+        pattern: "^[a-z0-9][a-z0-9-]{0,40}$"
+        examples: ["catch-the-scoop", "melt-timer"]
+    Limit:
+      name: limit
+      in: query
+      description: Max items per page
+      schema:
+        type: integer
+        default: 50
+        minimum: 1
+        maximum: 200
+    Cursor:
+      name: cursor
+      in: query
+      description: Opaque pagination cursor
+      schema:
+        type: string
+
+  responses:
+    Unauthorized:
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: Conflict (e.g. duplicate slug)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ValidationError:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    RateLimited:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    SpamRejected:
+      description: Failed spam check (honeypot filled or Turnstile invalid)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Health:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+    OkResult:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+
+    Slug:
+      type: string
+      pattern: "^[a-z0-9][a-z0-9-]{0,80}$"
+      examples: ["my-first-app", "knitted-scarf"]
+    Locale:
+      type: string
+      enum: [cs, en]
+    PublishStatus:
+      type: string
+      enum: [draft, published]
+    MessageStatus:
+      type: string
+      enum: [new, read, archived, spam]
+
+    ReorderRequest:
+      type: object
+      required: [ids]
+      description: Ordered list of ids; server rewrites sort_order to match
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+
+    ProjectLink:
+      type: object
+      required: [label, url]
+      properties:
+        label:
+          type: string
+        url:
+          type: string
+          format: uri
+        type:
+          type: string
+          examples: ["repo", "live", "demo"]
+
+    Category:
+      type: object
+      required: [id, slug, name_cs, name_en, sort_order, visible]
+      properties:
+        id:
+          type: integer
+        slug:
+          $ref: "#/components/schemas/Slug"
+        name_cs:
+          type: string
+        name_en:
+          type: string
+        sort_order:
+          type: integer
+        visible:
+          type: boolean
+    CategoryCreate:
+      type: object
+      required: [slug, name_cs, name_en]
+      properties:
+        slug:
+          $ref: "#/components/schemas/Slug"
+        name_cs:
+          type: string
+        name_en:
+          type: string
+        sort_order:
+          type: integer
+        visible:
+          type: boolean
+          default: true
+    CategoryUpdate:
+      type: object
+      properties:
+        slug:
+          $ref: "#/components/schemas/Slug"
+        name_cs:
+          type: string
+        name_en:
+          type: string
+        sort_order:
+          type: integer
+        visible:
+          type: boolean
+
+    MediaRef:
+      type: object
+      description: Lightweight media reference embedded in content
+      required: [id, public_url]
+      properties:
+        id:
+          type: integer
+        public_url:
+          type: string
+          format: uri
+        alt_cs:
+          type: [string, "null"]
+        alt_en:
+          type: [string, "null"]
+        width:
+          type: [integer, "null"]
+        height:
+          type: [integer, "null"]
+    Media:
+      type: object
+      required: [id, s3_key, public_url, mime, size_bytes, created_at]
+      properties:
+        id:
+          type: integer
+        s3_key:
+          type: string
+        public_url:
+          type: string
+          format: uri
+        mime:
+          type: string
+          examples: ["image/webp", "image/svg+xml"]
+        width:
+          type: [integer, "null"]
+        height:
+          type: [integer, "null"]
+        size_bytes:
+          type: integer
+        alt_cs:
+          type: [string, "null"]
+        alt_en:
+          type: [string, "null"]
+        created_at:
+          type: string
+          format: date-time
+
+    ProjectSummary:
+      type: object
+      required: [id, slug, category, title_cs, title_en, status]
+      properties:
+        id:
+          type: integer
+        slug:
+          $ref: "#/components/schemas/Slug"
+        category:
+          $ref: "#/components/schemas/Category"
+        title_cs:
+          type: string
+        title_en:
+          type: string
+        summary_cs:
+          type: [string, "null"]
+        summary_en:
+          type: [string, "null"]
+        cover:
+          oneOf:
+            - $ref: "#/components/schemas/MediaRef"
+            - type: "null"
+        featured:
+          type: boolean
+        status:
+          $ref: "#/components/schemas/PublishStatus"
+        project_date:
+          type: [string, "null"]
+          format: date
+        sort_order:
+          type: integer
+    ProjectDetail:
+      allOf:
+        - $ref: "#/components/schemas/ProjectSummary"
+        - type: object
+          properties:
+            body_cs:
+              type: [string, "null"]
+              description: Markdown (sanitized)
+            body_en:
+              type: [string, "null"]
+            gallery:
+              type: array
+              items:
+                $ref: "#/components/schemas/MediaRef"
+            links:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProjectLink"
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+    ProjectCreate:
+      type: object
+      required: [slug, category_id, title_cs, title_en]
+      properties:
+        slug:
+          $ref: "#/components/schemas/Slug"
+        category_id:
+          type: integer
+        title_cs:
+          type: string
+        title_en:
+          type: string
+        summary_cs:
+          type: string
+        summary_en:
+          type: string
+        body_cs:
+          type: string
+        body_en:
+          type: string
+        cover_media_id:
+          type: [integer, "null"]
+        gallery:
+          type: array
+          description: Ordered media ids
+          items:
+            type: integer
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProjectLink"
+        project_date:
+          type: [string, "null"]
+          format: date
+        featured:
+          type: boolean
+          default: false
+        status:
+          $ref: "#/components/schemas/PublishStatus"
+        sort_order:
+          type: integer
+    ProjectUpdate:
+      type: object
+      description: All fields optional; slug must stay unique if changed
+      properties:
+        slug:
+          $ref: "#/components/schemas/Slug"
+        category_id:
+          type: integer
+        title_cs:
+          type: string
+        title_en:
+          type: string
+        summary_cs:
+          type: string
+        summary_en:
+          type: string
+        body_cs:
+          type: string
+        body_en:
+          type: string
+        cover_media_id:
+          type: [integer, "null"]
+        gallery:
+          type: array
+          items:
+            type: integer
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProjectLink"
+        project_date:
+          type: [string, "null"]
+          format: date
+        featured:
+          type: boolean
+        status:
+          $ref: "#/components/schemas/PublishStatus"
+        sort_order:
+          type: integer
+
+    Link:
+      type: object
+      required: [id, label_cs, label_en, url, visible, sort_order]
+      properties:
+        id:
+          type: integer
+        label_cs:
+          type: string
+        label_en:
+          type: string
+        url:
+          type: string
+          format: uri
+        icon:
+          type: [string, "null"]
+        visible:
+          type: boolean
+        sort_order:
+          type: integer
+        click_count:
+          type: integer
+    LinkCreate:
+      type: object
+      required: [label_cs, label_en, url]
+      properties:
+        label_cs:
+          type: string
+        label_en:
+          type: string
+        url:
+          type: string
+          format: uri
+        icon:
+          type: string
+        visible:
+          type: boolean
+          default: true
+        sort_order:
+          type: integer
+    LinkUpdate:
+      type: object
+      properties:
+        label_cs:
+          type: string
+        label_en:
+          type: string
+        url:
+          type: string
+          format: uri
+        icon:
+          type: string
+        visible:
+          type: boolean
+        sort_order:
+          type: integer
+
+    Section:
+      type: object
+      required: [key]
+      properties:
+        key:
+          type: string
+          examples: ["about", "hero"]
+        heading_cs:
+          type: [string, "null"]
+        heading_en:
+          type: [string, "null"]
+        body_cs:
+          type: [string, "null"]
+        body_en:
+          type: [string, "null"]
+        media:
+          oneOf:
+            - $ref: "#/components/schemas/MediaRef"
+            - type: "null"
+        updated_at:
+          type: string
+          format: date-time
+    SectionUpdate:
+      type: object
+      properties:
+        heading_cs:
+          type: string
+        heading_en:
+          type: string
+        body_cs:
+          type: string
+        body_en:
+          type: string
+        media_id:
+          type: [integer, "null"]
+
+    Skill:
+      type: object
+      required: [id, name, category, visible, sort_order]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+          examples: ["languages", "tools", "craft"]
+        icon:
+          type: [string, "null"]
+        level:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 5
+        visible:
+          type: boolean
+        sort_order:
+          type: integer
+    SkillCreate:
+      type: object
+      required: [name, category]
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+        icon:
+          type: string
+        level:
+          type: integer
+          minimum: 1
+          maximum: 5
+        visible:
+          type: boolean
+          default: true
+        sort_order:
+          type: integer
+    SkillUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+        icon:
+          type: string
+        level:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 5
+        visible:
+          type: boolean
+        sort_order:
+          type: integer
+
+    BusinessInfo:
+      type: object
+      required: [legal_name]
+      description: OSVČ (živnostník) disclosure. DIČ empty (neplátce); sídlo shown on the legal page only.
+      properties:
+        legal_name:
+          type: string
+          description: Jméno a příjmení
+        ico:
+          type: [string, "null"]
+        dic:
+          type: [string, "null"]
+          description: Empty for a neplátce; renders only when set
+        address_lines:
+          type: [string, "null"]
+        city:
+          type: [string, "null"]
+        zip:
+          type: [string, "null"]
+        country:
+          type: [string, "null"]
+        register_note_cs:
+          type: [string, "null"]
+          description: e.g. "Zapsáno v živnostenském rejstříku, úřad …"
+        register_note_en:
+          type: [string, "null"]
+        contact_email:
+          type: [string, "null"]
+          format: email
+        contact_phone:
+          type: [string, "null"]
+        data_note_cs:
+          type: [string, "null"]
+        data_note_en:
+          type: [string, "null"]
+        updated_at:
+          type: string
+          format: date-time
+    BusinessInfoUpdate:
+      type: object
+      properties:
+        legal_name:
+          type: string
+        ico:
+          type: string
+        dic:
+          type: string
+        address_lines:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        country:
+          type: string
+        register_note_cs:
+          type: string
+        register_note_en:
+          type: string
+        contact_email:
+          type: string
+          format: email
+        contact_phone:
+          type: string
+        data_note_cs:
+          type: string
+        data_note_en:
+          type: string
+
+    ContactSubmit:
+      type: object
+      required: [name, email, message]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        subject:
+          type: string
+        message:
+          type: string
+        locale:
+          $ref: "#/components/schemas/Locale"
+        website:
+          type: string
+          description: Honeypot — must be empty; a filled value is treated as spam
+        turnstile_token:
+          type: string
+          description: Cloudflare Turnstile token (required when Turnstile is enabled)
+    ContactMessage:
+      type: object
+      required: [id, name, email, message, status, created_at]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        subject:
+          type: [string, "null"]
+        message:
+          type: string
+        locale:
+          type: [string, "null"]
+        ip:
+          type: [string, "null"]
+        user_agent:
+          type: [string, "null"]
+        status:
+          $ref: "#/components/schemas/MessageStatus"
+        created_at:
+          type: string
+          format: date-time
+
+    ScoreSubmit:
+      type: object
+      required: [player_name, score]
+      properties:
+        player_name:
+          type: string
+          maxLength: 32
+        score:
+          type: integer
+          minimum: 0
+        locale:
+          $ref: "#/components/schemas/Locale"
+        website:
+          type: string
+          description: Honeypot — must be empty
+        turnstile_token:
+          type: string
+          description: Cloudflare Turnstile token
+    ScoreEntry:
+      type: object
+      required: [player_name, score, created_at]
+      properties:
+        player_name:
+          type: string
+        score:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+    ScoreSubmitResult:
+      type: object
+      required: [rank, top]
+      properties:
+        rank:
+          type: integer
+          description: The submitter's rank on the board
+        top:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScoreEntry"
+
+# Default auth for endpoints (public read/write and health override with security: []).
+security:
+  - bearerAuth: []
+  - sessionCookie: []
