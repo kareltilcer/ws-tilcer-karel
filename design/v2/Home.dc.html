@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --sky-1:#9FE3FF; --sky-2:#FFE7BE; --bg:#FFF6E9; --surface:#FFFFFF; --surface-2:#FFF0DD;
+    --ink:#3A2416; --ink-soft:#8A6A50; --cream-line:#EBD9BE;
+    --mango:#FF9F1C; --tanger:#FF7A1A; --cherry:#EF476F; --cherry-strong:#D62A54;
+    --pistachio:#7FC85F; --sky:#37B6EF; --yuzu:#F2CE2E; --poppy:#B4A2F0; --sun:#FFD23F;
+    --shadow: 0 14px 30px -12px rgba(58,36,22,.32);
+    --ring: rgba(214,42,84,.5);
+  }
+  [data-theme="night"]{
+    --sky-1:#241E48; --sky-2:#5A2E5E; --bg:#1B1530; --surface:#2A2340; --surface-2:#241E3A;
+    --ink:#FDF3E7; --ink-soft:#C6B4D6; --cream-line:#3B3358;
+    --mango:#FFB24D; --tanger:#FF9350; --cherry:#FF6B90; --cherry-strong:#FF6B90;
+    --pistachio:#9BE07A; --sky:#66D0FF; --yuzu:#FFE06A; --poppy:#C9BAFF; --sun:#FFE9A8;
+    --shadow: 0 18px 40px -14px rgba(0,0,0,.6);
+    --ring: rgba(255,107,144,.6);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--cherry);color:#fff}
+  a{color:var(--cherry-strong);text-decoration:none}
+  a:hover{color:var(--tanger)}
+  @keyframes floaty{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-16px) rotate(var(--r,0deg))}}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes twinkle{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+  @keyframes drip{0%{transform:scaleY(.4);opacity:.7}60%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1) translateY(6px);opacity:0}}
+  @keyframes pulsering{0%{box-shadow:0 0 0 0 var(--ring)}70%{box-shadow:0 0 0 14px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  @keyframes wob{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+  .om-anim-float{animation:floaty 6s ease-in-out infinite}
+  .om-anim-bob{animation:bob 3.4s ease-in-out infinite}
+  .om-anim-spin{animation:spin 44s linear infinite}
+  .om-anim-tw{animation:twinkle 3s ease-in-out infinite}
+  .om-anim-wob{animation:wob 2.8s ease-in-out infinite}
+  @media (prefers-reduced-motion:reduce){.om-anim-float,.om-anim-bob,.om-anim-spin,.om-anim-tw,.om-anim-wob{animation:none !important}html{scroll-behavior:auto !important}}
+  .navlink{position:relative}
+  .navlink::after{content:"";position:absolute;left:0;right:100%;bottom:-4px;height:3px;border-radius:3px;background:var(--cherry);transition:right .25s ease}
+  .navlink:hover::after{right:0}
+  @media (max-width:900px){ .hero-nav{display:none !important} }
+  @media (max-width:640px){
+    .hero-grid{grid-template-columns:1fr !important;gap:8px !important}
+    .hero-grid > div:last-child{min-height:300px !important}
+    .paths{grid-template-columns:1fr 1fr !important}
+    h1{font-size:clamp(36px,11vw,52px) !important}
+  }
+  @media (max-width:420px){
+    .ctrls{gap:6px}
+    .ctrls button{height:38px !important;width:auto}
+  }
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="position:relative;min-height:100vh;overflow:hidden;background:linear-gradient(180deg,var(--sky-1) 0%,var(--sky-2) 62%,var(--bg) 100%);color:var(--ink);transition:background .5s ease,color .3s ease">
+
+  <div ref="{{ glowRef }}" style="position:fixed;top:0;left:0;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;background:radial-gradient(circle,rgba(255,210,63,.35),transparent 70%);pointer-events:none;z-index:60;mix-blend-mode:screen;opacity:0;transition:opacity .3s"></div>
+
+  <div style="position:absolute;top:5%;right:8%;z-index:1" class="om-anim-spin">
+    <div class="om-anim-tw" style="width:132px;height:132px;border-radius:50%;background:radial-gradient(circle at 38% 38%,#FFF0B0,var(--sun));box-shadow:0 0 60px 12px var(--sun),0 0 0 10px rgba(255,210,63,.18)"></div>
+  </div>
+  <div style="position:absolute;top:11%;left:14%;width:14px;height:14px;border-radius:50%;background:#fff;opacity:.9" ></div>
+  <div class="om-anim-tw" style="position:absolute;top:22%;left:34%;width:9px;height:9px;border-radius:50%;background:#fff"></div>
+  <div class="om-anim-tw" style="position:absolute;top:16%;right:34%;width:7px;height:7px;border-radius:50%;background:#fff;animation-delay:1.2s"></div>
+
+  <header style="position:relative;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px clamp(18px,5vw,64px)">
+    <a href="#top" style="display:flex;align-items:center;gap:12px;color:var(--ink)">
+      <span style="display:grid;place-items:center;width:44px;height:44px;border-radius:16px 16px 16px 6px;background:var(--cherry-strong);color:#fff;font-family:'Baloo 2',cursive;font-weight:800;font-size:24px;box-shadow:var(--shadow);transform:rotate(-6deg)">k</span>
+      <span style="font-family:'Baloo 2',cursive;font-weight:700;font-size:22px;letter-spacing:-.01em">karel<span style="color:var(--cherry-strong)">.</span></span>
+    </a>
+    <nav style="display:flex;align-items:center;gap:26px" class="hero-nav">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="6">
+        <a href="{{ item.href }}" class="navlink" style="font-weight:600;font-size:16px;color:var(--ink)">{{ item.label }}</a>
+      </sc-for>
+    </nav>
+    <div class="ctrls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <button onClick="{{ toggleLang }}" title="Language" style="height:42px;padding:0 14px;border:2px solid var(--cream-line);background:var(--surface);color:var(--ink);border-radius:14px;font-family:'Baloo 2',cursive;font-weight:700;font-size:15px;cursor:pointer;box-shadow:var(--shadow)">{{ langLabel }}</button>
+      <button onClick="{{ toggleTheme }}" title="Theme" style="width:42px;height:42px;border:2px solid var(--cream-line);background:var(--surface);border-radius:14px;cursor:pointer;box-shadow:var(--shadow);font-size:18px;line-height:1">{{ themeIcon }}</button>
+      <button onClick="{{ toggleSound }}" title="Sound" style="width:42px;height:42px;border:2px solid var(--cream-line);background:var(--surface);border-radius:14px;cursor:pointer;box-shadow:var(--shadow);font-size:16px;line-height:1">{{ soundIcon }}</button>
+    </div>
+  </header>
+
+  <main id="top" style="position:relative;z-index:20;display:grid;grid-template-columns:1.05fr .95fr;gap:24px;align-items:center;padding:clamp(12px,3vw,40px) clamp(18px,5vw,64px) 40px;max-width:1440px;margin:0 auto" class="hero-grid">
+    <div style="max-width:560px">
+      <div style="display:inline-flex;align-items:center;gap:9px;padding:8px 15px;border-radius:999px;background:var(--surface);border:2px solid var(--cream-line);font-weight:600;font-size:14px;color:var(--ink-soft);box-shadow:var(--shadow)">
+        <span style="width:9px;height:9px;border-radius:50%;background:var(--pistachio)"></span>{{ kicker }}
+      </div>
+      <h1 style="font-family:'Baloo 2',cursive;font-weight:800;line-height:1.04;letter-spacing:-.02em;font-size:clamp(40px,6.4vw,84px);margin:18px 0 0;text-wrap:balance">{{ heroName }}</h1>
+      <p style="font-family:'Baloo 2',cursive;font-weight:600;font-size:clamp(20px,2.4vw,30px);line-height:1.2;margin:6px 0 0;color:var(--cherry-strong);text-wrap:balance">{{ heroTag }}</p>
+      <p style="font-size:clamp(16px,1.5vw,19px);line-height:1.55;margin:20px 0 0;color:var(--ink-soft);max-width:48ch;text-wrap:pretty">{{ heroSub }}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:30px">
+        <a href="#projects" style="display:inline-flex;align-items:center;gap:10px;padding:15px 26px;border-radius:16px;background:var(--cherry-strong);color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:18px;box-shadow:var(--shadow)">{{ ctaPrimary }}<span style="font-size:20px">→</span></a>
+        <a href="#arcade" style="display:inline-flex;align-items:center;gap:10px;padding:15px 26px;border-radius:16px;background:var(--surface);color:var(--ink);border:2px solid var(--cream-line);font-family:'Baloo 2',cursive;font-weight:700;font-size:18px;box-shadow:var(--shadow)">{{ ctaSecondary }}</a>
+      </div>
+      <div style="display:inline-flex;align-items:center;gap:9px;margin-top:22px;font-size:14px;color:var(--ink-soft);font-weight:500">
+        <span style="display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--yuzu);color:var(--ink);font-weight:800">✱</span>{{ flingHint }}
+      </div>
+    </div>
+
+    <div style="position:relative;min-height:clamp(320px,44vw,520px)">
+      <div ref="{{ playRef }}" style="position:absolute;inset:0;pointer-events:none"></div>
+    </div>
+  </main>
+
+  <section style="position:relative;z-index:20;max-width:1440px;margin:0 auto;padding:8px clamp(18px,5vw,64px) 70px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px" class="paths">
+      <sc-for list="{{ paths }}" as="p" hint-placeholder-count="4">
+        <a href="{{ p.href }}" class="om-anim-bob" style="--i:0;display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:22px;background:var(--surface);border:2px solid var(--cream-line);box-shadow:var(--shadow);color:var(--ink)">
+          <span style="width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:24px;background:{{ p.tint }}">{{ p.emoji }}</span>
+          <span style="font-family:'Baloo 2',cursive;font-weight:700;font-size:20px">{{ p.title }}</span>
+          <span style="font-size:14px;color:var(--ink-soft);line-height:1.4">{{ p.desc }}</span>
+        </a>
+      </sc-for>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:940},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;cs&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;'en'|'cs'&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;day&quot;,&quot;night&quot;],&quot;default&quot;:&quot;day&quot;,&quot;tsType&quot;:&quot;'day'|'night'&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;sound&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Appearance&quot;}}">
+class Component extends DCLogic {
+  state = {
+    lang: this.props.lang || 'en',
+    theme: this.props.theme || 'day',
+    sound: this.props.sound ?? false,
+  };
+
+  I18N = {
+    en: {
+      nav: ['Projects','About','Skills','Arcade','Links','Contact'],
+      kicker: 'Developer · Game-maker · Ice-cream enthusiast',
+      name: 'Ahoj, I\u2019m Karel.',
+      tag: 'I build playful apps, games & the odd perfect scoop.',
+      sub: 'Former Czechitas teacher, full-time developer, aspiring game-maker. Right now I\u2019m building YarnLog and a home-management app \u2014 and chasing the perfect mango scoop. Welcome to my sunny corner of the internet.',
+      ctaPrimary: 'See my work', ctaSecondary: 'Enter the arcade',
+      flingHint: 'Grab a scoop \u2014 give it a fling.',
+      scrollHint: 'Scroll to explore',
+      paths: [
+        {title:'Projects', desc:'Software & hand-made, side by side.', emoji:'\uD83E\uDDF6', tint:'var(--pistachio)', href:'#projects'},
+        {title:'Arcade', desc:'Four tiny summer games + high scores.', emoji:'\uD83D\uDD79\uFE0F', tint:'var(--sky)', href:'#arcade'},
+        {title:'Links', desc:'Everywhere else you\u2019ll find me.', emoji:'\uD83C\uDF66', tint:'var(--yuzu)', href:'#links'},
+        {title:'Contact', desc:'Say ahoj \u2014 I reply.', emoji:'\u2709\uFE0F', tint:'var(--poppy)', href:'#contact'},
+      ],
+    },
+    cs: {
+      nav: ['Projekty','O mn\u011b','Dovednosti','Ark\u00e1da','Odkazy','Kontakt'],
+      kicker: 'V\u00fdvoj\u00e1\u0159 · Tv\u016frce her · Nad\u0161enec do zmrzliny',
+      name: 'Ahoj, j\u00e1 jsem Karel.',
+      tag: 'Tvo\u0159\u00edm hrav\u00e9 appky, hry a ob\u010das dokonal\u00fd kope\u010dek.',
+      sub: 'B\u00fdval\u00fd lektor v Czechitas, developer na pln\u00fd \u00favazek, za\u010d\u00ednaj\u00edc\u00ed tv\u016frce her. Zrovna te\u010f stav\u00edm YarnLog a appku na spr\u00e1vu dom\u00e1cnosti \u2014 a lov\u00edm dokonal\u00fd mangov\u00fd kope\u010dek. V\u00edtej v m\u00e9m slune\u010dn\u00edm koutku internetu.',
+      ctaPrimary: 'Prohl\u00e9dni si moji pr\u00e1ci', ctaSecondary: 'Vstup do ark\u00e1dy',
+      flingHint: 'Chy\u0165 kope\u010dek \u2014 a mrskni s n\u00edm.',
+      scrollHint: 'Posouvej a objevuj',
+      paths: [
+        {title:'Projekty', desc:'Software i ru\u010dn\u00ed pr\u00e1ce vedle sebe.', emoji:'\uD83E\uDDF6', tint:'var(--pistachio)', href:'#projects'},
+        {title:'Ark\u00e1da', desc:'\u010cty\u0159i letn\u00ed hry + \u017eeb\u0159\u00ed\u010dky.', emoji:'\uD83D\uDD79\uFE0F', tint:'var(--sky)', href:'#arcade'},
+        {title:'Odkazy', desc:'V\u0161ude jinde, kde m\u011b najde\u0161.', emoji:'\uD83C\uDF66', tint:'var(--yuzu)', href:'#links'},
+        {title:'Kontakt', desc:'\u0158ekni ahoj \u2014 odpov\u00edm.', emoji:'\u2709\uFE0F', tint:'var(--poppy)', href:'#contact'},
+      ],
+    },
+  };
+
+  componentDidMount(){
+    this._setup();
+    window.addEventListener('resize', this._onResize = () => this._boundsResize());
+  }
+  componentWillUnmount(){ this._teardown(); window.removeEventListener('resize', this._onResize); }
+  _rebuild(){ clearTimeout(this._rbT); this._rbT=setTimeout(()=>{ this._teardown(); this._setup(); }, 60); }
+
+  // ---------- audio ----------
+  _blip(freq, dur, type){
+    if(!this.state.sound) return;
+    try{
+      this._ac = this._ac || new (window.AudioContext||window.webkitAudioContext)();
+      const ac=this._ac, o=ac.createOscillator(), g=ac.createGain();
+      o.type=type||'sine'; o.frequency.value=freq;
+      o.connect(g); g.connect(ac.destination);
+      g.gain.setValueAtTime(.0001, ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(.16, ac.currentTime+.01);
+      g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime+(dur||.15));
+      o.start(); o.stop(ac.currentTime+(dur||.15));
+    }catch(e){}
+  }
+
+  // ---------- sprites ----------
+  _cone(a,b){return `<svg viewBox="0 0 100 140" width="100%" height="100%"><g stroke="#3A2416" stroke-width="4" stroke-linejoin="round"><path d="M50 138 L26 74 H74 Z" fill="#E7B26B"/><path d="M34 86 h32 M40 100 h20" stroke="#B9823C" stroke-width="3" fill="none"/><circle cx="50" cy="66" r="24" fill="${b}"/><circle cx="36" cy="52" r="20" fill="${a}"/><circle cx="64" cy="52" r="20" fill="${a}"/><circle cx="50" cy="40" r="19" fill="${b}"/><circle cx="50" cy="28" r="6" fill="#D62A54"/></g></svg>`;}
+  _pop(c){return `<svg viewBox="0 0 80 150" width="100%" height="100%"><g stroke="#3A2416" stroke-width="4" stroke-linejoin="round"><rect x="34" y="96" width="12" height="46" rx="6" fill="#E7B26B"/><rect x="16" y="12" width="48" height="92" rx="24" fill="${c}"/><path d="M40 12 v92" stroke="rgba(255,255,255,.5)" stroke-width="6" stroke-linecap="round"/><circle cx="30" cy="40" r="4" fill="#fff"/><circle cx="50" cy="66" r="4" fill="#fff"/></g></svg>`;}
+  _cup(c){return `<svg viewBox="0 0 110 130" width="100%" height="100%"><g stroke="#3A2416" stroke-width="4" stroke-linejoin="round"><path d="M22 62 L30 126 H80 L88 62 Z" fill="#FFE9C7"/><path d="M55 20 C40 20 30 34 34 50 C24 52 20 64 28 70 H82 C90 64 86 52 76 50 C80 34 70 20 55 20Z" fill="${c}"/><circle cx="55" cy="16" r="6" fill="#D62A54"/></g></svg>`;}
+
+  _sprites(){
+    const M=getComputedStyle(document.documentElement);
+    const c=n=>M.getPropertyValue(n).trim();
+    return [
+      {svg:this._cone(c('--mango'),c('--yuzu')), w:96, h:132},
+      {svg:this._cone(c('--pistachio'),c('--cherry')), w:92, h:126},
+      {svg:this._pop(c('--poppy')), w:70, h:132},
+      {svg:this._pop(c('--sky')), w:66, h:124},
+      {svg:this._cup(c('--cherry')), w:98, h:116},
+    ];
+  }
+
+  _setup(){
+    const host=this._ref('playRef'); if(!host) return;
+    host.innerHTML=''; host.style.pointerEvents='none';
+    const R=host.getBoundingClientRect();
+    this._W=R.width; this._H=R.height;
+    this._reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const defs=this._sprites();
+    this.items=[];
+    defs.forEach((d,i)=>{
+      const el=document.createElement('div');
+      el.innerHTML=d.svg;
+      el.style.cssText=`position:absolute;width:${d.w}px;height:${d.h}px;pointer-events:auto;cursor:grab;touch-action:none;filter:drop-shadow(0 10px 14px rgba(58,36,22,.28));will-change:transform`;
+      host.appendChild(el);
+      const it={el,w:d.w,h:d.h,
+        x: 20 + (i*0.19)*(this._W-d.w),
+        y: 10 + (i%2)*70,
+        vx:(Math.random()-.5)*.6, vy:0,
+        ang:(Math.random()-.5)*18, va:(Math.random()-.5)*1.2,
+        drag:false, grabbed:false};
+      this.items.push(it);
+      if(!this._reduce) this._bindDrag(it);
+    });
+    if(this._reduce){
+      // reduced-motion: no ambient physics or falling sprinkles — place scoops at rest, non-interactive
+      this.items.forEach((it,i)=>{ it.el.style.cursor='default'; it.el.style.pointerEvents='none'; it.y=this._H-it.h-6; it.ang=(i-2)*4; it.el.style.transform=`translate(${it.x}px,${it.y}px) rotate(${it.ang}deg)`; });
+      this._sprinkles=[];
+      return;
+    }
+    this._floor=0.997; this._grav=0.16;
+    this._loop();
+    // ambient sprinkles
+    this._sprinkles=[];
+    const cols=['--mango','--cherry','--pistachio','--sky','--yuzu','--poppy'];
+    const M=getComputedStyle(document.documentElement);
+    for(let i=0;i<14;i++){
+      const s=document.createElement('div');
+      const col=M.getPropertyValue(cols[i%cols.length]).trim();
+      s.style.cssText=`position:absolute;top:0;left:0;width:6px;height:16px;border-radius:6px;background:${col};opacity:.8;pointer-events:none;will-change:transform`;
+      host.appendChild(s);
+      this._sprinkles.push({el:s, x:Math.random()*this._W, y:-20-Math.random()*this._H, vx:0, vy:.6+Math.random()*.9, rot:Math.random()*180, vr:(Math.random()-.5)*6});
+    }
+  }
+
+  _bindDrag(it){
+    const down=(e)=>{
+      e.preventDefault();
+      it.grabbed=true; it.drag=true; it.vx=0; it.vy=0;
+      it.el.style.cursor='grabbing'; it.el.style.zIndex=10;
+      const p=this._pt(e);
+      it._px=p.x; it._py=p.y; it._lx=p.x; it._ly=p.y;
+      this._blip(520,.08,'triangle');
+      window.addEventListener('pointermove',move);
+      window.addEventListener('pointerup',up);
+    };
+    const move=(e)=>{
+      if(!it.drag) return;
+      const p=this._pt(e);
+      it.x += p.x - it._lx; it.y += p.y - it._ly;
+      it.va = (p.x - it._lx)*0.3;
+      it._lx=p.x; it._ly=p.y;
+    };
+    const up=(e)=>{
+      it.drag=false; it.grabbed=false; it.el.style.cursor='grab'; it.el.style.zIndex=1;
+      const p=this._pt(e);
+      it.vx=(p.x-it._px===0? (Math.random()-.5)*2 : 0); // fall through to velocity below
+      it.vx=(p.x - it._lx); it.vy=(p.y - it._ly);
+      // use recent delta as fling velocity
+      it.vx = Math.max(-22,Math.min(22,(it._lx - it._px)*0.25 + (Math.random()-.5)));
+      it.vy = Math.max(-24,Math.min(6,(it._ly - it._py)*0.18));
+      this._blip(300,.12,'sine');
+      window.removeEventListener('pointermove',move);
+      window.removeEventListener('pointerup',up);
+    };
+    it.el.addEventListener('pointerdown',down);
+  }
+
+  _pt(e){ return {x:e.clientX, y:e.clientY}; }
+
+  _boundsResize(){ const host=this._ref('playRef'); if(host){const R=host.getBoundingClientRect(); this._W=R.width; this._H=R.height;} }
+
+  _loop(){
+    this._raf=requestAnimationFrame(()=>this._loop());
+    const W=this._W, H=this._H;
+    (this.items||[]).forEach(it=>{
+      if(!it.drag){
+        it.vy += this._grav;
+        it.x += it.vx; it.y += it.vy;
+        it.ang += it.va; it.va *= 0.985;
+        // floor
+        if(it.y + it.h > H){ it.y = H - it.h; if(Math.abs(it.vy)>1.2){ it.vy *= -0.5; this._blip(200,.06,'sine'); } else it.vy=0; it.vx*=0.9; }
+        // walls
+        if(it.x < 0){ it.x=0; it.vx*=-0.6; }
+        if(it.x + it.w > W){ it.x=W-it.w; it.vx*=-0.6; }
+        // gentle idle float when resting
+        if(it.y >= H-it.h-0.5 && Math.abs(it.vx)<0.15){ it.vx += (Math.random()-.5)*0.02; }
+        it.vx *= 0.995;
+      }
+      it.el.style.transform=`translate(${it.x}px,${it.y}px) rotate(${it.ang}deg)`;
+    });
+    (this._sprinkles||[]).forEach(s=>{
+      s.vy=Math.min(3.6, s.vy+0.03);           // gravity: sprinkles fall
+      s.x += s.vx; s.vx *= 0.98;
+      s.y += s.vy; s.rot += s.vr;
+      const sh=16, sw=6;
+      // collide with the cones/scoops: land on the dome, bounce, then slide off — until 3 hits
+      if((s.hits||0) < 3){
+        (this.items||[]).forEach(it=>{
+          if(it.drag) return;
+          if(s.x+sw > it.x+it.w*0.18 && s.x < it.x+it.w*0.82){
+            const topY = it.y + it.h*0.08;
+            if(s.vy>0 && s.y+sh>=topY && s.y+sh<=topY+s.vy+10){
+              s.y = topY - sh;
+              s.vy *= -0.42;
+              const cx = it.x + it.w/2;
+              s.vx += (s.x < cx ? -1 : 1) * (.5+Math.random()*.7);
+              s.hits = (s.hits||0) + 1;
+            }
+          }
+        });
+      }
+      // sprinkles ignore the floor — wrap back to the top
+      if(s.y > H+24){ s.y=-20; s.x=Math.random()*W; s.vx=0; s.vy=.6+Math.random()*.9; s.hits=0; }
+      if(s.x < -20) s.x=W+10; else if(s.x > W+20) s.x=-10;
+      s.el.style.transform=`translate(${s.x}px,${s.y}px) rotate(${s.rot}deg)`;
+    });
+  }
+
+  _teardown(){ if(this._raf) cancelAnimationFrame(this._raf); this._raf=null; this.items=[]; this._sprinkles=[]; const p=this._ref('playRef'); if(p) p.innerHTML=''; }
+
+  _ref(name){ return this._refs && this._refs[name]; }
+
+  renderVals(){
+    const L=this.I18N[this.state.lang];
+    this._refs=this._refs||{};
+    const setRef=(k)=>(el)=>{ if(el) this._refs[k]=el; };
+    // glow cursor
+    if(!this._glowBound){ this._glowBound=true; setTimeout(()=>{
+      const g=this._refs.glowRef;
+      window.addEventListener('pointermove',(e)=>{ if(g){ g.style.left=e.clientX+'px'; g.style.top=e.clientY+'px'; g.style.opacity=.9; }});
+    },0);}
+    return {
+      theme: this.state.theme,
+      navItems: L.nav.map((label,i)=>({label, href:['#projects','#about','#skills','#arcade','#links','#contact'][i]})),
+      kicker: L.kicker, heroName: L.name, heroTag: L.tag, heroSub: L.sub,
+      ctaPrimary: L.ctaPrimary, ctaSecondary: L.ctaSecondary,
+      flingHint: L.flingHint,
+      paths: L.paths,
+      langLabel: this.state.lang==='en'?'CS':'EN',
+      themeIcon: this.state.theme==='day'?'\uD83C\uDF19':'\u2600\uFE0F',
+      soundIcon: this.state.sound?'\uD83D\uDD0A':'\uD83D\uDD07',
+      playRef: setRef('playRef'), glowRef: setRef('glowRef'),
+      toggleLang: ()=>{ this._blip(660,.07,'triangle'); this.setState(s=>({lang:s.lang==='en'?'cs':'en'})); },
+      toggleTheme: ()=>{ this._blip(440,.09,'sine'); this.setState(s=>({theme:s.theme==='day'?'night':'day'})); this._rebuild(); },
+      toggleSound: ()=>{ this.setState(s=>({sound:!s.sound})); },
+    };
+  }
+}
+</script>
+</body>
+</html>

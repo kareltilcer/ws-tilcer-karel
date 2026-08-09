@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#FFF6E9; --surface:#FFFFFF; --surface-2:#FFF0DD;
+    --ink:#3A2416; --ink-soft:#8A6A50; --cream-line:#EBD9BE;
+    --mango:#FF9F1C; --tanger:#FF7A1A; --cherry:#EF476F; --cherry-strong:#D62A54;
+    --pistachio:#7FC85F; --sky:#37B6EF; --yuzu:#F2CE2E; --poppy:#B4A2F0; --sun:#FFD23F;
+    --shadow:0 14px 30px -12px rgba(58,36,22,.32);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:#EFE1C8;color:var(--ink);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .mono{font-family:'Space Mono',monospace}
+  .display{font-family:'Baloo 2',cursive}
+  .stripe{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.5) 0 22px,transparent 22px 44px)}
+</style>
+</helmet>
+<div style="min-height:100vh;padding:clamp(28px,5vw,64px);max-width:1160px;margin:0 auto">
+
+  <div style="margin-bottom:34px">
+    <div class="mono" style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--cherry-strong);font-weight:700">Design deliverable</div>
+    <h1 class="display" style="font-weight:800;font-size:clamp(30px,5vw,46px);margin:8px 0 6px;letter-spacing:-.02em">Open Graph / social-share cards</h1>
+    <p style="color:var(--ink-soft);font-size:17px;line-height:1.55;margin:0;max-width:66ch">The unfurl is part of the wow — it lands before the site does. Every shared <span class="mono" style="font-size:14px">karel.tilcer.cz</span> link renders one of these. Canvas <strong>1200×630</strong> (1.91:1), the daylight palette, big characterful type, safe margins so nothing clips in the LinkedIn / X / Messenger crop.</p>
+  </div>
+
+  <!-- CARD MOCKS -->
+  <div style="display:flex;flex-direction:column;gap:34px">
+    <sc-for list="{{ cards }}" as="c" hint-placeholder-count="3">
+      <div>
+        <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+          <span class="display" style="font-weight:800;font-size:20px">{{ c.route }}</span>
+          <span class="mono" style="font-size:13px;color:var(--ink-soft)">{{ c.note }}</span>
+        </div>
+
+        <!-- true 1200x630 rendered at 0.5 -> 600x315 box; inner scaled -->
+        <div style="width:600px;max-width:100%;aspect-ratio:1200/630;border-radius:18px;overflow:hidden;box-shadow:var(--shadow);border:2px solid var(--cream-line)">
+          <div style="width:1200px;height:630px;transform:scale(.5);transform-origin:top left;position:relative;background:{{ c.bg }};overflow:hidden">
+
+            <!-- ambient stripe wash -->
+            <div class="stripe" style="position:absolute;inset:0;opacity:.16"></div>
+            <!-- corner sun -->
+            <div style="position:absolute;top:-120px;right:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle at 40% 40%, var(--sun), transparent 68%);opacity:.55"></div>
+
+            <!-- big motif -->
+            <div style="position:absolute;right:64px;top:50%;transform:translateY(-50%);font-size:300px;line-height:1;filter:drop-shadow(0 24px 26px rgba(58,36,22,.28))">{{ c.motif }}</div>
+
+            <!-- content -->
+            <div style="position:absolute;left:72px;top:64px;bottom:64px;right:420px;display:flex;flex-direction:column">
+              <div style="display:flex;align-items:center;gap:18px">
+                <span class="display" style="display:grid;place-items:center;width:76px;height:76px;border-radius:26px 26px 26px 9px;background:var(--cherry-strong);color:#fff;font-weight:800;font-size:44px;box-shadow:var(--shadow);transform:rotate(-6deg)">k</span>
+                <span class="display" style="font-weight:700;font-size:38px">karel<span style="color:var(--cherry-strong)">.</span></span>
+              </div>
+
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px">
+                <span style="align-self:flex-start;padding:10px 22px;border-radius:999px;background:var(--surface);border:3px solid var(--cream-line);font-weight:700;font-size:22px;color:{{ c.chipColor }}">{{ c.chip }}</span>
+                <h2 class="display" style="font-weight:800;font-size:{{ c.titleSize }};line-height:1.0;letter-spacing:-.02em;margin:0;color:var(--ink);max-width:15ch">{{ c.title }}</h2>
+                <p style="font-size:26px;line-height:1.4;color:var(--ink-soft);margin:0;max-width:26ch">{{ c.sub }}</p>
+              </div>
+
+              <div class="mono" style="display:inline-flex;align-items:center;gap:12px;font-size:22px;font-weight:700;color:var(--cherry-strong)">
+                <span style="width:14px;height:14px;border-radius:50%;background:var(--pistachio)"></span>{{ c.url }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- DIRECTION -->
+  <div style="margin-top:44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px">
+    <sc-for list="{{ specs }}" as="s" hint-placeholder-count="4">
+      <div style="background:var(--surface);border:2px solid var(--cream-line);border-radius:18px;padding:22px">
+        <div class="mono" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--cherry-strong);font-weight:700;margin-bottom:10px">{{ s.head }}</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ s.rows }}" as="r" hint-placeholder-count="4">
+            <div style="display:flex;justify-content:space-between;gap:14px;font-size:14px;line-height:1.4">
+              <span style="color:var(--ink-soft)">{{ r.k }}</span>
+              <span class="mono" style="font-weight:700;text-align:right;color:var(--ink)">{{ r.v }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="margin-top:18px;background:var(--surface);border:2px solid var(--cream-line);border-radius:18px;padding:24px">
+    <div class="mono" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--cherry-strong);font-weight:700;margin-bottom:12px">Per-route meta (client-side, v1)</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <sc-for list="{{ meta }}" as="m" hint-placeholder-count="4">
+        <div style="border-left:3px solid var(--mango);padding-left:14px">
+          <div class="mono" style="font-size:13px;color:var(--ink-soft)">{{ m.path }}</div>
+          <div style="font-weight:700;font-size:15px;margin-top:2px">og:title — {{ m.title }}</div>
+          <div style="font-size:14px;color:var(--ink-soft);margin-top:1px">og:description — {{ m.desc }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <p style="font-size:13px;color:var(--ink-soft);line-height:1.5;margin:16px 0 0">Bilingual: emit <span class="mono">og:locale</span> <span class="mono">cs_CZ</span> (default) + <span class="mono">og:locale:alternate en_US</span>; title/description follow the active language. Always set <span class="mono">og:url</span> and <span class="mono">&lt;link rel="canonical"&gt;</span> to the <span class="mono">karel.tilcer.cz</span> host (never <span class="mono">kaja.</span>). Twitter: <span class="mono">summary_large_image</span>. Project cards may swap the motif for the project cover (1200×630 crop) with the same wordmark + URL overlay; non-cover projects fall back to the flavour motif shown here.</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1160,&quot;height&quot;:1400}}">
+class Component extends DCLogic {
+  renderVals(){
+    const cards=[
+      { route:'Home / default', note:'og-default.png — the fallback for any share',
+        bg:'linear-gradient(135deg,#FFE7BE,#9FE3FF)', motif:'🍦', chip:'Personal site', chipColor:'var(--cherry-strong)',
+        title:'Karel Tilcer', titleSize:'92px', sub:'Projects, play, and a little summer.', url:'karel.tilcer.cz' },
+      { route:'Project detail', note:'built per project — cover or flavour motif',
+        bg:'linear-gradient(135deg,#FFF0DD,#FFD9A8)', motif:'🧶', chip:'Craft', chipColor:'var(--tanger)',
+        title:'Pleten\u00e1 \u0161\u00e1la', titleSize:'80px', sub:'A hand-knitted scarf, start to finish.', url:'karel.tilcer.cz/projects/…' },
+      { route:'Arcade', note:'shared straight from a game-over screen',
+        bg:'linear-gradient(135deg,#B4A2F0,#9FE3FF)', motif:'🕹️', chip:'The Arcade', chipColor:'var(--cherry-strong)',
+        title:'Beat my score', titleSize:'86px', sub:'Tiny summer games, real leaderboards.', url:'karel.tilcer.cz/arcade' },
+    ];
+    const specs=[
+      { head:'Canvas', rows:[{k:'Size',v:'1200×630'},{k:'Ratio',v:'1.91:1'},{k:'Format',v:'PNG'},{k:'Weight',v:'≤ 300 KB'}] },
+      { head:'Safe area', rows:[{k:'Margin',v:'64 px'},{k:'Text width',v:'≤ 640 px'},{k:'Wordmark',v:'top-left'},{k:'URL chip',v:'bottom-left'}] },
+      { head:'Type', rows:[{k:'Headline',v:'Baloo 2 800'},{k:'Sub',v:'Hanken 500'},{k:'URL',v:'Space Mono'},{k:'Min size',v:'26 px'}] },
+      { head:'Colour', rows:[{k:'Ground',v:'cream/sky'},{k:'Accent',v:'cherry #D62A54'},{k:'Theme',v:'daylight only'},{k:'Contrast',v:'AA on cream'}] },
+    ];
+    const meta=[
+      { path:'/', title:'Karel Tilcer', desc:'Projects, play, and a little summer — Karel\u2019s personal site.' },
+      { path:'/projects/{slug}', title:'{title} · Karel Tilcer', desc:'{summary}' },
+      { path:'/arcade', title:'The Arcade · Karel Tilcer', desc:'Tiny summer games with real leaderboards. Beat my score.' },
+      { path:'/impressum', title:'Impressum · Karel Tilcer', desc:'Povinn\u011b zve\u0159ejn\u011bn\u00e9 informace o podnikateli (OSV\u010c).' },
+    ];
+    return { cards, specs, meta };
+  }
+}
+</script>
+</body>
+</html>

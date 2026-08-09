@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --sky-1:#9FE3FF; --sky-2:#FFE7BE; --bg:#FFF6E9; --surface:#FFFFFF; --surface-2:#FFF0DD;
+    --ink:#3A2416; --ink-soft:#8A6A50; --cream-line:#EBD9BE;
+    --mango:#FF9F1C; --tanger:#FF7A1A; --cherry:#EF476F; --cherry-strong:#D62A54;
+    --pistachio:#7FC85F; --sky:#37B6EF; --yuzu:#F2CE2E; --poppy:#B4A2F0; --sun:#FFD23F;
+    --shadow:0 14px 30px -12px rgba(58,36,22,.32);
+  }
+  [data-theme="night"]{
+    --sky-1:#241E48; --sky-2:#5A2E5E; --bg:#1B1530; --surface:#2A2340; --surface-2:#241E3A;
+    --ink:#FDF3E7; --ink-soft:#C6B4D6; --cream-line:#3B3358;
+    --mango:#FFB24D; --tanger:#FF9350; --cherry:#FF6B90; --cherry-strong:#FF6B90;
+    --pistachio:#9BE07A; --sky:#66D0FF; --yuzu:#FFE06A; --poppy:#C9BAFF; --sun:#FFE9A8;
+    --shadow:0 18px 40px -14px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;transition:background .4s,color .3s}
+  .mono{font-family:'Space Mono',monospace}
+  .display{font-family:'Baloo 2',cursive}
+  a{color:var(--cherry-strong);text-decoration:none} a:hover{color:var(--tanger)}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes wobble{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+  @keyframes drip{0%{transform:scaleY(.8)}50%{transform:scaleY(1.15)}100%{transform:scaleY(.8)}}
+  .demo-bob{animation:bob 3s ease-in-out infinite}
+  .demo-wobble{animation:wobble 2.4s ease-in-out infinite;transform-origin:top center}
+  .demo-drip{animation:drip 2.2s ease-in-out infinite;transform-origin:top}
+  @media (prefers-reduced-motion:reduce){.demo-bob,.demo-wobble,.demo-drip{animation:none !important}html{scroll-behavior:auto !important}}
+  .sect{scroll-margin-top:90px}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="min-height:100vh;background:var(--bg);color:var(--ink)">
+
+  <header style="position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px clamp(18px,5vw,56px);background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(10px);border-bottom:2px solid var(--cream-line)">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="display" style="display:grid;place-items:center;width:40px;height:40px;border-radius:14px 14px 14px 5px;background:var(--cherry-strong);color:#fff;font-weight:800;font-size:20px;box-shadow:var(--shadow);transform:rotate(-6deg)">k</span>
+      <div>
+        <div class="display" style="font-weight:700;font-size:18px;line-height:1">karel<span style="color:var(--cherry-strong)">.</span> design system</div>
+        <div class="mono" style="font-size:11px;color:var(--ink-soft)">v1 · engineering redline · React + TS + Tailwind</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onClick="{{ toggleTheme }}" style="width:38px;height:38px;border:2px solid var(--cream-line);background:var(--surface);border-radius:12px;cursor:pointer;font-size:16px">{{ themeIcon }}</button>
+    </div>
+  </header>
+
+  <main style="max-width:1080px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(18px,5vw,56px) 100px">
+
+    <!-- INTRO -->
+    <div style="margin-bottom:40px">
+      <div class="mono" style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--cherry-strong);font-weight:700">Deliverable 1</div>
+      <h1 class="display" style="font-weight:800;font-size:clamp(34px,6vw,58px);letter-spacing:-.02em;margin:8px 0 10px;line-height:1.02">Summer &amp; ice-cream, tokenised.</h1>
+      <p style="font-size:18px;color:var(--ink-soft);line-height:1.55;margin:0;max-width:70ch;text-wrap:pretty">The reusable vocabulary behind every screen: colour, type, spacing, radii, elevation, and the motion language. Toggle <strong>theme</strong> above to see tokens respond live. Illustration medium is committed: <strong>flat emoji + soft SVG stickers</strong> with hand-drawn ink outlines — consistency over variety.</p>
+    </div>
+
+    <!-- COLOR -->
+    <section class="sect" id="color" style="margin-bottom:44px">
+      <div class="mono" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:14px">01 · Colour tokens <span style="color:var(--pistachio)">(AA-verified on their intended ground)</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
+        <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="10">
+          <div style="border:2px solid var(--cream-line);border-radius:16px;overflow:hidden;background:var(--surface)">
+            <div style="height:74px;background:{{ s.val }}"></div>
+            <div style="padding:10px 12px">
+              <div style="font-weight:700;font-size:14px">{{ s.name }}</div>
+              <div class="mono" style="font-size:11px;color:var(--ink-soft)">{{ s.var }}</div>
+              <div class="mono" style="font-size:11px;color:var(--ink-soft)">{{ s.hex }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <p style="font-size:14px;color:var(--ink-soft);line-height:1.5;margin:14px 0 0;max-width:72ch">Contrast trap guard: body copy is always <span class="mono">--ink</span> on <span class="mono">--bg/--surface</span> (≥ 7:1). Saturated flavours (mango, yuzu, sky) are decoration or fills behind dark ink — never small text on cream. Cherry-strong is the one accent for text/CTAs (4.8:1 on cream). Night theme re-tunes every token; the same rules hold.</p>
+    </section>
+
+    <!-- TYPE -->
+    <section class="sect" id="type" style="margin-bottom:44px">
+      <div class="mono" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:14px">02 · Type scale <span style="color:var(--pistachio)">(Czech-diacritic-safe)</span></div>
+      <div style="background:var(--surface);border:2px solid var(--cream-line);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:16px">
+        <sc-for list="{{ typeRows }}" as="t" hint-placeholder-count="5">
+          <div style="display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;border-bottom:1px dashed var(--cream-line);padding-bottom:14px">
+            <div class="mono" style="width:120px;font-size:11px;color:var(--ink-soft);flex-shrink:0">{{ t.spec }}</div>
+            <div style="font-family:{{ t.font }};font-weight:{{ t.weight }};font-size:{{ t.size }};line-height:1.05;color:var(--ink)">{{ t.sample }}</div>
+          </div>
+        </sc-for>
+        <p style="font-size:13px;color:var(--ink-soft);margin:0;line-height:1.5"><strong>Baloo 2</strong> (display) &amp; <strong>Hanken Grotesk</strong> (body/CMS) both ship the full Czech glyph set; <strong>Space Mono</strong> for scores, dates, code. Headlines proofed with <span class="display" style="font-size:15px">Příliš žluťoučký kůň — ĚŠČŘŽÝÁÍÉÚŮĎŤŇ</span> — tight leading (1.02) leaves diacritics uncramped.</p>
+      </div>
+    </section>
+
+    <!-- SPACING / RADII / ELEVATION -->
+    <section class="sect" id="scale" style="margin-bottom:44px">
+      <div class="mono" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:14px">03 · Spacing · radii · elevation</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+        <div style="background:var(--surface);border:2px solid var(--cream-line);border-radius:18px;padding:20px">
+          <div style="font-weight:700;margin-bottom:12px">Spacing (4px base)</div>
+          <div style="display:flex;align-items:flex-end;gap:8px">
+            <sc-for list="{{ spacing }}" as="p" hint-placeholder-count="6">
+              <div style="text-align:center">
+                <div style="width:26px;background:var(--mango);border-radius:6px;height:{{ p.px }}"></div>
+                <div class="mono" style="font-size:10px;color:var(--ink-soft);margin-top:5px">{{ p.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:2px solid var(--cream-line);border-radius:18px;padding:20px">
+          <div style="font-weight:700;margin-bottom:12px">Radii</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <sc-for list="{{ radii }}" as="r" hint-placeholder-count="4">
+              <div style="text-align:center">
+                <div style="width:56px;height:56px;background:var(--poppy);border:2px solid var(--ink);border-radius:{{ r.px }}"></div>
+                <div class="mono" style="font-size:10px;color:var(--ink-soft);margin-top:5px">{{ r.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <p class="mono" style="font-size:11px;color:var(--ink-soft);margin:12px 0 0">logo notch: 15/15/15/5 (a bitten corner)</p>
+        </div>
+        <div style="background:var(--surface);border:2px solid var(--cream-line);border-radius:18px;padding:20px">
+          <div style="font-weight:700;margin-bottom:12px">Elevation</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <div style="width:70px;height:52px;background:var(--surface-2);border-radius:14px;box-shadow:0 6px 14px -6px rgba(58,36,22,.4)"></div>
+            <div style="width:70px;height:52px;background:var(--surface-2);border-radius:14px;box-shadow:var(--shadow)"></div>
+          </div>
+          <p class="mono" style="font-size:11px;color:var(--ink-soft);margin:12px 0 0">--shadow (card) · deep (modal/overlay). Warm-brown tint, never neutral grey.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MOTION -->
+    <section class="sect" id="motion" style="margin-bottom:44px">
+      <div class="mono" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:14px">04 · Motion language</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+        <sc-for list="{{ motions }}" as="m" hint-placeholder-count="4">
+          <div style="background:var(--surface);border:2px solid var(--cream-line);border-radius:18px;padding:22px;text-align:center">
+            <div style="height:70px;display:grid;place-items:center">
+              <div class="{{ m.cls }}" style="font-size:46px">{{ m.icon }}</div>
+            </div>
+            <div style="font-weight:700;margin-top:6px">{{ m.name }}</div>
+            <div class="mono" style="font-size:11px;color:var(--ink-soft);margin-top:3px">{{ m.spec }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <p style="font-size:14px;color:var(--ink-soft);line-height:1.5;margin:14px 0 0;max-width:72ch"><strong>Note:</strong> the earlier <strong>calm-mode</strong> register and its <span class="mono">prefers-reduced-motion</span> mapping were <strong>removed at the client’s request</strong> (Aug 2026). The site now ships a single full-experience register. To keep it accessible without that toggle, every screen honours <span class="mono">prefers-reduced-motion: reduce</span>: ambient loops (bob / float / spin / twinkle / drip) and the hero’s physics + falling-sprinkle simulation are stilled, functional feedback (loading spinners, skeletons, gameplay) is preserved. Motion tokens above run only when the visitor has no reduced-motion preference.</p>
+    </section>
+
+    <!-- COMPONENT INVENTORY -->
+    <section class="sect" id="components" style="margin-bottom:44px">
+      <div class="mono" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:14px">05 · Component inventory — states</div>
+      <div style="overflow-x:auto;border:2px solid var(--cream-line);border-radius:18px;background:var(--surface)">
+        <table style="width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px">
+          <thead>
+            <tr style="background:var(--surface-2);text-align:left">
+              <th style="padding:12px 16px;font-weight:800" class="display">Component</th>
+              <th style="padding:12px 16px;font-weight:700">Behaviour</th>
+              <th style="padding:12px 16px;font-weight:700">States</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ inventory }}" as="c" hint-placeholder-count="10">
+              <tr style="border-top:1px solid var(--cream-line)">
+                <td style="padding:12px 16px;font-weight:700;color:var(--ink)">{{ c.name }}</td>
+                <td style="padding:12px 16px;color:var(--ink-soft)">{{ c.behaviour }}</td>
+                <td style="padding:12px 16px;color:var(--ink-soft)" class="mono" >{{ c.states }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- LIVE COMPONENT SAMPLES -->
+    <section class="sect" id="samples" style="margin-bottom:44px">
+      <div class="mono" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:14px">06 · Live primitives</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+        <div style="background:var(--surface);border:2px solid var(--cream-line);border-radius:18px;padding:22px">
+          <div style="font-weight:700;margin-bottom:14px">Buttons</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button class="display" style="height:48px;border-radius:14px;border:none;background:var(--cherry-strong);color:#fff;font-weight:700;font-size:16px;cursor:pointer;box-shadow:var(--shadow)">Primary</button>
+            <button class="display" style="height:48px;border-radius:14px;border:2px solid var(--cream-line);background:var(--surface-2);color:var(--ink);font-weight:700;font-size:16px;cursor:pointer">Secondary</button>
+            <button class="display" style="height:48px;border-radius:14px;border:none;background:var(--ink-soft);color:#fff;font-weight:700;font-size:16px;opacity:.6;cursor:not-allowed">Disabled</button>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:2px solid var(--cream-line);border-radius:18px;padding:22px">
+          <div style="font-weight:700;margin-bottom:14px">Category chips</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span style="padding:8px 15px;border-radius:999px;background:var(--cherry-strong);color:#fff;font-weight:700;font-size:13px">Vše</span>
+            <span style="padding:8px 15px;border-radius:999px;background:var(--surface-2);border:2px solid var(--cream-line);font-weight:600;font-size:13px">Software</span>
+            <span style="padding:8px 15px;border-radius:999px;background:var(--surface-2);border:2px solid var(--cream-line);font-weight:600;font-size:13px">Řemeslo</span>
+            <span style="padding:8px 15px;border-radius:999px;background:var(--surface-2);border:2px solid var(--cream-line);font-weight:600;font-size:13px">Hudba</span>
+          </div>
+        </div>
+        <div style="background:var(--surface);border:2px solid var(--cream-line);border-radius:18px;padding:22px">
+          <div style="font-weight:700;margin-bottom:14px">Skill meter · form field</div>
+          <div style="display:flex;gap:5px;margin-bottom:14px">
+            <sc-for list="{{ meter }}" as="d" hint-placeholder-count="5">
+              <div style="width:26px;height:14px;border-radius:5px;background:{{ d.on }}"></div>
+            </sc-for>
+          </div>
+          <input placeholder="Tvé jméno" style="width:100%;height:44px;padding:0 14px;border-radius:12px;border:2px solid var(--cream-line);background:var(--surface-2);color:var(--ink);font-size:15px;font-family:inherit;outline:none" />
+        </div>
+      </div>
+    </section>
+
+    <!-- HARD PROBLEMS -->
+    <section class="sect" id="hard" style="margin-bottom:24px">
+      <div class="mono" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:14px">07 · Nine hard problems — where each is solved</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px">
+        <sc-for list="{{ hard }}" as="h" hint-placeholder-count="9">
+          <div style="background:var(--surface);border:2px solid var(--cream-line);border-radius:16px;padding:16px 18px;border-left:4px solid var(--mango)">
+            <div style="display:flex;gap:10px;align-items:baseline">
+              <span class="display" style="font-weight:800;color:var(--cherry-strong);font-size:18px">{{ h.n }}</span>
+              <span style="font-weight:700;font-size:14.5px">{{ h.t }}</span>
+            </div>
+            <p style="font-size:13px;color:var(--ink-soft);line-height:1.5;margin:6px 0 0">{{ h.d }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <p class="mono" style="font-size:12px;color:var(--ink-soft);text-align:center;margin-top:36px">Screens: Home · Projects · Pages (About/Skills/Linktree/Contact/Legal) · Arcade · NotFound · Admin · OG-Card — all consume these tokens.</p>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1080,&quot;height&quot;:1600},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;day&quot;,&quot;night&quot;],&quot;default&quot;:&quot;day&quot;,&quot;tsType&quot;:&quot;'day'|'night'&quot;,&quot;section&quot;:&quot;Appearance&quot;}}">
+class Component extends DCLogic {
+  state = { theme:this.props.theme||'day' };
+  renderVals(){
+    const S=this.state;
+    const day={'--bg':'#FFF6E9','--surface':'#FFFFFF','--surface-2':'#FFF0DD','--ink':'#3A2416','--ink-soft':'#8A6A50','--cream-line':'#EBD9BE','--mango':'#FF9F1C','--tanger':'#FF7A1A','--cherry':'#EF476F','--cherry-strong':'#D62A54','--pistachio':'#7FC85F','--sky':'#37B6EF','--yuzu':'#F2CE2E','--poppy':'#B4A2F0','--sun':'#FFD23F'};
+    const swatches=[
+      ['Background','--bg'],['Surface','--surface'],['Surface 2','--surface-2'],['Ink','--ink'],['Ink soft','--ink-soft'],
+      ['Cherry (accent)','--cherry-strong'],['Mango','--mango'],['Tangerine','--tanger'],['Pistachio','--pistachio'],['Sky','--sky'],['Yuzu','--yuzu'],['Poppy','--poppy'],
+    ].map(([name,v])=>({name, var:v, val:`var(${v})`, hex:day[v]||''}));
+
+    const typeRows=[
+      {spec:'Baloo2 800 · 72',font:"'Baloo 2',cursive",weight:800,size:'52px',sample:'Léto v kornoutu'},
+      {spec:'Baloo2 700 · 32',font:"'Baloo 2',cursive",weight:700,size:'30px',sample:'Chyť kopeček'},
+      {spec:'Hanken 500 · 20',font:"'Hanken Grotesk',sans-serif",weight:500,size:'20px',sample:'Přehledné, čitelné tělo textu i v CMS.'},
+      {spec:'Hanken 400 · 16',font:"'Hanken Grotesk',sans-serif",weight:400,size:'16px',sample:'Řádkování 1,55 — příjemné na dlouhé Markdown bio.'},
+      {spec:'Space Mono 700 · 14',font:"'Space Mono',monospace",weight:700,size:'14px',sample:'2 140 · 5. 8. 2026 · #3'},
+    ];
+    const spacing=[{label:'4',px:'12px'},{label:'8',px:'20px'},{label:'12',px:'30px'},{label:'16',px:'42px'},{label:'24',px:'58px'},{label:'32',px:'76px'}];
+    const radii=[{label:'11',px:'11px'},{label:'14',px:'14px'},{label:'18',px:'18px'},{label:'26',px:'26px'}];
+
+    const motions=[
+      {name:'Bob',icon:'🍦',cls:'demo-bob',spec:'translateY 8px · 3s'},
+      {name:'Wobble',icon:'🍭',cls:'demo-wobble',spec:'rotate ±5° · 2.4s'},
+      {name:'Drip / melt',icon:'🍫',cls:'demo-drip',spec:'scaleY 0.8–1.15 · 2.2s'},
+      {name:'Spring hover',icon:'🍬',cls:'',spec:'cubic(.34,1.56,.64,1)'},
+    ];
+
+    const inventory=[
+      {name:'Control cluster',behaviour:'lang · theme · sound, glowing',states:'default·active'},
+      {name:'Hero',behaviour:'grab-&-fling ice-cream physics',states:'default·load'},
+      {name:'Project card',behaviour:'hover lift + tilt, featured ring',states:'default·featured·load·empty'},
+      {name:'Category filter',behaviour:'animated underline chips',states:'2–12 items·CZ long·active'},
+      {name:'Detail gallery',behaviour:'lightbox + parallax',states:'cover·no-cover·many'},
+      {name:'Linktree row',behaviour:'bounce on hover',states:'default·hidden'},
+      {name:'Minigame shell',behaviour:'attract→play→over',states:'attract·playing·over·submit·board'},
+      {name:'Score submit',behaviour:'confetti + Turnstile',states:'idle·checking·ok·sending·done·spam'},
+      {name:'Contact form',behaviour:'playful validation',states:'idle·error·sending·202·spam·429'},
+      {name:'Empty / 404',behaviour:'dropped-scoop + drip',states:'empty·loading·error·404'},
+      {name:'Admin field pair',behaviour:'CZ/EN + missing-flag (function-first)',states:'idle·missing·error'},
+      {name:'Confirm / toast',behaviour:'destructive confirm + toast',states:'confirm·success·error'},
+    ];
+
+    const meter=[1,1,1,0,0].map(v=>({on: v?'var(--cherry-strong)':'var(--cream-line)'}));
+
+    const hard=[
+      {n:'1',t:'Single register (calm removed)',d:'Calm mode was removed at client request (Aug 2026); the site ships one full-experience register. Accessibility follow-up recorded in handoff.'},
+      {n:'2',t:'Wow on a phone',d:'Physics/games tuned for 375px + touch; a reduced-fidelity path for low-power devices keeps first paint fast.'},
+      {n:'3',t:'Wander vs goal-directed',d:'Playful hero for the wanderer; nav + linktree get the goal-directed visitor to content in seconds.'},
+      {n:'4',t:'Cool, not childish',d:'Ink outlines, restrained palette, AA contrast — characterful not kiddie; legibility first.'},
+      {n:'5',t:'Non-software parity',d:'Imagery-led card + detail flatter a photo project as much as a repo one.'},
+      {n:'6',t:'Dynamic CZ filter',d:'Chips wrap, no fixed set assumed; proofed with long Czech category names.'},
+      {n:'7',t:'Two registers, one identity',d:'Public wow + quiet admin share tokens; admin sheds motion/games.'},
+      {n:'8',t:'Frictionless + honest',d:'Play in a tap, no account; submit survives honeypot + Turnstile + code-bound scores.'},
+      {n:'9',t:'CZ + display face',d:'Baloo 2 carries ě/š/č/ř/ž/ů + capitals at 52px+; tight leading, no clip.'},
+    ];
+
+    return {
+      theme:S.theme,
+      swatches, typeRows, spacing, radii, motions, inventory, meter, hard,
+      themeIcon:S.theme==='day'?'🌙':'☀️',
+      toggleTheme:()=>this.setState(s=>({theme:s.theme==='day'?'night':'day'})),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --sky-1:#9FE3FF; --sky-2:#FFE7BE; --bg:#FFF6E9; --surface:#FFFFFF; --surface-2:#FFF0DD;
+    --ink:#3A2416; --ink-soft:#8A6A50; --cream-line:#EBD9BE;
+    --mango:#FF9F1C; --tanger:#FF7A1A; --cherry:#EF476F; --cherry-strong:#D62A54;
+    --pistachio:#7FC85F; --sky:#37B6EF; --yuzu:#F2CE2E; --poppy:#B4A2F0; --sun:#FFD23F;
+    --shadow: 0 14px 30px -12px rgba(58,36,22,.32); --ring: rgba(214,42,84,.5); --err:#D62A54;
+  }
+  [data-theme="night"]{
+    --sky-1:#241E48; --sky-2:#5A2E5E; --bg:#1B1530; --surface:#2A2340; --surface-2:#241E3A;
+    --ink:#FDF3E7; --ink-soft:#C6B4D6; --cream-line:#3B3358;
+    --mango:#FFB24D; --tanger:#FF9350; --cherry:#FF6B90; --cherry-strong:#FF6B90;
+    --pistachio:#9BE07A; --sky:#66D0FF; --yuzu:#FFE06A; --poppy:#C9BAFF; --sun:#FFE9A8;
+    --shadow: 0 18px 40px -14px rgba(0,0,0,.6); --ring: rgba(255,107,144,.6); --err:#FF6B90;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--cherry);color:#fff}
+  a{color:var(--cherry-strong);text-decoration:none} a:hover{color:var(--tanger)}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  @keyframes bob2{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-10px) rotate(4deg)}}
+  @keyframes spins{to{transform:rotate(360deg)}}
+  .om-bob{animation:bob 3.2s ease-in-out infinite}
+  .om-bob2{animation:bob2 3.6s ease-in-out infinite}
+  @media (prefers-reduced-motion:reduce){.om-bob,.om-bob2{animation:none !important}html{scroll-behavior:auto !important}}
+  .lrow{transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s}
+  .lrow:hover{transform:translateY(-4px) scale(1.01)}
+  .schip{transition:transform .16s} .schip:hover{transform:translateY(-3px)}
+  .navlink{position:relative}
+  .navlink::after{content:"";position:absolute;left:0;right:100%;bottom:-4px;height:3px;border-radius:3px;background:var(--cherry);transition:right .25s}
+  .navlink:hover::after,.navlink[data-active="1"]::after{right:0}
+  input:focus,textarea:focus{border-color:var(--cherry-strong) !important}
+  @media (max-width:900px){ .hero-nav{display:none !important} }
+  @media (max-width:760px){ .about-grid{grid-template-columns:1fr !important} .contact-grid{grid-template-columns:1fr !important} }
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="position:relative;min-height:100vh;background:var(--bg);color:var(--ink);transition:background .5s,color .3s">
+
+  <header style="position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px clamp(18px,5vw,64px);background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);border-bottom:2px solid var(--cream-line)">
+    <a href="#" onClick="{{ goHome }}" style="display:flex;align-items:center;gap:12px;color:var(--ink)">
+      <span style="display:grid;place-items:center;width:42px;height:42px;border-radius:15px 15px 15px 5px;background:var(--cherry-strong);color:#fff;font-family:'Baloo 2',cursive;font-weight:800;font-size:22px;box-shadow:var(--shadow);transform:rotate(-6deg)">k</span>
+      <span style="font-family:'Baloo 2',cursive;font-weight:700;font-size:21px">karel<span style="color:var(--cherry-strong)">.</span></span>
+    </a>
+    <nav class="hero-nav" style="display:flex;align-items:center;gap:22px">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="6">
+        <a href="#" onClick="{{ item.go }}" class="navlink" data-active="{{ item.active }}" style="font-weight:600;font-size:16px;color:var(--ink)">{{ item.label }}</a>
+      </sc-for>
+    </nav>
+    <div class="ctrls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <button onClick="{{ toggleLang }}" title="Language" style="height:40px;padding:0 13px;border:2px solid var(--cream-line);background:var(--surface);color:var(--ink);border-radius:13px;font-family:'Baloo 2',cursive;font-weight:700;font-size:14px;cursor:pointer">{{ langLabel }}</button>
+      <button onClick="{{ toggleTheme }}" title="Theme" style="width:40px;height:40px;border:2px solid var(--cream-line);background:var(--surface);border-radius:13px;cursor:pointer;font-size:17px">{{ themeIcon }}</button>
+    </div>
+  </header>
+
+  <!-- mobile section tabs -->
+  <div style="display:flex;gap:8px;overflow-x:auto;padding:12px clamp(18px,5vw,64px);border-bottom:2px solid var(--cream-line)">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+      <button onClick="{{ t.go }}" style="white-space:nowrap;height:38px;padding:0 16px;border-radius:999px;border:2px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};font-weight:700;font-size:14px;cursor:pointer">{{ t.label }}</button>
+    </sc-for>
+  </div>
+
+  <main style="max-width:1080px;margin:0 auto;padding:clamp(26px,4vw,56px) clamp(18px,5vw,64px) 100px">
+
+    <!-- ============ ABOUT ============ -->
+    <sc-if value="{{ isAbout }}" hint-placeholder-val="{{ true }}">
+    <div class="about-grid" style="display:grid;grid-template-columns:.85fr 1.15fr;gap:36px;align-items:start">
+      <div style="position:sticky;top:150px">
+        <div style="position:relative;border-radius:28px;overflow:hidden;border:3px solid var(--cream-line);aspect-ratio:4/5;background:color-mix(in srgb,var(--poppy) 45%,var(--surface));box-shadow:var(--shadow)">
+          <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.16) 0 14px,transparent 14px 28px)"></div>
+          <div class="om-bob2" style="position:absolute;right:16px;top:16px;font-size:42px">🍦</div>
+          <div style="position:absolute;left:0;right:0;bottom:0;padding:14px;font-family:'Space Mono',monospace;font-size:12px;color:rgba(58,36,22,.6);background:linear-gradient(0deg,rgba(255,255,255,.5),transparent)">photo — Karel, Amy & Blair</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+          <sc-for list="{{ aboutFacts }}" as="f" hint-placeholder-count="3">
+            <span style="display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:999px;background:var(--surface);border:2px solid var(--cream-line);font-weight:600;font-size:13px;color:var(--ink)"><span style="font-size:16px">{{ f.icon }}</span>{{ f.label }}</span>
+          </sc-for>
+        </div>
+      </div>
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 14px;border-radius:999px;background:var(--surface);border:2px solid var(--cream-line);font-weight:600;font-size:13px;color:var(--ink-soft)"><span style="width:9px;height:9px;border-radius:50%;background:var(--pistachio)"></span>{{ aboutEyebrow }}</div>
+        <h1 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(36px,5.5vw,60px);line-height:1.04;letter-spacing:-.02em;margin:16px 0 0;color:var(--ink)">{{ aboutHeading }}</h1>
+        <div dangerouslySetInnerHTML="{{ aboutBody }}" style="font-size:18px;line-height:1.7;color:var(--ink);margin-top:18px"></div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ SKILLS ============ -->
+    <sc-if value="{{ isSkills }}" hint-placeholder-val="{{ false }}">
+    <div style="text-align:center;max-width:620px;margin:0 auto">
+      <h1 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(36px,6vw,64px);line-height:1.03;letter-spacing:-.02em;margin:0;color:var(--ink)">{{ skillsTitle }}</h1>
+      <p style="font-size:clamp(16px,1.6vw,19px);color:var(--ink-soft);margin:12px 0 0;line-height:1.5">{{ skillsSub }}</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:30px;margin-top:40px">
+      <sc-for list="{{ skillGroups }}" as="grp" hint-placeholder-count="3">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <span style="font-size:24px">{{ grp.icon }}</span>
+            <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:22px;margin:0;color:var(--ink)">{{ grp.title }}</h3>
+            <div style="flex:1;height:2px;background:var(--cream-line);border-radius:2px"></div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <sc-for list="{{ grp.items }}" as="s" hint-placeholder-count="4">
+              <div class="schip" style="display:flex;flex-direction:column;gap:9px;padding:15px 17px;border-radius:18px;background:var(--surface);border:2px solid var(--cream-line);box-shadow:var(--shadow);min-width:150px">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span style="font-size:19px">{{ s.icon }}</span>
+                  <span style="font-weight:700;font-size:16px;color:var(--ink)">{{ s.name }}</span>
+                </div>
+                <div dangerouslySetInnerHTML="{{ s.meter }}" style="display:flex;gap:4px;align-items:center"></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    </sc-if>
+
+    <!-- ============ LINKS ============ -->
+    <sc-if value="{{ isLinks }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:560px;margin:0 auto">
+      <div style="text-align:center">
+        <div class="om-bob" style="font-size:56px">🍦</div>
+        <h1 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(34px,5.5vw,54px);line-height:1.04;margin:10px 0 0;color:var(--ink)">{{ linksTitle }}</h1>
+        <p style="font-size:17px;color:var(--ink-soft);margin:10px 0 0">{{ linksSub }}</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:30px">
+        <sc-for list="{{ links }}" as="l" hint-placeholder-count="6">
+          <a href="{{ l.url }}" target="_blank" onClick="{{ l.click }}" class="lrow" style="display:flex;align-items:center;gap:15px;padding:17px 20px;border-radius:20px;background:var(--surface);border:2px solid var(--cream-line);box-shadow:var(--shadow);color:var(--ink)">
+            <span style="width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:23px;background:{{ l.tint }}">{{ l.icon }}</span>
+            <span style="display:flex;flex-direction:column;gap:1px;flex:1">
+              <span style="font-family:'Baloo 2',cursive;font-weight:700;font-size:18px">{{ l.label }}</span>
+              <span style="font-size:13px;color:var(--ink-soft);font-family:'Space Mono',monospace">{{ l.host }}</span>
+            </span>
+            <span style="font-size:20px;color:var(--ink-soft)">↗</span>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ CONTACT ============ -->
+    <sc-if value="{{ isContact }}" hint-placeholder-val="{{ false }}">
+    <div class="contact-grid" style="display:grid;grid-template-columns:.9fr 1.1fr;gap:36px;align-items:start">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 14px;border-radius:999px;background:var(--surface);border:2px solid var(--cream-line);font-weight:600;font-size:13px;color:var(--ink-soft)"><span style="width:9px;height:9px;border-radius:50%;background:var(--pistachio)"></span>{{ contactEyebrow }}</div>
+        <h1 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(34px,5vw,56px);line-height:1.04;letter-spacing:-.02em;margin:16px 0 0;color:var(--ink)">{{ contactTitle }}</h1>
+        <p style="font-size:18px;color:var(--ink-soft);line-height:1.6;margin:16px 0 0">{{ contactSub }}</p>
+        <div class="om-bob2" style="font-size:64px;margin-top:24px">✉️</div>
+      </div>
+
+      <div style="background:var(--surface);border:2px solid var(--cream-line);border-radius:26px;padding:26px;box-shadow:var(--shadow)">
+        <sc-if value="{{ contactSuccess }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;padding:20px 6px">
+            <div class="om-bob" style="font-size:60px">🍨</div>
+            <h3 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:28px;margin:12px 0 6px;color:var(--ink)">{{ successTitle }}</h3>
+            <p style="color:var(--ink-soft);margin:0;line-height:1.55">{{ successBody }}</p>
+            <button onClick="{{ resetContact }}" style="margin-top:20px;padding:12px 22px;border-radius:13px;border:2px solid var(--cream-line);background:var(--surface);color:var(--ink);font-weight:700;font-size:15px;cursor:pointer">{{ sendAnother }}</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ contactForm }}" hint-placeholder-val="{{ true }}">
+          <sc-if value="{{ showBanner }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:11px;align-items:flex-start;padding:13px 15px;border-radius:14px;background:color-mix(in srgb,var(--err) 14%,var(--surface));border:2px solid var(--err);margin-bottom:16px">
+              <span style="font-size:18px">{{ bannerIcon }}</span>
+              <span style="font-size:14px;color:var(--ink);line-height:1.45">{{ bannerText }}</span>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;gap:14px" class="cf-row">
+              <label style="flex:1;display:flex;flex-direction:column;gap:6px">
+                <span style="font-weight:700;font-size:13px;color:var(--ink-soft)">{{ nameL }}</span>
+                <input value="{{ cName }}" onInput="{{ onCName }}" placeholder="{{ namePh }}" style="height:46px;padding:0 14px;border-radius:12px;border:2px solid {{ nameBorder }};background:var(--surface-2);color:var(--ink);font-size:16px;font-family:inherit;outline:none" />
+                <sc-if value="{{ errName }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--err);font-weight:600">{{ errNameMsg }}</span></sc-if>
+              </label>
+              <label style="flex:1;display:flex;flex-direction:column;gap:6px">
+                <span style="font-weight:700;font-size:13px;color:var(--ink-soft)">{{ emailL }}</span>
+                <input value="{{ cEmail }}" onInput="{{ onCEmail }}" placeholder="{{ emailPh }}" style="height:46px;padding:0 14px;border-radius:12px;border:2px solid {{ emailBorder }};background:var(--surface-2);color:var(--ink);font-size:16px;font-family:inherit;outline:none" />
+                <sc-if value="{{ errEmail }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--err);font-weight:600">{{ errEmailMsg }}</span></sc-if>
+              </label>
+            </div>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-weight:700;font-size:13px;color:var(--ink-soft)">{{ subjectL }}</span>
+              <input value="{{ cSubject }}" onInput="{{ onCSubject }}" placeholder="{{ subjectPh }}" style="height:46px;padding:0 14px;border-radius:12px;border:2px solid var(--cream-line);background:var(--surface-2);color:var(--ink);font-size:16px;font-family:inherit;outline:none" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-weight:700;font-size:13px;color:var(--ink-soft)">{{ msgL }}</span>
+              <textarea value="{{ cMsg }}" onInput="{{ onCMsg }}" rows="5" placeholder="{{ msgPh }}" style="padding:12px 14px;border-radius:12px;border:2px solid {{ msgBorder }};background:var(--surface-2);color:var(--ink);font-size:16px;font-family:inherit;outline:none;resize:vertical"></textarea>
+              <sc-if value="{{ errMsg }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--err);font-weight:600">{{ errMsgMsg }}</span></sc-if>
+            </label>
+            <input value="{{ honeypot }}" onInput="{{ onHoney }}" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
+            <button onClick="{{ turnstileClick }}" style="display:flex;align-items:center;gap:12px;height:54px;padding:0 16px;border-radius:12px;border:2px solid {{ tsBorder }};background:var(--surface-2);cursor:{{ tsCursor }};text-align:left">
+              <span style="width:26px;height:26px;border-radius:7px;border:2px solid {{ tsBoxBorder }};display:grid;place-items:center;background:{{ tsBoxBg }};color:#fff;font-size:16px">{{ tsMark }}</span>
+              <span style="font-weight:600;font-size:14px;color:var(--ink)">{{ tsLabel }}</span>
+              <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;color:var(--ink-soft);line-height:1.1;text-align:right">Cloudflare<br/>Turnstile</span>
+            </button>
+            <button onClick="{{ submitContact }}" disabled="{{ sending }}" style="height:52px;border-radius:14px;border:none;background:var(--cherry-strong);color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:17px;cursor:{{ sendCursor }};opacity:{{ sendOpacity }};box-shadow:var(--shadow)">{{ submitLabel }}</button>
+            <p style="font-size:12px;color:var(--ink-soft);text-align:center;margin:0;line-height:1.5">{{ contactFoot }}</p>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ LEGAL / IMPRESSUM ============ -->
+    <sc-if value="{{ isLegal }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:720px;margin:0 auto">
+      <h1 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(30px,4.5vw,46px);line-height:1.05;margin:0;color:var(--ink)">{{ legalTitle }}</h1>
+      <p style="font-size:16px;color:var(--ink-soft);margin:10px 0 0;line-height:1.5">{{ legalIntro }}</p>
+      <div style="margin-top:26px;background:var(--surface);border:2px solid var(--cream-line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)">
+        <sc-for list="{{ legalRows }}" as="r" hint-placeholder-count="5">
+          <div style="display:grid;grid-template-columns:minmax(140px,1fr) 2fr;gap:16px;padding:16px 20px;border-bottom:2px solid var(--cream-line)">
+            <div style="font-weight:700;font-size:14px;color:var(--ink-soft)">{{ r.label }}</div>
+            <div dangerouslySetInnerHTML="{{ r.value }}" style="font-size:16px;color:var(--ink);line-height:1.5"></div>
+          </div>
+        </sc-for>
+      </div>
+      <p style="font-size:13px;color:var(--ink-soft);margin:18px 2px 0;line-height:1.55">{{ legalNote }}</p>
+    </div>
+    </sc-if>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1080,&quot;height&quot;:940},&quot;section&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;about&quot;,&quot;skills&quot;,&quot;links&quot;,&quot;contact&quot;,&quot;legal&quot;],&quot;default&quot;:&quot;about&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;cs&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;'en'|'cs'&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;day&quot;,&quot;night&quot;],&quot;default&quot;:&quot;day&quot;,&quot;tsType&quot;:&quot;'day'|'night'&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;contactState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;success&quot;,&quot;spam&quot;,&quot;rate&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo states&quot;}}">
+class Component extends DCLogic {
+  state = {
+    lang:this.props.lang||'en', theme:this.props.theme||'day',
+    section:this.props.section||'about',
+    cName:'', cEmail:'', cSubject:'', cMsg:'', honeypot:'', ts:'idle', cPhase:'idle', errs:{},
+  };
+
+  _md(src){
+    if(!src) return '';
+    const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const inline=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\[(.+?)\]\((.+?)\)/g,'<a href="$2">$1</a>');
+    return src.split('\n\n').map(p=>`<p style="margin:0 0 16px">${inline(p.trim())}</p>`).join('');
+  }
+  _meter(level){
+    if(level==null) return `<span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-soft)">\u2014</span>`;
+    let h='';
+    for(let i=0;i<5;i++){ const on=i<level; h+=`<span style="font-size:17px;line-height:1;display:inline-block;${on?'':'filter:grayscale(1);opacity:.3'}">\uD83C\uDF66</span>`; }
+    return h;
+  }
+
+  UI = {
+    en:{ nav:['Projects','About','Skills','Arcade','Links','Contact'],
+      tabs:[['about','About'],['skills','Skills'],['links','Links'],['contact','Contact'],['legal','Legal']],
+      aboutEyebrow:'Showcase of me', aboutHeading:'A developer with a growing soft spot for games.',
+      aboutBody:'I\u2019m Karel \u2014 a developer from the Czech Republic. I spent a few good years teaching web development at **Czechitas**, and these days I build products full-time: right now that\u2019s **YarnLog**, a companion for knitters and crocheters, and a home-management app my own household actually runs on. Web and app development is what I do, and what I love doing.\n\nGames are a hobby that keeps growing on me. **Scoop Rush**, over in the arcade, is one I\u2019ve already shipped, with more melting away in my side-project freezer \u2014 I\u2019m still learning the craft and enjoying it on the side, alongside the day job rather than instead of it. So ask me about a product build or a little game; I\u2019m happy to talk shop about either.\n\nAway from the keyboard you\u2019ll find me with a crochet hook, hunting the perfect scoop of mango or lemon-yuzu, or being closely supervised by **Amy** (our maltese) and **Blair** (a cat we rescued from the streets of Slovakia). My wife puts up with all of it, and I\u2019m grateful.',
+      aboutFacts:[['\uD83C\uDF66','Mango, always'],['\uD83D\uDC36','Dog + cat person'],['\uD83E\uDDF6','Crochets, badly-well']],
+      skillsTitle:'What I\u2019m good at.', skillsSub:'Roughly, honestly, in scoops out of five. Code, tools, and the hand-made stuff \u2014 no career timeline, promise.',
+      linksTitle:'Find me everywhere.', linksSub:'The fast path \u2014 grab what you came for.',
+      contactEyebrow:'Say ahoj', contactTitle:'Let\u2019s talk.', contactSub:'A project, a question, or just an ice-cream recommendation \u2014 drop me a line and I\u2019ll get back to you.',
+      nameL:'Your name', namePh:'Jane Scoop', emailL:'Email', emailPh:'you@example.com', subjectL:'Subject (optional)', subjectPh:'What\u2019s this about?', msgL:'Message', msgPh:'Tell me everything\u2026',
+      ts:'I\u2019m not a melting robot', tsChecking:'Checking\u2026', tsOk:'Verified \u2014 you\u2019re human',
+      submit:'Send message', sending:'Sending\u2026', contactFoot:'Protected by Cloudflare Turnstile. I\u2019ll only use your email to reply.',
+      successTitle:'Message sent!', successBody:'Thanks \u2014 it landed safely. I usually reply within a day or two (unless the ice-cream is really good).', sendAnother:'Send another',
+      errNameMsg:'Please add your name.', errEmailMsg:'That email doesn\u2019t look right.', errMsgMsg:'A message would help!',
+      bannerSpam:['\uD83E\uDD16','That looked like spam and was blocked. If you\u2019re human, try again.'],
+      bannerRate:['\u23F3','Whoa, lots of messages! Please wait a minute and try again.'],
+      legalTitle:'Legal notice', legalIntro:'Mandatory disclosure for a Czech sole trader (OSV\u010c). Czech is authoritative; English is a courtesy translation.',
+      legalNote:'Registered address shown here only, as required by law \u2014 it does not appear elsewhere on this site. Karel is not a VAT payer (nepl\u00e1tce DPH), so no DI\u010c is shown.',
+      leg:{name:'Name',ico:'I\u010cO',seat:'Registered seat',reg:'Trade register',vat:'VAT',email:'Email'} },
+    cs:{ nav:['Projekty','O mn\u011b','Dovednosti','Ark\u00e1da','Odkazy','Kontakt'],
+      tabs:[['about','O mn\u011b'],['skills','Dovednosti'],['links','Odkazy'],['contact','Kontakt'],['legal','Pr\u00e1vn\u00ed']],
+      aboutEyebrow:'Uk\u00e1zka m\u011b', aboutHeading:'V\u00fdvoj\u00e1\u0159, kter\u00e9mu k srdci p\u0159ir\u016fstaj\u00ed hry.',
+      aboutBody:'Jsem Karel \u2014 v\u00fdvoj\u00e1\u0159 z \u010cesk\u00e9 republiky. P\u00e1r hezk\u00fdch let jsem u\u010dil webov\u00fd v\u00fdvoj v **Czechitas** a dneska stav\u00edm produkty na pln\u00fd \u00favazek: te\u010f **YarnLog**, spole\u010dn\u00edka pro pleta\u0159ky a h\u00e1\u010dka\u0159ky, a appku na spr\u00e1vu dom\u00e1cnosti, na kter\u00e9 n\u00e1m doma opravdu v\u0161echno b\u011b\u017e\u00ed. Webov\u00fd a appov\u00fd v\u00fdvoj je to, co d\u011bl\u00e1m \u2014 a co m\u011b bav\u00ed.\n\nHry jsou kon\u00ed\u010dek, kter\u00fd mi po\u0159\u00e1d v\u00edc p\u0159ir\u016fst\u00e1 k srdci. **Scoop Rush** v ark\u00e1d\u011b u\u017e m\u00e1m vydan\u00fd a v \u0161upl\u00edku mi taje dal\u0161\u00ed \u2014 po\u0159\u00e1d se to u\u010d\u00edm a u\u017e\u00edv\u00e1m si to bokem, vedle sv\u00e9 pr\u00e1ce, ne m\u00edsto n\u00ed. Tak se klidn\u011b ptej na produktov\u00fd projekt i na malou hru, r\u00e1d si o obojim pop\u006fv\u00edd\u00e1m.\n\nMimo kl\u00e1vesnici m\u011b najde\u0161 s h\u00e1\u010dkem v ruce, na lovu dokonal\u00e9ho kope\u010dku manga nebo citr\u00f3nu s yuzu, nebo pod bedliv\u00fdm dohledem **Amy** (na\u0161e malt\u00e9za\u010dka) a **Blair** (ko\u010dka, kterou jsme zachr\u00e1nili z ulic Slovenska). \u017dena to v\u0161echno sn\u00e1\u0161\u00ed a j\u00e1 jsem za to vd\u011b\u010dn\u00fd.',
+      aboutFacts:[['\uD83C\uDF66','V\u017edycky mango'],['\uD83D\uDC36','Pes i ko\u010dka'],['\uD83E\uDDF6','H\u00e1\u010dkuje, tak akor\u00e1t']],
+      skillsTitle:'Co mi jde.', skillsSub:'Zhruba a up\u0159\u00edmn\u011b, v kope\u010dc\u00edch z p\u011bti. K\u00f3d, n\u00e1stroje a ru\u010dn\u00ed pr\u00e1ce \u2014 \u017e\u00e1dn\u00e1 \u010dasov\u00e1 osa kari\u00e9ry, slibuju.',
+      linksTitle:'Najde\u0161 m\u011b v\u0161ude.', linksSub:'Rychl\u00e1 cesta \u2014 vezmi si, pro co jsi p\u0159i\u0161el.',
+      contactEyebrow:'\u0158ekni ahoj', contactTitle:'Poj\u010fme si napsat.', contactSub:'Projekt, dotaz, nebo jen tip na zmrzlinu \u2014 napi\u0161 mi a ozvu se ti zp\u011bt.',
+      nameL:'Tv\u00e9 jm\u00e9no', namePh:'Jana Kope\u010dkov\u00e1', emailL:'E-mail', emailPh:'ty@priklad.cz', subjectL:'P\u0159edm\u011bt (nepovinn\u00e9)', subjectPh:'\u010ceho se to t\u00fdk\u00e1?', msgL:'Zpr\u00e1va', msgPh:'Napi\u0161 mi v\u0161echno\u2026',
+      ts:'Nejsem taj\u00edc\u00ed robot', tsChecking:'Ov\u011b\u0159uji\u2026', tsOk:'Ov\u011b\u0159eno \u2014 jsi \u010dlov\u011bk',
+      submit:'Odeslat zpr\u00e1vu', sending:'Odes\u00edl\u00e1m\u2026', contactFoot:'Chr\u00e1n\u011bno Cloudflare Turnstile. Tv\u016fj e-mail pou\u017eiju jen na odpov\u011b\u010f.',
+      successTitle:'Zpr\u00e1va odesl\u00e1na!', successBody:'D\u00edky \u2014 v po\u0159\u00e1dku dorazila. Obvykle odpov\u00edm do dne dvou (pokud zrovna nen\u00ed opravdu dobr\u00e1 zmrzlina).', sendAnother:'Poslat dal\u0161\u00ed',
+      errNameMsg:'Dopl\u0148 pros\u00edm jm\u00e9no.', errEmailMsg:'Ten e-mail nevypad\u00e1 spr\u00e1vn\u011b.', errMsgMsg:'Zpr\u00e1va by se hodila!',
+      bannerSpam:['\uD83E\uDD16','Vypadalo to jako spam a bylo to zablokov\u00e1no. Jsi-li \u010dlov\u011bk, zkus to znovu.'],
+      bannerRate:['\u23F3','Wow, spousta zpr\u00e1v! Po\u010dkej pros\u00edm minutu a zkus to znovu.'],
+      legalTitle:'Pr\u00e1vn\u00ed \u00fadaje', legalIntro:'Povinn\u011b zve\u0159ej\u0148ovan\u00e9 informace o podnikateli (OSV\u010c). Rozhoduj\u00edc\u00ed je \u010de\u0161tina; angli\u010dtina je p\u0159eklad pro pohodl\u00ed.',
+      legalNote:'S\u00eddlo je uvedeno pouze zde, jak vy\u017eaduje z\u00e1kon \u2014 jinde na webu se neobjevuje. Karel je nepl\u00e1tce DPH, proto se DI\u010c neuv\u00e1d\u00ed.',
+      leg:{name:'Jm\u00e9no',ico:'I\u010cO',seat:'S\u00eddlo',reg:'\u017divnostensk\u00fd rejst\u0159\u00edk',vat:'DPH',email:'E-mail'} },
+  };
+
+  SKILLS = [
+    {group:'languages', icon:'\uD83D\uDCBB', name_en:'Languages', name_cs:'Jazyky', items:[
+      {name:'TypeScript', icon:'\uD83D\uDD37', level:5},{name:'Go', icon:'\uD83D\uDC39', level:4},{name:'JavaScript', icon:'\uD83D\uDFE8', level:5},{name:'Python', icon:'\uD83D\uDC0D', level:3},{name:'SQL', icon:'\uD83D\uDDC4\uFE0F', level:3}]},
+    {group:'tools', icon:'\uD83D\uDEE0\uFE0F', name_en:'Tools', name_cs:'N\u00e1stroje', items:[
+      {name:'React', icon:'\u269B\uFE0F', level:5},{name:'Vite', icon:'\u26A1', level:4},{name:'Node', icon:'\uD83D\uDFE9', level:4},{name:'Docker', icon:'\uD83D\uDC33', level:3},{name:'Figma', icon:'\uD83C\uDFA8', level:3},{name:'Git', icon:'\uD83C\uDF3F', level:4}]},
+    {group:'craft', icon:'\uD83E\uDDF6', name_en:'Hand-made', name_cs:'Ru\u010dn\u00ed pr\u00e1ce', items:[
+      {name_en:'Crochet', name_cs:'H\u00e1\u010dkov\u00e1n\u00ed', icon:'\uD83E\uDDF6', level:4},{name_en:'Woodworking', name_cs:'Truhla\u0159ina', icon:'\uD83E\uDEB5', level:3},{name_en:'Film photography', name_cs:'Filmov\u00e1 fotografie', icon:'\uD83D\uDCF7', level:3},{name_en:'Baking', name_cs:'Pe\u010den\u00ed', icon:'\uD83E\uDDC1', level:null}]},
+  ];
+
+  LINKS = [
+    {label_en:'GitHub', label_cs:'GitHub', url:'https://github.com/kareltilcer', host:'github.com/kareltilcer', icon:'\uD83D\uDC19', tint:'--surface-2'},
+    {label_en:'YarnLog \u2014 live', label_cs:'YarnLog \u2014 \u017eiv\u011b', url:'#', host:'yarnlog.app', icon:'\uD83E\uDDF6', tint:'--pistachio'},
+    {label_en:'LinkedIn', label_cs:'LinkedIn', url:'#', host:'linkedin.com/in/karel', icon:'\uD83D\uDCBC', tint:'--sky'},
+    {label_en:'Instagram', label_cs:'Instagram', url:'#', host:'@karel.scoops', icon:'\uD83D\uDCF8', tint:'--poppy'},
+    {label_en:'Email me', label_cs:'Napi\u0161 mi', url:'#contact', host:'ahoj@karel.tilcer.cz', icon:'\u2709\uFE0F', tint:'--mango'},
+    {label_en:'Buy me an ice-cream', label_cs:'Kup mi zmrzlinu', url:'#', host:'ko-fi.com/karel', icon:'\uD83C\uDF66', tint:'--yuzu'},
+  ];
+
+  _validEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+  renderVals(){
+    const S=this.state, U=this.UI[S.lang], lang=S.lang;
+    const tn=(o,b)=> o[b+'_'+lang]!==undefined ? o[b+'_'+lang] : o[b];
+    const sec=S.section;
+    const go=(name)=>(e)=>{ if(e)e.preventDefault(); this.setState({section:name}); window.scrollTo(0,0); };
+
+    const navMap={'Projects':'about','About':'about','Skills':'skills','Arcade':'about','Links':'links','Contact':'contact'};
+    const navHref={0:'#projects',3:'#arcade'};
+    const navItems=U.nav.map((label,i)=>{
+      const target=['#','about','skills','#','links','contact'][i];
+      return { label, active:(target===sec)?'1':'0', go:(e)=>{ e.preventDefault(); if(target.startsWith('#'))return; this.setState({section:target}); window.scrollTo(0,0); } };
+    });
+    const tabs=U.tabs.map(([k,label])=>({ label, go:go(k),
+      border:sec===k?'var(--cherry-strong)':'var(--cream-line)', bg:sec===k?'var(--cherry-strong)':'var(--surface)', color:sec===k?'#fff':'var(--ink)' }));
+
+    // skills
+    const skillGroups=this.SKILLS.map(g=>({ icon:g.icon, title:tn(g,'name'),
+      items:g.items.map(s=>({ icon:s.icon, name:tn(s,'name'), meter:{__html:this._meter(s.level)} })) }));
+
+    // links
+    const links=this.LINKS.map(l=>({ url:l.url, label:tn(l,'label'), host:l.host, icon:l.icon, tint:`color-mix(in srgb, var(${l.tint}) 55%, var(--surface))`,
+      click:(e)=>{ /* FR-6 fire-and-forget click counter */ } }));
+
+    // contact display phase (allow tweak override)
+    let phase=S.cPhase;
+    if(this.props.contactState && this.props.contactState!=='auto') phase=this.props.contactState;
+    const errs=S.errs, tsOk=S.ts==='ok';
+
+    // legal rows
+    const legalRows=[
+      {label:U.leg.name, value:{__html:'Karel T\u00edlcer'}},
+      {label:U.leg.ico, value:{__html:'<span style="font-family:\'Space Mono\',monospace">123 45 678</span>'}},
+      {label:U.leg.seat, value:{__html:'Slune\u010dn\u00ed 12<br/>110 00 Praha 1<br/>'+(lang==='cs'?'\u010cesk\u00e1 republika':'Czech Republic')}},
+      {label:U.leg.reg, value:{__html: lang==='cs'
+        ? 'Fyzick\u00e1 osoba podnikaj\u00edc\u00ed dle \u017eivnostensk\u00e9ho z\u00e1kona nezapsan\u00e1 v obchodn\u00edm rejst\u0159\u00edku. Zaps\u00e1no v \u017eivnostensk\u00e9m rejst\u0159\u00edku, \u00da\u0159ad m\u011bstsk\u00e9 \u010d\u00e1sti Praha 1.'
+        : 'Sole trader under the Czech Trade Licensing Act, not entered in the Commercial Register. Registered in the Trade Register, Prague 1 Municipal Office.'}},
+      {label:U.leg.email, value:{__html:'<a href="mailto:ahoj@karel.tilcer.cz">ahoj@karel.tilcer.cz</a>'}},
+    ];
+
+    return {
+      theme:S.theme,
+      isAbout:sec==='about', isSkills:sec==='skills', isLinks:sec==='links', isContact:sec==='contact', isLegal:sec==='legal',
+      navItems, tabs,
+      // about
+      aboutEyebrow:U.aboutEyebrow, aboutHeading:U.aboutHeading, aboutBody:{__html:this._md(U.aboutBody)},
+      aboutFacts:U.aboutFacts.map(([icon,label])=>({icon,label})),
+      // skills
+      skillsTitle:U.skillsTitle, skillsSub:U.skillsSub, skillGroups,
+      // links
+      linksTitle:U.linksTitle, linksSub:U.linksSub, links,
+      // contact
+      contactEyebrow:U.contactEyebrow, contactTitle:U.contactTitle, contactSub:U.contactSub,
+      contactSuccess:phase==='success', contactForm:phase!=='success',
+      showBanner:phase==='spam'||phase==='rate',
+      bannerIcon:(phase==='spam'?U.bannerSpam:U.bannerRate)[0], bannerText:(phase==='spam'?U.bannerSpam:U.bannerRate)[1],
+      nameL:U.nameL, namePh:U.namePh, emailL:U.emailL, emailPh:U.emailPh, subjectL:U.subjectL, subjectPh:U.subjectPh, msgL:U.msgL, msgPh:U.msgPh,
+      cName:S.cName, cEmail:S.cEmail, cSubject:S.cSubject, cMsg:S.cMsg, honeypot:S.honeypot,
+      onCName:(e)=>this.setState(s=>({cName:e.target.value, errs:{...s.errs,name:undefined}})),
+      onCEmail:(e)=>this.setState(s=>({cEmail:e.target.value, errs:{...s.errs,email:undefined}})),
+      onCSubject:(e)=>this.setState({cSubject:e.target.value}),
+      onCMsg:(e)=>this.setState(s=>({cMsg:e.target.value, errs:{...s.errs,msg:undefined}})),
+      onHoney:(e)=>this.setState({honeypot:e.target.value}),
+      errName:!!errs.name, errNameMsg:U.errNameMsg, errEmail:!!errs.email, errEmailMsg:U.errEmailMsg, errMsg:!!errs.msg, errMsgMsg:U.errMsgMsg,
+      nameBorder:errs.name?'var(--err)':'var(--cream-line)', emailBorder:errs.email?'var(--err)':'var(--cream-line)', msgBorder:errs.msg?'var(--err)':'var(--cream-line)',
+      tsLabel:S.ts==='ok'?U.tsOk:(S.ts==='checking'?U.tsChecking:U.ts), tsMark:S.ts==='ok'?'\u2713':'',
+      tsBorder:S.ts==='ok'?'var(--pistachio)':'var(--cream-line)', tsBoxBorder:S.ts==='ok'?'var(--pistachio)':'var(--ink-soft)', tsBoxBg:S.ts==='ok'?'var(--pistachio)':'transparent', tsCursor:S.ts==='idle'?'pointer':'default',
+      turnstileClick:()=>{ if(S.ts!=='idle')return; this.setState({ts:'checking'}); setTimeout(()=>this.setState({ts:'ok'}),1000); },
+      sending:phase==='sending', sendCursor:phase==='sending'?'wait':'pointer', sendOpacity:phase==='sending'?'.7':'1',
+      submitLabel:phase==='sending'?U.sending:U.submit,
+      submitContact:()=>{
+        if(S.honeypot){ this.setState({cPhase:'spam'}); return; }
+        const er={}; if(!S.cName.trim())er.name=1; if(!this._validEmail(S.cEmail))er.email=1; if(!S.cMsg.trim())er.msg=1;
+        if(Object.keys(er).length){ this.setState({errs:er}); return; }
+        if(!tsOk){ this.setState({errs:{}}); return; }
+        this.setState({errs:{}, cPhase:'sending'});
+        setTimeout(()=>this.setState({cPhase:'success'}),1100);
+      },
+      resetContact:()=>this.setState({cPhase:'idle', cName:'', cEmail:'', cSubject:'', cMsg:'', ts:'idle', errs:{}}),
+      successTitle:U.successTitle, successBody:U.successBody, sendAnother:U.sendAnother, contactFoot:U.contactFoot,
+      // legal
+      legalTitle:U.legalTitle, legalIntro:U.legalIntro, legalRows, legalNote:U.legalNote,
+      // chrome
+      langLabel:lang==='en'?'CS':'EN', themeIcon:S.theme==='day'?'\uD83C\uDF19':'\u2600\uFE0F',
+      toggleLang:()=>this.setState(s=>({lang:s.lang==='en'?'cs':'en'})),
+      toggleTheme:()=>this.setState(s=>({theme:s.theme==='day'?'night':'day'})),
+      goHome:(e)=>{ e.preventDefault(); this.setState({section:'about'}); window.scrollTo(0,0); },
+    };
+  }
+}
+</script>
+</body>
+</html>

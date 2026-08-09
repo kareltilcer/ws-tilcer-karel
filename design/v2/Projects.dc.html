@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Space+Mono&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --sky-1:#9FE3FF; --sky-2:#FFE7BE; --bg:#FFF6E9; --surface:#FFFFFF; --surface-2:#FFF0DD;
+    --ink:#3A2416; --ink-soft:#8A6A50; --cream-line:#EBD9BE;
+    --mango:#FF9F1C; --tanger:#FF7A1A; --cherry:#EF476F; --cherry-strong:#D62A54;
+    --pistachio:#7FC85F; --sky:#37B6EF; --yuzu:#F2CE2E; --poppy:#B4A2F0; --sun:#FFD23F;
+    --shadow: 0 14px 30px -12px rgba(58,36,22,.32); --ring: rgba(214,42,84,.5);
+  }
+  [data-theme="night"]{
+    --sky-1:#241E48; --sky-2:#5A2E5E; --bg:#1B1530; --surface:#2A2340; --surface-2:#241E3A;
+    --ink:#FDF3E7; --ink-soft:#C6B4D6; --cream-line:#3B3358;
+    --mango:#FFB24D; --tanger:#FF9350; --cherry:#FF6B90; --cherry-strong:#FF6B90;
+    --pistachio:#9BE07A; --sky:#66D0FF; --yuzu:#FFE06A; --poppy:#C9BAFF; --sun:#FFE9A8;
+    --shadow: 0 18px 40px -14px rgba(0,0,0,.6); --ring: rgba(255,107,144,.6);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--cherry);color:#fff}
+  a{color:var(--cherry-strong);text-decoration:none} a:hover{color:var(--tanger)}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  @keyframes shimmer{100%{background-position:200% 0}}
+  @keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+  @keyframes wobtile{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(-1.2deg)}}
+  .om-bob{animation:bob 3.4s ease-in-out infinite}
+  @media (prefers-reduced-motion:reduce){.om-bob{animation:none !important}html{scroll-behavior:auto !important}}
+  .card{transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s}
+  .card:hover{transform:translateY(-8px) rotate(-.6deg)}
+  .navlink{position:relative}
+  .navlink::after{content:"";position:absolute;left:0;right:100%;bottom:-4px;height:3px;border-radius:3px;background:var(--cherry);transition:right .25s ease}
+  .navlink:hover::after,.navlink[data-active="1"]::after{right:0}
+  .skel{background:linear-gradient(90deg,var(--surface-2) 25%,var(--cream-line) 37%,var(--surface-2) 63%);background-size:200% 100%;animation:shimmer 1.3s linear infinite}
+  @media (max-width:900px){ .hero-nav{display:none !important} }
+  @media (max-width:760px){ .pgrid{grid-template-columns:1fr !important} .pgrid .feat{grid-column:auto !important} .detail-grid{grid-template-columns:1fr !important} }
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="position:relative;min-height:100vh;background:var(--bg);color:var(--ink);transition:background .5s,color .3s">
+
+  <header style="position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px clamp(18px,5vw,64px);background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);border-bottom:2px solid var(--cream-line)">
+    <a href="#" onClick="{{ goGrid }}" style="display:flex;align-items:center;gap:12px;color:var(--ink)">
+      <span style="display:grid;place-items:center;width:42px;height:42px;border-radius:15px 15px 15px 5px;background:var(--cherry-strong);color:#fff;font-family:'Baloo 2',cursive;font-weight:800;font-size:22px;box-shadow:var(--shadow);transform:rotate(-6deg)">k</span>
+      <span style="font-family:'Baloo 2',cursive;font-weight:700;font-size:21px;letter-spacing:-.01em">karel<span style="color:var(--cherry-strong)">.</span></span>
+    </a>
+    <nav class="hero-nav" style="display:flex;align-items:center;gap:24px">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="6">
+        <a href="{{ item.href }}" class="navlink" data-active="{{ item.active }}" style="font-weight:600;font-size:16px;color:var(--ink)">{{ item.label }}</a>
+      </sc-for>
+    </nav>
+    <div class="ctrls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <button onClick="{{ toggleLang }}" title="Language" style="height:40px;padding:0 13px;border:2px solid var(--cream-line);background:var(--surface);color:var(--ink);border-radius:13px;font-family:'Baloo 2',cursive;font-weight:700;font-size:14px;cursor:pointer">{{ langLabel }}</button>
+      <button onClick="{{ toggleTheme }}" title="Theme" style="width:40px;height:40px;border:2px solid var(--cream-line);background:var(--surface);border-radius:13px;cursor:pointer;font-size:17px">{{ themeIcon }}</button>
+    </div>
+  </header>
+
+  <!-- ===================== GRID VIEW ===================== -->
+  <sc-if value="{{ isGrid }}" hint-placeholder-val="{{ true }}">
+  <main style="max-width:1240px;margin:0 auto;padding:clamp(24px,4vw,56px) clamp(18px,5vw,64px) 96px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 14px;border-radius:999px;background:var(--surface);border:2px solid var(--cream-line);font-weight:600;font-size:13px;color:var(--ink-soft)">
+          <span style="width:9px;height:9px;border-radius:50%;background:var(--pistachio)"></span>{{ eyebrow }}
+        </div>
+        <h1 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(38px,6vw,68px);line-height:1.04;letter-spacing:-.02em;margin:16px 0 0;color:var(--ink)">{{ title }}</h1>
+        <p style="font-size:clamp(16px,1.6vw,19px);color:var(--ink-soft);margin:12px 0 0;max-width:52ch;line-height:1.5">{{ subtitle }}</p>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:14px;color:var(--ink-soft);white-space:nowrap">{{ countLabel }}</div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:30px 0 8px">
+      <sc-for list="{{ chips }}" as="c" hint-placeholder-count="5">
+        <button onClick="{{ c.onClick }}" style="display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:2px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};font-weight:700;font-size:15px;cursor:pointer;transition:transform .15s">{{ c.label }}<span style="font-family:'Space Mono',monospace;font-size:12px;opacity:.7">{{ c.count }}</span></button>
+      </sc-for>
+    </div>
+
+    <!-- loading -->
+    <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+      <div class="pgrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:26px">
+        <sc-for list="{{ skeletons }}" as="s" hint-placeholder-count="6">
+          <div style="border-radius:24px;overflow:hidden;border:2px solid var(--cream-line);background:var(--surface)">
+            <div class="skel" style="aspect-ratio:4/3"></div>
+            <div style="padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div class="skel" style="height:14px;width:40%;border-radius:6px"></div>
+              <div class="skel" style="height:22px;width:80%;border-radius:6px"></div>
+              <div class="skel" style="height:14px;width:100%;border-radius:6px"></div>
+              <div class="skel" style="height:14px;width:60%;border-radius:6px"></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- error -->
+    <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:40px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:56px 24px;border-radius:28px;border:2px dashed var(--cream-line);background:var(--surface)">
+        <div style="font-size:64px;filter:grayscale(.2)">🫠</div>
+        <h3 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:26px;margin:0">{{ errTitle }}</h3>
+        <p style="color:var(--ink-soft);margin:0;max-width:40ch">{{ errBody }}</p>
+        <button onClick="{{ retry }}" style="margin-top:6px;padding:13px 24px;border-radius:14px;background:var(--cherry-strong);color:#fff;border:none;font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;cursor:pointer;box-shadow:var(--shadow)">{{ retryLabel }}</button>
+      </div>
+    </sc-if>
+
+    <!-- empty -->
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:40px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:60px 24px;border-radius:28px;border:2px dashed var(--cream-line);background:var(--surface)">
+        <div style="font-size:66px">🍦</div>
+        <h3 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:26px;margin:0">{{ emptyTitle }}</h3>
+        <p style="color:var(--ink-soft);margin:0;max-width:42ch">{{ emptyBody }}</p>
+      </div>
+    </sc-if>
+
+    <!-- ready grid -->
+    <sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+      <div class="pgrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:26px">
+        <sc-for list="{{ projects }}" as="p" hint-placeholder-count="6">
+          <a href="#" onClick="{{ p.open }}" class="card {{ p.featClass }}" style="grid-column:{{ p.span }};display:flex;flex-direction:column;border-radius:24px;overflow:hidden;border:2px solid var(--cream-line);background:var(--surface);box-shadow:var(--shadow);color:var(--ink)">
+            <div style="position:relative;aspect-ratio:{{ p.ratio }};background:{{ p.coverBg }};overflow:hidden">
+              <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.14) 0 12px,transparent 12px 24px)"></div>
+              <div class="om-bob" style="position:absolute;right:14px;top:14px;font-size:30px">{{ p.motif }}</div>
+              <sc-if value="{{ p.featured }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:14px;top:14px;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--yuzu);color:#3A2416;font-weight:800;font-size:12px;box-shadow:var(--shadow)">★ {{ featuredLabel }}</div>
+              </sc-if>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:10px 14px;font-family:'Space Mono',monospace;font-size:11px;color:rgba(58,36,22,.6);background:linear-gradient(0deg,rgba(255,255,255,.5),transparent)">{{ p.coverTag }}</div>
+            </div>
+            <div style="padding:18px 18px 20px;display:flex;flex-direction:column;gap:9px;flex:1">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="padding:4px 11px;border-radius:999px;background:{{ p.catBg }};color:{{ p.catColor }};font-weight:700;font-size:12px">{{ p.catName }}</span>
+                <span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-soft)">{{ p.date }}</span>
+              </div>
+              <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:{{ p.titleSize }};line-height:1.1;margin:0;color:var(--ink)">{{ p.title }}</h3>
+              <p style="color:var(--ink-soft);font-size:15px;line-height:1.5;margin:0;text-wrap:pretty">{{ p.summary }}</p>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:8px">
+                <sc-for list="{{ p.linkTypes }}" as="lt" hint-placeholder-count="2">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--ink-soft)">{{ lt.icon }} {{ lt.label }}</span>
+                </sc-for>
+                <span style="margin-left:auto;font-weight:800;color:var(--cherry-strong);font-size:15px">{{ openLabel }} →</span>
+              </div>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </sc-if>
+  </main>
+  </sc-if>
+
+  <!-- ===================== DETAIL VIEW ===================== -->
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+  <main style="max-width:1080px;margin:0 auto;padding:clamp(20px,3vw,40px) clamp(18px,5vw,64px) 96px">
+    <button onClick="{{ goGrid }}" style="display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:13px;border:2px solid var(--cream-line);background:var(--surface);color:var(--ink);font-weight:700;font-size:15px;cursor:pointer;margin-bottom:22px">← {{ backLabel }}</button>
+
+    <div class="detail-grid" style="display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:start">
+      <div>
+        <div style="position:relative;border-radius:28px;overflow:hidden;border:2px solid var(--cream-line);aspect-ratio:16/10;background:{{ d.coverBg }};box-shadow:var(--shadow)">
+          <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.14) 0 14px,transparent 14px 28px)"></div>
+          <div class="om-bob" style="position:absolute;right:20px;top:18px;font-size:44px">{{ d.motif }}</div>
+          <div style="position:absolute;left:0;right:0;bottom:0;padding:14px 18px;font-family:'Space Mono',monospace;font-size:12px;color:rgba(58,36,22,.6);background:linear-gradient(0deg,rgba(255,255,255,.55),transparent)">{{ d.coverTag }}</div>
+        </div>
+        <div ref="{{ bodyRef }}" style="margin-top:26px;font-size:17px;line-height:1.7;color:var(--ink)" dangerouslySetInnerHTML="{{ d.bodyHtml }}"></div>
+
+        <sc-if value="{{ d.hasGallery }}" hint-placeholder-val="{{ false }}">
+          <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:22px;margin:34px 0 14px">{{ galleryLabel }}</h3>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+            <sc-for list="{{ d.gallery }}" as="g" hint-placeholder-count="6">
+              <button onClick="{{ g.open }}" style="position:relative;aspect-ratio:1;border-radius:16px;overflow:hidden;border:2px solid var(--cream-line);background:{{ g.bg }};cursor:pointer;padding:0">
+                <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.14) 0 10px,transparent 10px 20px)"></div>
+                <div style="position:absolute;left:8px;bottom:8px;font-family:'Space Mono',monospace;font-size:10px;color:rgba(58,36,22,.6)">{{ g.tag }}</div>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+
+      <aside style="position:sticky;top:96px;display:flex;flex-direction:column;gap:18px">
+        <div>
+          <span style="display:inline-block;padding:5px 13px;border-radius:999px;background:{{ d.catBg }};color:{{ d.catColor }};font-weight:700;font-size:13px">{{ d.catName }}</span>
+          <h1 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(30px,4vw,46px);line-height:1.06;letter-spacing:-.02em;margin:14px 0 0;color:var(--ink)">{{ d.title }}</h1>
+          <div style="font-family:'Space Mono',monospace;font-size:13px;color:var(--ink-soft);margin-top:10px">{{ d.date }}</div>
+          <p style="font-size:17px;color:var(--ink-soft);line-height:1.55;margin:14px 0 0">{{ d.summary }}</p>
+        </div>
+        <sc-if value="{{ d.hasLinks }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:20px;border:2px solid var(--cream-line);background:var(--surface);box-shadow:var(--shadow)">
+            <div style="font-weight:800;font-size:14px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em">{{ linksLabel }}</div>
+            <sc-for list="{{ d.links }}" as="l" hint-placeholder-count="2">
+              <a href="{{ l.url }}" target="_blank" style="display:flex;align-items:center;gap:11px;padding:13px 15px;border-radius:14px;background:{{ l.bg }};color:{{ l.color }};font-weight:700;font-size:15px">
+                <span style="font-size:18px">{{ l.icon }}</span>{{ l.label }}<span style="margin-left:auto;opacity:.7">↗</span>
+              </a>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ d.noLinks }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:16px 18px;border-radius:20px;border:2px dashed var(--cream-line);color:var(--ink-soft);font-size:14px;line-height:1.5">{{ noLinksNote }}</div>
+        </sc-if>
+      </aside>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- lightbox -->
+  <sc-if value="{{ hasLightbox }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeLightbox }}" style="position:fixed;inset:0;z-index:80;background:rgba(27,21,48,.82);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px">
+      <div style="position:relative;width:min(900px,92vw);aspect-ratio:4/3;border-radius:22px;overflow:hidden;background:{{ lb.bg }};border:3px solid #fff;box-shadow:0 30px 80px rgba(0,0,0,.5)">
+        <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.14) 0 18px,transparent 18px 36px)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:18px 22px;font-family:'Space Mono',monospace;font-size:13px;color:rgba(58,36,22,.7);background:linear-gradient(0deg,rgba(255,255,255,.6),transparent)">{{ lb.tag }}</div>
+      </div>
+      <button onClick="{{ closeLightbox }}" style="position:absolute;top:22px;right:22px;width:48px;height:48px;border-radius:50%;border:none;background:#fff;color:#3A2416;font-size:22px;cursor:pointer;box-shadow:var(--shadow)">✕</button>
+      <button onClick="{{ lbPrev }}" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:none;background:#fff;color:#3A2416;font-size:22px;cursor:pointer;box-shadow:var(--shadow)">‹</button>
+      <button onClick="{{ lbNext }}" style="position:absolute;right:20px;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:none;background:#fff;color:#3A2416;font-size:22px;cursor:pointer;box-shadow:var(--shadow)">›</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:1000},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;cs&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;'en'|'cs'&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;day&quot;,&quot;night&quot;],&quot;default&quot;:&quot;day&quot;,&quot;tsType&quot;:&quot;'day'|'night'&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;'ready'|'loading'|'empty'|'error'&quot;,&quot;section&quot;:&quot;Demo states&quot;}}">
+class Component extends DCLogic {
+  state = {
+    lang: this.props.lang || 'en',
+    theme: this.props.theme || 'day',
+    dataState: this.props.dataState || 'ready',
+    view: 'grid', slug: null, activeCat: 'all', lightbox: null,
+  };
+
+  CATS = [
+    {slug:'apps',   name_cs:'Appky',       name_en:'Apps',        tint:'--sky'},
+    {slug:'games',  name_cs:'Hry',         name_en:'Games',       tint:'--cherry'},
+    {slug:'crafts', name_cs:'Ru\u010dn\u00ed pr\u00e1ce', name_en:'Crafts',      tint:'--pistachio'},
+    {slug:'photo',  name_cs:'Fotografie',  name_en:'Photography', tint:'--poppy'},
+  ];
+
+  PROJECTS = [
+    {slug:'yarnlog', cat:'apps', featured:true, date:'2026-03', motif:'\uD83E\uDDF6', cover:'--sky',
+     title_cs:'YarnLog', title_en:'YarnLog',
+     sum_cs:'\u00datuln\u00fd den\u00edk pro pleta\u0159ky a h\u00e1\u010dka\u0159ky \u2014 z\u00e1soby p\u0159\u00edze, vzory a rozd\u011blan\u00e1 d\u00edla na jednom m\u00edst\u011b.',
+     sum_en:'A cozy tracker for knitters & crocheters \u2014 your yarn stash, patterns, and works-in-progress in one place.',
+     body_en:'## Why I built it\nMy wife kept a shoebox of yarn labels and a notebook of half-finished projects. **YarnLog** turns that chaos into something searchable.\n\n### What it does\n- Track your **stash** by weight, fibre and colour\n- Save patterns and link them to a project\n- A progress ring for every work-in-progress\n\nBuilt with React, TypeScript and a tiny Go backend \u2014 the same stack as this site.',
+     body_cs:'## Pro\u010d to vzniklo\n\u017dena m\u011bla krabici od bot plnou etiket od p\u0159\u00edze a se\u0161it s rozd\u011blan\u00fdmi projekty. **YarnLog** z toho chaosu d\u011bl\u00e1 n\u011bco, v \u010dem se d\u00e1 hledat.\n\n### Co um\u00ed\n- Eviduje **z\u00e1soby** p\u0159\u00edze podle hmotnosti, materi\u00e1lu a barvy\n- Ukl\u00e1d\u00e1 vzory a propojuje je s projektem\n- Kruh postupu u ka\u017ed\u00e9ho rozd\u011blan\u00e9ho d\u00edla\n\nPostaveno na Reactu, TypeScriptu a mal\u00e9m Go backendu \u2014 stejn\u00fd stack jako tenhle web.',
+     links:[{type:'live',label_en:'Live site',label_cs:'\u017div\u00e1 verze',url:'#'},{type:'repo',label_en:'Source',label_cs:'Zdroj\u00e1k',url:'#'}],
+     gallery:['stash view','pattern detail','progress ring','mobile home','dark mode','onboarding']},
+    {slug:'doma-hq', cat:'apps', featured:false, date:'2025-11', motif:'\uD83C\uDFE0', cover:'--mango',
+     title_cs:'Doma HQ', title_en:'Doma HQ',
+     sum_cs:'Dom\u00e1c\u00ed \u00fakoly, n\u00e1kupy a psí veterina \u2014 cel\u00e1 dom\u00e1cnost v jednom klidn\u00e9m p\u0159ehledu.',
+     sum_en:'Chores, groceries, and the dog\u2019s vet dates \u2014 the whole household in one calm dashboard.',
+     body_en:'## The household, sorted\nA private dashboard my wife and I actually use every day. Shared shopping lists, a rota that nudges, and a pet section for Amy\u2019s (the dog) and Blair\u2019s (the cat) vet dates.\n\nNo ads, no cloud lock-in \u2014 it runs on the same little droplet as everything else I make.',
+     body_cs:'## Dom\u00e1cnost pod kontrolou\nSoukrom\u00fd p\u0159ehled, kter\u00fd s \u017eenou opravdu ka\u017ed\u00fd den pou\u017e\u00edv\u00e1me. Sd\u00edlen\u00e9 n\u00e1kupn\u00ed seznamy, rozpis, co ob\u010das \u0161\u0165ouchne, a sekce pro mazl\u00ed\u010dky \u2014 veterina pro Amy (fenka) i Blair (ko\u010dka).\n\n\u017d\u00e1dn\u00e9 reklamy, \u017e\u00e1dn\u00fd cloud \u2014 b\u011b\u017e\u00ed na stejn\u00e9m mal\u00e9m dropletu jako v\u0161echno ostatn\u00ed.',
+     links:[{type:'live',label_en:'Live site',label_cs:'\u017div\u00e1 verze',url:'#'}],
+     gallery:['week rota','shopping list','pet dates','settings']},
+    {slug:'scoop-rush', cat:'games', featured:true, date:'2026-06', motif:'\uD83C\uDF66', cover:'--cherry',
+     title_cs:'Scoop Rush', title_en:'Scoop Rush',
+     sum_cs:'Chytej padaj\u00edc\u00ed kope\u010dky, ne\u017e \u017euchnou na zem. Moje prvn\u00ed vydan\u00e1 webov\u00e1 hra.',
+     sum_en:'Catch the falling scoops before they splat. My first published web game \u2014 and the star of the arcade.',
+     body_en:'## My first shipped game\nA fast little catcher: move the cone, stack the scoops, don\u2019t let them hit the pavement. It lives in the **Arcade** on this very site, with a real leaderboard.\n\nWriting the physics for the bouncing scoops is what got me hooked on game-making.',
+     body_cs:'## Moje prvn\u00ed vydan\u00e1 hra\nRychl\u00fd chyta\u010d: h\u00fdbej kornoutem, skl\u00e1dej kope\u010dky a nenech je spadnout na chodn\u00edk. \u017dije v **Ark\u00e1d\u011b** p\u0159\u00edmo na tomhle webu, s opravdov\u00fdm \u017eeb\u0159\u00ed\u010dkem.\n\nPr\u00e1v\u011b psan\u00ed fyziky poskakuj\u00edc\u00edch kope\u010dk\u016f m\u011b k tvorb\u011b her p\u0159itáhlo.',
+     links:[{type:'demo',label_en:'Play it',label_cs:'Zahraj si',url:'#arcade'},{type:'repo',label_en:'Source',label_cs:'Zdroj\u00e1k',url:'#'}],
+     gallery:['title screen','mid-game','game over','leaderboard']},
+    {slug:'melt-point', cat:'games', featured:false, date:'2026-01', motif:'\uD83E\uDD75', cover:null,
+     title_cs:'Melt Point', title_en:'Melt Point',
+     sum_cs:'Reak\u010dn\u00ed hra na jedno tla\u010d\u00edtko o p\u0159esn\u00e9m okam\u017eiku, kdy zmrzlina za\u010dne t\u00e1t.',
+     sum_en:'A one-button reaction game about the exact moment ice-cream starts to melt.',
+     body_en:'## One button, one perfect moment\nWatch the scoop. Tap the instant before the first drip. Too early, too late \u2014 both cost you. A tiny experiment in timing and tension that I keep coming back to.',
+     body_cs:'## Jedno tla\u010d\u00edtko, jeden dokonal\u00fd okam\u017eik\nSleduj kope\u010dek. Klikni t\u011bsn\u011b p\u0159ed prvn\u00ed kapkou. Brzy i pozd\u011b \u2014 oboj\u00ed t\u011b st\u00e1l\u00ed body. Mal\u00fd experiment s na\u010dasov\u00e1n\u00edm a nap\u011bt\u00edm, ke kter\u00e9mu se po\u0159\u00e1d vrac\u00edm.',
+     links:[{type:'demo',label_en:'Play it',label_cs:'Zahraj si',url:'#arcade'}],
+     gallery:[]},
+    {slug:'amigurumi-icecream', cat:'crafts', featured:false, date:'2025-08', motif:'\uD83E\uDDF6', cover:'--pistachio',
+     title_cs:'Ha\u010dkovan\u00e1 zmrzlina', title_en:'Amigurumi Ice-Cream',
+     sum_cs:'H\u00e1\u010dkovan\u00e9 kope\u010dky, kornouty a jeden hodn\u011b samolib\u00fd nanuk. Vzory brzy v YarnLogu.',
+     sum_en:'Crocheted scoops, cones, and one very smug popsicle. Patterns coming to YarnLog.',
+     body_en:'## Made with hooks, not code\nA weekend of crochet that turned into a whole little gelateria of amigurumi. Yes, the popsicle has a face. Yes, he\u2019s judging you.\n\nThis is exactly the kind of non-software project I want this site to show off just as proudly as an app.',
+     body_cs:'## Vyroben\u00e9 h\u00e1\u010dkem, ne k\u00f3dem\nV\u00edkend h\u00e1\u010dkov\u00e1n\u00ed, ze kter\u00e9ho vznikla cel\u00e1 mal\u00e1 gelaterie amigurumi. Ano, nanuk m\u00e1 obli\u010dej. Ano, hodnot\u00ed t\u011b.\n\nP\u0159esn\u011b takov\u00fd nesoftwarov\u00fd projekt chci na tomhle webu ukazovat stejn\u011b hrd\u011b jako appku.',
+     links:[],
+     gallery:['the whole set','mint scoop','smug popsicle','cone close-up','in progress','wip hooks','yarn used','size next to mug']},
+    {slug:'walnut-shelf', cat:'crafts', featured:false, date:'2025-05', motif:'\uD83E\uDEB5', cover:'--mango',
+     title_cs:'O\u0159echov\u00e1 police', title_en:'Walnut Wall Shelf',
+     sum_cs:'Plovouc\u00ed o\u0159echov\u00e1 police postaven\u00e1 b\u011bhem jednoho dlouh\u00e9ho v\u00edkendu.',
+     sum_en:'A floating walnut shelf built over one long weekend.',
+     body_en:'## Sawdust therapy\nHidden bracket, oiled walnut, one slightly-too-close call with the router. It holds our plants and a rotating cast of ice-cream cookbooks.',
+     body_cs:'## Terapie pilinami\nSkryt\u00fd d\u017eberov\u00fd \u00favaz, naolejovan\u00fd o\u0159ech a jedno tro\u0161ku moc t\u011bsn\u00e9 setk\u00e1n\u00ed s frézkou. Dr\u017e\u00ed na\u0161e kytky a st\u0159\u00eddaj\u00edc\u00ed se kucha\u0159ky o zmrzlin\u011b.',
+     links:[],
+     gallery:['finished, on wall','the joint','oiling','plants on it']},
+    {slug:'amy-maltese', cat:'photo', featured:false, date:'2026-02', motif:'\uD83D\uDC36', cover:'--poppy',
+     title_cs:'Amy, malt\u00e9za\u010dka', title_en:'Amy the Maltese',
+     sum_cs:'Rok portr\u00e9t\u016f t\u00e9 nejchlupat\u011bj\u0161\u00ed vedouc\u00ed ateli\u00e9ru v dom\u011b.',
+     sum_en:'A year of portraits of the fluffiest studio supervisor in the house.',
+     body_en:'## The fluffiest supervisor\nAmy oversees every commit from the corner of my desk. This is a year of her \u2014 naps, zoomies, and one legendary encounter with a lemon.',
+     body_cs:'## Nejchlupat\u011bj\u0161\u00ed vedouc\u00ed\nAmy dohl\u00ed\u017e\u00ed na ka\u017ed\u00fd commit z rohu stolu. Tohle je rok s n\u00ed \u2014 sp\u00e1nky, \u0159\u00e1d\u011bn\u00ed a jedno legend\u00e1rn\u00ed setk\u00e1n\u00ed s citr\u00f3nem.',
+     links:[],
+     gallery:['on the desk','mid-zoomie','the lemon','sunbeam nap','with Blair','walk']},
+    {slug:'prague-july', cat:'photo', featured:false, date:'2025-07', motif:'\uD83C\uDF05', cover:'--yuzu',
+     title_cs:'Praha v \u010dervenci', title_en:'Prague in July',
+     sum_cs:'Rozp\u00e1len\u00e9 l\u00e9to, fronty na zmrzku a dlouh\u00e9 sv\u011btlo. Naceno na film.',
+     sum_en:'Heat-haze, gelato queues, and long evening light. Shot on film.',
+     body_en:'## Shot on film\nA roll of Portra wandered around Prague on the hottest week of the year. Grain, warmth, and a lot of people eating ice-cream on kerbs.',
+     body_cs:'## Naceno na film\nJeden film Portra se proto\u010dil Prahou v nejteplej\u0161\u00edm t\u00fddnu roku. Zrno, teplo a spousta lid\u00ed jedouc\u00edch zmrzlinu na obrubn\u00edku.',
+     links:[],
+     gallery:['tram in haze','gelato queue','long shadows','river','rooftops','film strip']},
+  ];
+
+  UI = {
+    en:{ nav:['Projects','About','Skills','Arcade','Links','Contact'], eyebrow:'Software & hand-made',
+      title:'Things I\u2019ve made.', subtitle:'Apps and games I\u2019ve built, and things I\u2019ve made with my hands. All of it gets the same spotlight.',
+      all:'All', featured:'Featured', open:'Open', back:'All projects', links:'Links', gallery:'Gallery',
+      noLinks:'A hands-on project \u2014 no code to link, just the photos above.', retry:'Try again',
+      errTitle:'That didn\u2019t load', errBody:'Something melted on the way here. Give it another go.',
+      emptyTitle:'Nothing here yet', emptyBody:'No projects in this category yet \u2014 check back soon, or browse the others.',
+      months:['January','February','March','April','May','June','July','August','September','October','November','December'] },
+    cs:{ nav:['Projekty','O mn\u011b','Dovednosti','Ark\u00e1da','Odkazy','Kontakt'], eyebrow:'Software i ru\u010dn\u00ed pr\u00e1ce',
+      title:'Co jsem vytvo\u0159il.', subtitle:'Appky a hry, kter\u00e9 jsem postavil, i v\u011bci vyroben\u00e9 vlastn\u00edma rukama. V\u0161echno dost\u00e1v\u00e1 stejn\u00e9 sv\u011btlo reflektor\u016f.',
+      all:'V\u0161e', featured:'Vybran\u00e9', open:'Otev\u0159\u00edt', back:'V\u0161echny projekty', links:'Odkazy', gallery:'Galerie',
+      noLinks:'Ru\u010dn\u00ed projekt \u2014 nen\u00ed co odkazovat, jen fotky v\u00fd\u0161e.', retry:'Zkusit znovu',
+      errTitle:'Nepovedlo se na\u010d\u00edst', errBody:'N\u011bco se cestou rozteklo. Zkus to pros\u00edm znovu.',
+      emptyTitle:'Zat\u00edm tu nic nen\u00ed', emptyBody:'V t\u00e9to kategorii zat\u00edm nejsou \u017e\u00e1dn\u00e9 projekty \u2014 koukni pozd\u011bji, nebo proch\u00e1zej ostatn\u00ed.',
+      months:['leden','\u00fanor','b\u0159ezen','duben','kv\u011bten','\u010derven','\u010dervenec','srpen','z\u00e1\u0159\u00ed','\u0159\u00edjen','listopad','prosinec'] },
+  };
+
+  LINK_ICON = {repo:'\u{1F4BE}', live:'\uD83C\uDF10', demo:'\u25B6\uFE0F'};
+
+  _md(src){
+    if(!src) return '';
+    const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const inline=s=>esc(s)
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\[(.+?)\]\((.+?)\)/g,'<a href="$2">$1</a>');
+    const lines=src.split('\n'); let html=''; let inList=false;
+    const closeList=()=>{ if(inList){ html+='</ul>'; inList=false; } };
+    for(const raw of lines){
+      const line=raw.trim();
+      if(!line){ closeList(); continue; }
+      if(line.startsWith('### ')){ closeList(); html+=`<h4 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:19px;margin:22px 0 8px">${inline(line.slice(4))}</h4>`; }
+      else if(line.startsWith('## ')){ closeList(); html+=`<h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:24px;margin:24px 0 10px">${inline(line.slice(3))}</h3>`; }
+      else if(line.startsWith('- ')){ if(!inList){ html+='<ul style="margin:8px 0;padding-left:22px;display:flex;flex-direction:column;gap:6px">'; inList=true;} html+=`<li>${inline(line.slice(2))}</li>`; }
+      else { closeList(); html+=`<p style="margin:0 0 14px">${inline(line)}</p>`; }
+    }
+    closeList(); return html;
+  }
+
+  _cv(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  _fmtDate(d){ const [y,m]=d.split('-'); const U=this.UI[this.state.lang]; return `${U.months[parseInt(m,10)-1]} ${y}`; }
+  _catBg(cat){ return `color-mix(in srgb, var(${cat.tint}) 22%, var(--surface))`; }
+  _catColor(){ return 'var(--ink)'; }
+  _coverBg(v){ return v ? `color-mix(in srgb, var(${v}) 60%, var(--surface))` : 'color-mix(in srgb, var(--cream-line) 60%, var(--surface))'; }
+
+  _countLabel(n){
+    const l=this.state.lang;
+    if(l==='cs'){ const w = n===1?'projekt':(n>=2&&n<=4?'projekty':'projekt\u016f'); return `${n} ${w}`; }
+    return `${n} project${n===1?'':'s'}`;
+  }
+
+  renderVals(){
+    const S=this.state, U=this.UI[S.lang];
+    this._refs=this._refs||{};
+    const setRef=k=>el=>{ if(el) this._refs[k]=el; };
+    const lang=S.lang;
+    const tname=(o,base)=>o[base+'_'+lang];
+
+    // filtered projects
+    const visible = this.PROJECTS.filter(p=> S.activeCat==='all' || p.cat===S.activeCat);
+    const catCount = slug => this.PROJECTS.filter(p=>slug==='all'||p.cat===slug).length;
+
+    // chips
+    const chip=(slug,label)=>{
+      const active = S.activeCat===slug;
+      const cat = this.CATS.find(c=>c.slug===slug);
+      const tint = cat?`var(${cat.tint})`:'var(--cherry-strong)';
+      return { label, count: catCount(slug), onClick:(e)=>{e.preventDefault(); this.setState({activeCat:slug});},
+        border: active?tint:'var(--cream-line)',
+        bg: active?tint:'var(--surface)',
+        color: active?(cat&&cat.slug==='games'?'#fff':(cat&&(cat.slug==='crafts')?'#20340F':'#3A2416')):'var(--ink)' };
+    };
+    const chips=[chip('all',U.all), ...this.CATS.map(c=>chip(c.slug, tname(c,'name')))];
+
+    const linkTypeLabel = t => ({repo:{en:'Code',cs:'K\u00f3d'},live:{en:'Live',cs:'\u017divě'},demo:{en:'Demo',cs:'Demo'}}[t]||{en:t,cs:t})[lang];
+
+    const mapCard = p => {
+      const cat=this.CATS.find(c=>c.slug===p.cat);
+      return {
+        featClass: p.featured?'feat':'',
+        span: p.featured?'span 2':'auto',
+        ratio: p.featured?'16/9':'4/3',
+        titleSize: p.featured?'30px':'22px',
+        featured: p.featured,
+        coverBg: this._coverBg(p.cover),
+        coverTag: (p.cover? 'cover \u2014 '+tname(p,'title') : 'no cover \u2014 add one'),
+        motif: p.motif,
+        catName: tname(cat,'name'), catBg:this._catBg(cat), catColor:this._catColor(),
+        date: this._fmtDate(p.date),
+        title: tname(p,'title'),
+        summary: tname(p,'sum'),
+        linkTypes: (p.links||[]).map(l=>({icon:this.LINK_ICON[l.type]||'\uD83D\uDD17', label:linkTypeLabel(l.type)})),
+        open:(e)=>{ e.preventDefault(); this.setState({view:'detail', slug:p.slug, lightbox:null}); window.scrollTo(0,0); },
+      };
+    };
+
+    // detail
+    let d=null;
+    const dp = this.PROJECTS.find(p=>p.slug===S.slug);
+    if(dp){
+      const cat=this.CATS.find(c=>c.slug===dp.cat);
+      d={
+        coverBg:this._coverBg(dp.cover), motif:dp.motif,
+        coverTag:(dp.cover?'cover photo \u2014 ':'no cover \u2014 ')+tname(dp,'title'),
+        bodyHtml:{__html:this._md(dp['body_'+lang])},
+        catName:tname(cat,'name'), catBg:this._catBg(cat), catColor:this._catColor(),
+        title:tname(dp,'title'), date:this._fmtDate(dp.date), summary:tname(dp,'sum'),
+        hasLinks:(dp.links||[]).length>0, noLinks:(dp.links||[]).length===0,
+        links:(dp.links||[]).map(l=>({ url:l.url, label:tname(l,'label'), icon:this.LINK_ICON[l.type]||'\uD83D\uDD17',
+          bg: l.type==='live'?'var(--cherry-strong)':(l.type==='demo'?'var(--sky)':'var(--surface-2)'),
+          color: (l.type==='live')?'#fff':'var(--ink)'})),
+        hasGallery:(dp.gallery||[]).length>0,
+        gallery:(dp.gallery||[]).map((g,i)=>({ tag:g, bg:this._coverBg(this.CATS.find(c=>c.slug===dp.cat).tint),
+          open:(e)=>{ e.preventDefault(); this.setState({lightbox:i}); } })),
+      };
+    }
+
+    const ds=S.dataState;
+    const filteredEmpty = ds==='ready' && visible.length===0;
+
+    // lightbox
+    let lb=null;
+    if(S.lightbox!=null && dp){ const g=dp.gallery[S.lightbox]; if(g) lb={ tag:g+'  \u2014  '+tname(dp,'title'), bg:this._coverBg(this.CATS.find(c=>c.slug===dp.cat).tint) }; }
+
+    return {
+      theme:S.theme,
+      isGrid: S.view==='grid', isDetail: S.view==='detail',
+      navItems: U.nav.map((label,i)=>({label, href:['#','#about','#skills','#arcade','#links','#contact'][i], active:(i===0&&S.view==='grid')?'1':'0'})),
+      eyebrow:U.eyebrow, title:U.title, subtitle:U.subtitle, countLabel:this._countLabel(visible.length),
+      chips,
+      isLoading: ds==='loading', isError: ds==='error',
+      isEmpty: ds==='empty' || filteredEmpty, isReady: ds==='ready' && visible.length>0,
+      skeletons:[1,2,3,4,5,6],
+      projects: visible.map(mapCard),
+      featuredLabel:U.featured, openLabel:U.open,
+      errTitle:U.errTitle, errBody:U.errBody, retryLabel:U.retry, retry:()=>this.setState({dataState:'ready'}),
+      emptyTitle:U.emptyTitle, emptyBody:U.emptyBody,
+      d, backLabel:U.back, linksLabel:U.links, galleryLabel:U.gallery, noLinksNote:U.noLinks, bodyRef:setRef('bodyRef'),
+      hasLightbox:lb!=null, lb,
+      closeLightbox:()=>this.setState({lightbox:null}),
+      lbPrev:(e)=>{e.stopPropagation(); const n=dp.gallery.length; this.setState(s=>({lightbox:(s.lightbox-1+n)%n}));},
+      lbNext:(e)=>{e.stopPropagation(); const n=dp.gallery.length; this.setState(s=>({lightbox:(s.lightbox+1)%n}));},
+      goGrid:(e)=>{ if(e) e.preventDefault(); this.setState({view:'grid', slug:null, lightbox:null}); },
+      langLabel: lang==='en'?'CS':'EN',
+      themeIcon: S.theme==='day'?'\uD83C\uDF19':'\u2600\uFE0F',
+      toggleLang:()=>this.setState(s=>({lang:s.lang==='en'?'cs':'en'})),
+      toggleTheme:()=>this.setState(s=>({theme:s.theme==='day'?'night':'day'})),
+    };
+  }
+}
+</script>
+</body>
+</html>
