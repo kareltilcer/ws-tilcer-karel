@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#F3EDE1; --panel:#FFFFFF; --panel-2:#FAF5EB; --panel-3:#F1E9D8;
+    --side:#2A2015; --side-2:#342818; --side-line:#463726; --side-ink:#F6ECDA; --side-soft:#B9A587; --side-muted:#87765E;
+    --ink:#2E2116; --ink-soft:#7A6A55; --muted:#A2937C; --line:#E7DCC7; --line-2:#DBCEB4;
+    --accent:#D62A54; --accent-ink:#fff; --accent-soft:#FBE3E9;
+    --ok:#4E8A2C; --ok-soft:#E8F1DC; --warn:#B4741A; --warn-soft:#F7ECD6; --danger:#C7314F; --danger-soft:#FBE1E5;
+    --draft:#9C8A6E; --draft-soft:#EFE7D6;
+    --shadow:0 12px 30px -14px rgba(46,33,22,.28); --shadow-sm:0 4px 12px -6px rgba(46,33,22,.25);
+    --ring:rgba(214,42,84,.28);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--accent);color:#fff}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  input,textarea,select,button{font-family:inherit}
+  input::placeholder,textarea::placeholder{color:var(--muted)}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent) !important;box-shadow:0 0 0 3px var(--ring)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+  @keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+  .navi{transition:background .13s,color .13s}
+  .navi:hover{background:var(--side-2)}
+  .rowh{transition:background .12s}
+  .rowh:hover{background:var(--panel-2)}
+  .btnh{transition:transform .1s,box-shadow .12s,background .12s,border-color .12s}
+  .btnh:hover{transform:translateY(-1px)}
+  .btnh:active{transform:translateY(0)}
+  .skel{background:linear-gradient(90deg,var(--panel-3) 25%,var(--panel-2) 37%,var(--panel-3) 63%);background-size:800px 100%;animation:shimmer 1.3s linear infinite;border-radius:10px}
+  .fade{animation:fadeIn .2s ease both}
+  @media (prefers-reduced-motion:reduce){.fade,.navi,.btnh{animation:none !important;transition:none !important}html{scroll-behavior:auto !important}}
+  ::-webkit-scrollbar{width:11px;height:11px}
+  ::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:9px;border:3px solid var(--bg)}
+  ::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+  .sidescroll::-webkit-scrollbar-thumb{background:var(--side-line);border-color:var(--side)}
+  .admin-side{transition:transform .26s cubic-bezier(.4,0,.2,1)}
+  .navtoggle{display:none}
+  .navscrim{display:none}
+  @media (max-width:1000px){
+    .admin-main{margin-left:0 !important}
+    .admin-side{transform:translateX(-100%);box-shadow:var(--shadow)}
+    .admin-side.open{transform:translateX(0)}
+    .navtoggle{display:grid !important}
+    .navscrim.open{display:block !important}
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;background:var(--bg);color:var(--ink)">
+
+<!-- ============================ LOGIN (Mode B) ============================ -->
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(120% 100% at 50% -10%, #FFE7C4 0%, #F3EDE1 46%, #EFE6D6 100%)">
+  <div style="width:100%;max-width:396px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:22px">
+      <span style="display:grid;place-items:center;width:52px;height:52px;border-radius:18px 18px 18px 6px;background:var(--accent);color:#fff;font-family:'Baloo 2',cursive;font-weight:800;font-size:27px;box-shadow:var(--shadow);transform:rotate(-6deg)">k</span>
+      <div style="text-align:center">
+        <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:22px;color:var(--ink)">{{ loginTitle }}</div>
+        <div style="font-size:13px;color:var(--ink-soft);margin-top:2px">{{ loginSub }}</div>
+      </div>
+    </div>
+
+    <div style="background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px;box-shadow:var(--shadow)">
+      <sc-if value="{{ loginMfa }}" hint-placeholder-val="{{ false }}">
+        <div class="fade" style="text-align:center;padding:6px 2px">
+          <div style="width:46px;height:46px;margin:0 auto 12px;border-radius:14px;display:grid;place-items:center;background:var(--warn-soft);color:var(--warn)" dangerouslySetInnerHTML="{{ icShield }}"></div>
+          <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:19px">{{ mfaTitle }}</div>
+          <p style="font-size:14px;color:var(--ink-soft);line-height:1.5;margin:8px 0 18px">{{ mfaBody }}</p>
+          <a href="https://auth.tilcer.cz" target="_blank" class="btnh" style="display:flex;align-items:center;justify-content:center;gap:9px;height:48px;border-radius:12px;background:var(--ink);color:#fff;font-weight:700;font-size:15px;text-decoration:none">{{ mfaCta }} <span style="font-size:16px">↗</span></a>
+          <button onClick="{{ resetAuth }}" style="margin-top:12px;background:none;border:none;color:var(--ink-soft);font-weight:600;font-size:13px;cursor:pointer">{{ backToLogin }}</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ loginForm }}" hint-placeholder-val="{{ true }}">
+        <div class="fade">
+          <sc-if value="{{ loginError }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--danger-soft);border:1px solid var(--danger);margin-bottom:16px">
+              <span style="color:var(--danger);flex-shrink:0;margin-top:1px" dangerouslySetInnerHTML="{{ icAlert }}"></span>
+              <div>
+                <div style="font-weight:700;font-size:14px;color:var(--ink)">{{ loginErrTitle }}</div>
+                <div style="font-size:13px;color:var(--ink-soft);margin-top:2px;line-height:1.45">{{ loginErrBody }}</div>
+              </div>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-weight:700;font-size:13px;color:var(--ink-soft)">{{ emailL }}</span>
+              <input value="{{ liEmail }}" onInput="{{ onLiEmail }}" placeholder="karel@tilcer.cz" type="email" style="height:46px;padding:0 14px;border-radius:11px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--ink);font-size:15px" />
+            </label>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-weight:700;font-size:13px;color:var(--ink-soft)">{{ passL }}</span>
+              <input value="{{ liPass }}" onInput="{{ onLiPass }}" placeholder="••••••••••" type="password" style="height:46px;padding:0 14px;border-radius:11px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--ink);font-size:15px" />
+            </label>
+            <button onClick="{{ doLogin }}" disabled="{{ liBusy }}" class="btnh" style="height:48px;margin-top:4px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;cursor:{{ liCursor }};opacity:{{ liOpacity }};display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:var(--shadow-sm)">
+              <sc-if value="{{ liBusy }}" hint-placeholder-val="{{ false }}"><span style="width:17px;height:17px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite"></span></sc-if>
+              {{ loginBtn }}
+            </button>
+          </div>
+        </div>
+      </sc-if>
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line);text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)">{{ modeNote }}</div>
+    </div>
+
+    <div style="margin-top:16px;display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace">preview state:</span>
+      <sc-for list="{{ authStates }}" as="s" hint-placeholder-count="4">
+        <button onClick="{{ s.go }}" style="height:26px;padding:0 10px;border-radius:8px;border:1px solid {{ s.border }};background:{{ s.bg }};color:{{ s.color }};font-size:11px;font-weight:600;cursor:pointer">{{ s.label }}</button>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============================ APP SHELL ============================ -->
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;min-height:100vh">
+
+  <!-- ---------- SIDEBAR ---------- -->
+  <div onClick="{{ closeNav }}" class="navscrim {{ sideOpenClass }}" style="position:fixed;inset:0;z-index:25;background:rgba(30,20,12,.42);backdrop-filter:blur(2px)"></div>
+  <aside class="admin-side sidescroll {{ sideOpenClass }}" style="position:fixed;left:0;top:0;bottom:0;width:256px;background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;border-right:1px solid var(--side-line);overflow-y:auto;z-index:30">
+    <div style="display:flex;align-items:center;gap:11px;padding:20px 20px 16px">
+      <span style="display:grid;place-items:center;width:38px;height:38px;border-radius:13px 13px 13px 5px;background:var(--accent);color:#fff;font-family:'Baloo 2',cursive;font-weight:800;font-size:20px;transform:rotate(-6deg)">k</span>
+      <div style="line-height:1.15">
+        <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:17px">karel<span style="color:var(--accent)">.</span></div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--side-muted)">CMS · admin</div>
+      </div>
+    </div>
+
+    <nav style="flex:1;padding:6px 12px 12px">
+      <sc-for list="{{ navGroups }}" as="g" hint-placeholder-count="3">
+        <div style="margin-top:14px">
+          <div style="padding:0 10px 6px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--side-muted)">{{ g.heading }}</div>
+          <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+            <button onClick="{{ it.go }}" class="navi" style="width:100%;display:flex;align-items:center;gap:11px;padding:9px 10px;margin-bottom:2px;border:none;border-radius:10px;background:{{ it.bg }};color:{{ it.color }};font-weight:{{ it.weight }};font-size:14px;cursor:pointer;text-align:left;position:relative">
+              <span style="width:18px;height:18px;flex-shrink:0;color:{{ it.iconColor }};display:grid;place-items:center" dangerouslySetInnerHTML="{{ it.icon }}"></span>
+              <span style="flex:1">{{ it.label }}</span>
+              <sc-if value="{{ it.badge }}" hint-placeholder-val="{{ false }}"><span style="min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:{{ it.badgeBg }};color:{{ it.badgeColor }};font-size:11px;font-weight:700;display:grid;place-items:center">{{ it.badge }}</span></sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </sc-for>
+    </nav>
+
+    <div style="padding:12px;border-top:1px solid var(--side-line)">
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <sc-for list="{{ langBtns }}" as="l" hint-placeholder-count="2">
+          <button onClick="{{ l.go }}" style="flex:1;height:32px;border-radius:9px;border:1px solid {{ l.border }};background:{{ l.bg }};color:{{ l.color }};font-weight:700;font-size:12px;cursor:pointer">{{ l.label }}</button>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 6px">
+        <span style="width:34px;height:34px;border-radius:11px;background:var(--side-2);border:1px solid var(--side-line);display:grid;place-items:center;font-family:'Baloo 2',cursive;font-weight:700;font-size:15px;color:var(--side-ink)">K</span>
+        <div style="flex:1;line-height:1.2;min-width:0">
+          <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Karel Tílcer</div>
+          <div style="font-size:11px;color:var(--side-muted);font-family:'Space Mono',monospace">single admin</div>
+        </div>
+        <button onClick="{{ signOut }}" title="{{ signOutT }}" class="btnh" style="width:32px;height:32px;border-radius:9px;border:1px solid var(--side-line);background:var(--side-2);color:var(--side-soft);cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ icLogout }}"></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ---------- MAIN ---------- -->
+  <main class="admin-main" style="flex:1;margin-left:256px;min-width:0;display:flex;flex-direction:column">
+    <header style="position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px clamp(18px,3vw,34px);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)">
+      <div style="min-width:0">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button onClick="{{ toggleNav }}" class="navtoggle btnh" title="Menu" style="width:38px;height:38px;flex-shrink:0;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);cursor:pointer;place-items:center" dangerouslySetInnerHTML="{{ icMenu }}"></button>
+          <sc-if value="{{ showBack }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ goBackList }}" class="btnh" style="width:34px;height:34px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink-soft);cursor:pointer;display:grid;place-items:center;font-size:17px">←</button>
+          </sc-if>
+          <h1 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:clamp(20px,2.4vw,26px);margin:0;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ topTitle }}</h1>
+        </div>
+        <sc-if value="{{ topHint }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--ink-soft);margin-top:2px">{{ topHint }}</div></sc-if>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-soft);font-weight:600">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--ok)"></span>{{ savedLabel }}
+        </span>
+        <sc-if value="{{ topActionShow }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ onTopAction }}" class="btnh" style="height:40px;padding:0 16px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-sm)"><span style="font-size:17px;margin-top:-1px">＋</span>{{ topActionLabel }}</button>
+        </sc-if>
+      </div>
+    </header>
+
+    <div style="flex:1;padding:clamp(18px,2.6vw,30px) clamp(18px,3vw,34px) 80px;max-width:1160px;width:100%">
+
+      <!-- ===== PROJECTS LIST ===== -->
+      <sc-if value="{{ vProjects }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ projLoading }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ skelRows }}" as="k" hint-placeholder-count="5"><div class="skel" style="height:74px"></div></sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ projError }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;padding:70px 20px;background:var(--panel);border:1px solid var(--line);border-radius:18px">
+            <div style="width:54px;height:54px;margin:0 auto 14px;border-radius:16px;display:grid;place-items:center;background:var(--danger-soft);color:var(--danger)" dangerouslySetInnerHTML="{{ icAlert }}"></div>
+            <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:20px">{{ errTitle }}</div>
+            <p style="color:var(--ink-soft);font-size:14px;margin:6px 0 18px">{{ errBody }}</p>
+            <button onClick="{{ retryData }}" class="btnh" style="height:40px;padding:0 20px;border-radius:11px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);font-weight:700;font-size:14px;cursor:pointer">{{ retry }}</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ projEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;padding:70px 20px;background:var(--panel);border:1px dashed var(--line-2);border-radius:18px">
+            <div style="width:54px;height:54px;margin:0 auto 14px;border-radius:16px;display:grid;place-items:center;background:var(--panel-3);color:var(--muted)" dangerouslySetInnerHTML="{{ icProjects }}"></div>
+            <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:20px">{{ emptyProjTitle }}</div>
+            <p style="color:var(--ink-soft);font-size:14px;margin:6px 0 18px">{{ emptyProjBody }}</p>
+            <button onClick="{{ newProject }}" class="btnh" style="height:40px;padding:0 20px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-weight:700;font-size:14px;cursor:pointer">{{ newProjectLabel }}</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ projReady }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+            <sc-for list="{{ projFilters }}" as="f" hint-placeholder-count="4">
+              <button onClick="{{ f.go }}" class="btnh" style="height:34px;padding:0 14px;border-radius:999px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};font-weight:600;font-size:13px;cursor:pointer">{{ f.label }} <span style="opacity:.6;font-family:'Space Mono',monospace;font-size:11px">{{ f.count }}</span></button>
+            </sc-for>
+          </div>
+          <div style="background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)">
+            <sc-for list="{{ projects }}" as="p" hint-placeholder-count="5">
+              <div class="rowh" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid var(--line);cursor:pointer" onClick="{{ p.edit }}">
+                <div style="display:flex;flex-direction:column;gap:1px">
+                  <button onClick="{{ p.up }}" style="width:22px;height:17px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:11px;line-height:1;padding:0">▲</button>
+                  <button onClick="{{ p.down }}" style="width:22px;height:17px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:11px;line-height:1;padding:0">▼</button>
+                </div>
+                <div style="width:56px;height:56px;border-radius:12px;flex-shrink:0;background:{{ p.coverBg }};border:1px solid var(--line-2);position:relative;overflow:hidden;display:grid;place-items:center;color:var(--muted)" dangerouslySetInnerHTML="{{ p.coverIcon }}"></div>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <span style="font-weight:700;font-size:15px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.title }}</span>
+                    <sc-if value="{{ p.featured }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);padding:2px 8px;border-radius:999px">★ {{ featuredL }}</span></sc-if>
+                    <sc-if value="{{ p.missing }}" hint-placeholder-val="{{ false }}"><span title="{{ p.missingT }}" style="font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);padding:2px 8px;border-radius:999px">⚑ {{ p.missingL }}</span></sc-if>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:3px;font-size:12px;color:var(--ink-soft)">
+                    <span style="font-family:'Space Mono',monospace">/{{ p.slug }}</span>
+                    <span style="width:3px;height:3px;border-radius:50%;background:var(--line-2)"></span>
+                    <span>{{ p.catName }}</span>
+                    <span style="width:3px;height:3px;border-radius:50%;background:var(--line-2)"></span>
+                    <span>{{ p.date }}</span>
+                  </div>
+                </div>
+                <span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:{{ p.statusBg }};color:{{ p.statusColor }};white-space:nowrap">{{ p.statusLabel }}</span>
+                <div style="display:flex;gap:6px" onClick="{{ stop }}">
+                  <button onClick="{{ p.togglePub }}" class="btnh" title="{{ p.pubT }}" style="width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink-soft);cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ p.pubIcon }}"></button>
+                  <button onClick="{{ p.del }}" class="btnh" title="{{ deleteL }}" style="width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--danger);cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ icTrash }}"></button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ===== PROJECT EDITOR ===== -->
+      <sc-if value="{{ vProjectEditor }}" hint-placeholder-val="{{ false }}">
+        <div class="fade" style="display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+            <!-- title pair -->
+            <div style="background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow-sm)">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:16px">{{ secBasics }}</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                <label style="display:flex;flex-direction:column;gap:6px">
+                  <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ titleL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3);color:var(--ink-soft)">CS</span></span>
+                  <input value="{{ f_title_cs }}" onInput="{{ on_title_cs }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:15px" />
+                </label>
+                <label style="display:flex;flex-direction:column;gap:6px">
+                  <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ titleL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3);color:var(--ink-soft)">EN</span> <sc-if value="{{ miss_title_en }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:700;color:var(--warn)">⚑ {{ missingL }}</span></sc-if></span>
+                  <input value="{{ f_title_en }}" onInput="{{ on_title_en }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid {{ b_title_en }};background:var(--panel-2);font-size:15px" />
+                </label>
+              </div>
+              <label style="display:flex;flex-direction:column;gap:6px;margin-top:14px">
+                <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">{{ slugL }}</span>
+                <div style="display:flex;align-items:center;height:44px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);overflow:hidden">
+                  <span style="padding:0 4px 0 13px;font-family:'Space Mono',monospace;font-size:14px;color:var(--muted)">/projects/</span>
+                  <input value="{{ f_slug }}" onInput="{{ on_slug }}" style="flex:1;height:100%;padding:0 13px 0 0;border:none;background:none;font-family:'Space Mono',monospace;font-size:14px;color:var(--ink)" />
+                </div>
+              </label>
+            </div>
+
+            <!-- summary pair -->
+            <div style="background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow-sm)">
+              <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;margin-bottom:14px">{{ secSummary }}</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                <label style="display:flex;flex-direction:column;gap:6px">
+                  <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ summaryL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3)">CS</span></span>
+                  <textarea value="{{ f_sum_cs }}" onInput="{{ on_sum_cs }}" rows="3" style="padding:11px 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:14px;resize:vertical;line-height:1.5"></textarea>
+                </label>
+                <label style="display:flex;flex-direction:column;gap:6px">
+                  <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ summaryL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3)">EN</span></span>
+                  <textarea value="{{ f_sum_en }}" onInput="{{ on_sum_en }}" rows="3" style="padding:11px 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:14px;resize:vertical;line-height:1.5"></textarea>
+                </label>
+              </div>
+            </div>
+
+            <!-- body markdown pair -->
+            <div style="background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow-sm)">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:16px">{{ secBody }}</div>
+                <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)">Markdown</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                <label style="display:flex;flex-direction:column;gap:6px">
+                  <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ bodyL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3)">CS</span></span>
+                  <textarea value="{{ f_body_cs }}" onInput="{{ on_body_cs }}" rows="7" style="padding:11px 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-family:'Space Mono',monospace;font-size:13px;resize:vertical;line-height:1.55"></textarea>
+                </label>
+                <label style="display:flex;flex-direction:column;gap:6px">
+                  <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ bodyL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3)">EN</span> <sc-if value="{{ miss_body_en }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:700;color:var(--warn)">⚑ {{ missingL }}</span></sc-if></span>
+                  <textarea value="{{ f_body_en }}" onInput="{{ on_body_en }}" rows="7" style="padding:11px 13px;border-radius:10px;border:1px solid {{ b_body_en }};background:var(--panel-2);font-family:'Space Mono',monospace;font-size:13px;resize:vertical;line-height:1.55"></textarea>
+                </label>
+              </div>
+            </div>
+
+            <!-- out-links -->
+            <div style="background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow-sm)">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:16px">{{ secLinks }}</div>
+                <button onClick="{{ addOutLink }}" class="btnh" style="height:32px;padding:0 12px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);font-weight:700;font-size:13px;cursor:pointer">＋ {{ addL }}</button>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ outLinks }}" as="ol" hint-placeholder-count="2">
+                  <div style="display:grid;grid-template-columns:120px 1fr 34px;gap:10px;align-items:center">
+                    <select value="{{ ol.type }}" onChange="{{ ol.onType }}" style="height:40px;padding:0 10px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel-2);font-size:13px;font-weight:600;color:var(--ink)">
+                      <sc-for list="{{ linkTypes }}" as="lt" hint-placeholder-count="3"><option value="{{ lt.v }}">{{ lt.label }}</option></sc-for>
+                    </select>
+                    <input value="{{ ol.url }}" onInput="{{ ol.onUrl }}" placeholder="https://" style="height:40px;padding:0 12px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel-2);font-family:'Space Mono',monospace;font-size:13px" />
+                    <button onClick="{{ ol.remove }}" class="btnh" style="width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--danger);cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ icTrash }}"></button>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ noOutLinks }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--muted);padding:6px 2px">{{ noLinksL }}</div></sc-if>
+              </div>
+            </div>
+          </div>
+
+          <!-- editor sidebar -->
+          <div style="display:flex;flex-direction:column;gap:18px;position:sticky;top:86px">
+            <div style="background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm)">
+              <div style="font-weight:700;font-size:12px;color:var(--ink-soft);margin-bottom:10px">{{ statusL }}</div>
+              <div style="display:flex;gap:6px;padding:4px;background:var(--panel-3);border-radius:11px">
+                <sc-for list="{{ statusSeg }}" as="ss" hint-placeholder-count="2">
+                  <button onClick="{{ ss.go }}" style="flex:1;height:36px;border-radius:8px;border:none;background:{{ ss.bg }};color:{{ ss.color }};font-weight:700;font-size:13px;cursor:pointer;box-shadow:{{ ss.shadow }}">{{ ss.label }}</button>
+                </sc-for>
+              </div>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;cursor:pointer">
+                <span style="font-weight:700;font-size:14px">{{ featuredL }}</span>
+                <button onClick="{{ toggleFeatured }}" style="width:44px;height:26px;border-radius:999px;border:none;background:{{ featBg }};cursor:pointer;position:relative;transition:background .15s"><span style="position:absolute;top:3px;left:{{ featX }};width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.25)"></span></button>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;margin-top:16px">
+                <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">{{ categoryL }}</span>
+                <select value="{{ f_category }}" onChange="{{ on_category }}" style="height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:14px;font-weight:600;color:var(--ink)">
+                  <sc-for list="{{ categoryOpts }}" as="c" hint-placeholder-count="4"><option value="{{ c.id }}">{{ c.label }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;margin-top:14px">
+                <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">{{ dateL }}</span>
+                <input value="{{ f_date }}" onInput="{{ on_date }}" placeholder="2026-03" style="height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-family:'Space Mono',monospace;font-size:14px" />
+              </label>
+            </div>
+
+            <div style="background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm)">
+              <div style="font-weight:700;font-size:12px;color:var(--ink-soft);margin-bottom:10px">{{ coverL }}</div>
+              <button onClick="{{ pickCover }}" class="btnh" style="width:100%;aspect-ratio:16/10;border-radius:12px;border:1px solid var(--line-2);background:{{ coverBg }};cursor:pointer;position:relative;overflow:hidden;display:grid;place-items:center;color:var(--ink-soft)">
+                <sc-if value="{{ hasCover }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(214,42,84,.09) 0 12px,transparent 12px 24px)"></span></sc-if>
+                <span style="position:relative;font-weight:700;font-size:13px">{{ coverCta }}</span>
+              </button>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px">
+                <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">{{ galleryL }}</span>
+                <button onClick="{{ pickGallery }}" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:12px;cursor:pointer">＋ {{ addL }}</button>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px">
+                <sc-for list="{{ galleryThumbs }}" as="gt" hint-placeholder-count="6">
+                  <div style="aspect-ratio:1;border-radius:9px;background:{{ gt.bg }};border:1px solid var(--line-2);position:relative;overflow:hidden">
+                    <span style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(46,33,22,.06) 0 8px,transparent 8px 16px)"></span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px">
+              <button onClick="{{ goBackList }}" class="btnh" style="flex:1;height:46px;border-radius:12px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);font-weight:700;font-size:15px;cursor:pointer">{{ cancelL }}</button>
+              <button onClick="{{ saveProject }}" class="btnh" style="flex:1.4;height:46px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:15px;cursor:pointer;box-shadow:var(--shadow-sm)">{{ saveL }}</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== CATEGORIES ===== -->
+      <sc-if value="{{ vCategories }}" hint-placeholder-val="{{ false }}">
+        <div class="fade" style="background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm);max-width:760px">
+          <sc-for list="{{ categories }}" as="c" hint-placeholder-count="4">
+            <div class="rowh" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line)">
+              <div style="display:flex;flex-direction:column;gap:1px">
+                <button onClick="{{ c.up }}" style="width:22px;height:16px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0">▲</button>
+                <button onClick="{{ c.down }}" style="width:22px;height:16px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0">▼</button>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span style="font-weight:700;font-size:15px">{{ c.name_cs }}</span>
+                  <span style="color:var(--muted);font-size:14px">·</span>
+                  <span style="font-size:14px;color:var(--ink-soft)">{{ c.name_en }}</span>
+                  <sc-if value="{{ c.hidden }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:700;color:var(--draft);background:var(--draft-soft);padding:2px 8px;border-radius:999px">{{ hiddenL }}</span></sc-if>
+                </div>
+                <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin-top:2px">{{ c.slug }} · {{ c.usage }}</div>
+              </div>
+              <button onClick="{{ c.toggle }}" class="btnh" title="{{ c.visT }}" style="width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink-soft);cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ c.visIcon }}"></button>
+              <button onClick="{{ c.edit }}" class="btnh" style="width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink-soft);cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ icPencil }}"></button>
+              <button onClick="{{ c.del }}" class="btnh" title="{{ deleteL }}" style="width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:{{ c.delColor }};cursor:{{ c.delCursor }};display:grid;place-items:center" dangerouslySetInnerHTML="{{ icTrash }}"></button>
+            </div>
+          </sc-for>
+          <div style="padding:14px 16px;font-size:13px;color:var(--ink-soft);display:flex;align-items:center;gap:8px"><span dangerouslySetInnerHTML="{{ icInfo }}" style="color:var(--muted)"></span>{{ catDeleteNote }}</div>
+        </div>
+      </sc-if>
+
+      <!-- ===== LINKS ===== -->
+      <sc-if value="{{ vLinks }}" hint-placeholder-val="{{ false }}">
+        <div class="fade" style="background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm);max-width:820px">
+          <sc-for list="{{ links }}" as="l" hint-placeholder-count="5">
+            <div class="rowh" style="display:flex;align-items:center;gap:14px;padding:13px 16px;border-bottom:1px solid var(--line)">
+              <div style="display:flex;flex-direction:column;gap:1px">
+                <button onClick="{{ l.up }}" style="width:22px;height:16px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0">▲</button>
+                <button onClick="{{ l.down }}" style="width:22px;height:16px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0">▼</button>
+              </div>
+              <span style="width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:19px;background:var(--panel-3);flex-shrink:0">{{ l.icon }}</span>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span style="font-weight:700;font-size:14px">{{ l.label_cs }}</span>
+                  <span style="color:var(--muted)">·</span>
+                  <span style="font-size:13px;color:var(--ink-soft)">{{ l.label_en }}</span>
+                </div>
+                <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.url }}</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;color:var(--ink)">{{ l.clicks }}</div>
+                <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.06em">{{ clicksL }}</div>
+              </div>
+              <button onClick="{{ l.toggle }}" class="btnh" title="{{ l.visT }}" style="width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);background:{{ l.visBg }};color:{{ l.visColor }};cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ l.visIcon }}"></button>
+              <button onClick="{{ l.edit }}" class="btnh" style="width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink-soft);cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ icPencil }}"></button>
+              <button onClick="{{ l.del }}" class="btnh" style="width:34px;height:34px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--danger);cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ icTrash }}"></button>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ===== SECTIONS (About / Hero) ===== -->
+      <sc-if value="{{ vSections }}" hint-placeholder-val="{{ false }}">
+        <div class="fade" style="max-width:900px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;gap:6px;padding:4px;background:var(--panel-3);border-radius:11px;width:fit-content">
+            <sc-for list="{{ sectionTabs }}" as="st" hint-placeholder-count="2">
+              <button onClick="{{ st.go }}" style="height:34px;padding:0 18px;border-radius:8px;border:none;background:{{ st.bg }};color:{{ st.color }};font-weight:700;font-size:13px;cursor:pointer;box-shadow:{{ st.shadow }}">{{ st.label }}</button>
+            </sc-for>
+          </div>
+          <div style="background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow-sm)">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ headingL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3)">CS</span></span>
+                <input value="{{ sec_heading_cs }}" onInput="{{ on_sec_heading_cs }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:15px" />
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ headingL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3)">EN</span></span>
+                <input value="{{ sec_heading_en }}" onInput="{{ on_sec_heading_en }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:15px" />
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ bodyL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3)">CS</span></span>
+                <textarea value="{{ sec_body_cs }}" onInput="{{ on_sec_body_cs }}" rows="8" style="padding:12px 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-family:'Space Mono',monospace;font-size:13px;resize:vertical;line-height:1.55"></textarea>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ bodyL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3)">EN</span></span>
+                <textarea value="{{ sec_body_en }}" onInput="{{ on_sec_body_en }}" rows="8" style="padding:12px 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-family:'Space Mono',monospace;font-size:13px;resize:vertical;line-height:1.55"></textarea>
+              </label>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)">
+              <div style="width:64px;height:80px;border-radius:12px;background:var(--panel-3);border:1px solid var(--line-2);position:relative;overflow:hidden"><span style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(46,33,22,.06) 0 9px,transparent 9px 18px)"></span></div>
+              <div style="flex:1">
+                <div style="font-weight:700;font-size:13px;color:var(--ink-soft)">{{ photoL }}</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px">{{ photoHint }}</div>
+              </div>
+              <button onClick="{{ pickSectionPhoto }}" class="btnh" style="height:38px;padding:0 15px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);font-weight:700;font-size:13px;cursor:pointer">{{ changeL }}</button>
+              <button onClick="{{ saveSection }}" class="btnh" style="height:38px;padding:0 18px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-weight:700;font-size:13px;cursor:pointer">{{ saveL }}</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== SKILLS ===== -->
+      <sc-if value="{{ vSkills }}" hint-placeholder-val="{{ false }}">
+        <div class="fade" style="max-width:900px;display:flex;flex-direction:column;gap:20px">
+          <sc-for list="{{ skillGroups }}" as="g" hint-placeholder-count="3">
+            <div>
+              <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+                <span style="font-size:18px">{{ g.icon }}</span>
+                <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:17px;margin:0">{{ g.title }}</h3>
+                <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)">{{ g.key }}</span>
+              </div>
+              <div style="background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm)">
+                <sc-for list="{{ g.items }}" as="s" hint-placeholder-count="4">
+                  <div class="rowh" style="display:flex;align-items:center;gap:12px;padding:11px 15px;border-bottom:1px solid var(--line)">
+                    <div style="display:flex;flex-direction:column;gap:1px">
+                      <button onClick="{{ s.up }}" style="width:20px;height:15px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:10px;padding:0">▲</button>
+                      <button onClick="{{ s.down }}" style="width:20px;height:15px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:10px;padding:0">▼</button>
+                    </div>
+                    <span style="font-size:17px;width:24px;text-align:center">{{ s.icon }}</span>
+                    <span style="flex:1;font-weight:600;font-size:14px">{{ s.name }}</span>
+                    <div style="display:flex;gap:4px;align-items:center" dangerouslySetInnerHTML="{{ s.meter }}"></div>
+                    <button onClick="{{ s.edit }}" class="btnh" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink-soft);cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ icPencil }}"></button>
+                    <button onClick="{{ s.del }}" class="btnh" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel);color:var(--danger);cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ icTrash }}"></button>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ===== BUSINESS INFO ===== -->
+      <sc-if value="{{ vBusiness }}" hint-placeholder-val="{{ false }}">
+        <div class="fade" style="max-width:760px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;gap:11px;align-items:flex-start;padding:14px 16px;border-radius:13px;background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 40%,var(--line))">
+            <span style="color:var(--warn);flex-shrink:0" dangerouslySetInnerHTML="{{ icShield }}"></span>
+            <div style="font-size:13px;color:var(--ink);line-height:1.5">{{ bizPrivacy }}</div>
+          </div>
+          <div style="background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:16px">
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">{{ legalNameL }}</span>
+              <input value="{{ biz_name }}" onInput="{{ on_biz_name }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:15px" />
+            </label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">IČO</span>
+                <input value="{{ biz_ico }}" onInput="{{ on_biz_ico }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-family:'Space Mono',monospace;font-size:14px" />
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">DIČ <span style="font-size:10px;font-weight:700;color:var(--draft);background:var(--draft-soft);padding:2px 7px;border-radius:999px">{{ dicHidden }}</span></span>
+                <input value="{{ biz_dic }}" onInput="{{ on_biz_dic }}" placeholder="{{ dicPh }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-3);font-family:'Space Mono',monospace;font-size:14px;color:var(--muted)" />
+              </label>
+            </div>
+            <div style="height:1px;background:var(--line);margin:2px 0"></div>
+            <div style="font-weight:700;font-size:13px;color:var(--ink-soft)">{{ seatL }}</div>
+            <input value="{{ biz_addr }}" onInput="{{ on_biz_addr }}" placeholder="{{ addrPh }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:15px" />
+            <div style="display:grid;grid-template-columns:1fr 120px 1fr;gap:14px">
+              <input value="{{ biz_city }}" onInput="{{ on_biz_city }}" placeholder="{{ cityPh }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:15px" />
+              <input value="{{ biz_zip }}" onInput="{{ on_biz_zip }}" placeholder="PSČ" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-family:'Space Mono',monospace;font-size:14px" />
+              <input value="{{ biz_country }}" onInput="{{ on_biz_country }}" placeholder="{{ countryPh }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:15px" />
+            </div>
+            <div style="height:1px;background:var(--line);margin:2px 0"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ registerL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3)">CS</span></span>
+                <textarea value="{{ biz_reg_cs }}" onInput="{{ on_biz_reg_cs }}" rows="4" style="padding:11px 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:14px;resize:vertical;line-height:1.5"></textarea>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ registerL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3)">EN</span></span>
+                <textarea value="{{ biz_reg_en }}" onInput="{{ on_biz_reg_en }}" rows="4" style="padding:11px 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:14px;resize:vertical;line-height:1.5"></textarea>
+              </label>
+            </div>
+            <label style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">{{ contactEmailL }}</span>
+              <input value="{{ biz_email }}" onInput="{{ on_biz_email }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-family:'Space Mono',monospace;font-size:14px" />
+            </label>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:4px">
+              <button onClick="{{ saveBusiness }}" class="btnh" style="height:44px;padding:0 22px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:15px;cursor:pointer;box-shadow:var(--shadow-sm)">{{ saveChangesL }}</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== MEDIA LIBRARY ===== -->
+      <sc-if value="{{ vMedia }}" hint-placeholder-val="{{ false }}">
+        <div class="fade">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px">
+            <button onClick="{{ uploadMedia }}" class="btnh" style="aspect-ratio:1;border-radius:14px;border:2px dashed var(--line-2);background:var(--panel-2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--ink-soft)">
+              <span style="width:40px;height:40px;border-radius:12px;background:var(--panel);display:grid;place-items:center;color:var(--accent)" dangerouslySetInnerHTML="{{ icUpload }}"></span>
+              <span style="font-weight:700;font-size:14px">{{ uploadL }}</span>
+              <span style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace">PNG · JPEG · WEBP · SVG</span>
+            </button>
+            <sc-for list="{{ media }}" as="m" hint-placeholder-count="7">
+              <div style="background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm);display:flex;flex-direction:column">
+                <div style="aspect-ratio:1;background:{{ m.bg }};position:relative;display:grid;place-items:center;color:var(--muted)">
+                  <span style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(46,33,22,.06) 0 11px,transparent 11px 22px)"></span>
+                  <span dangerouslySetInnerHTML="{{ m.typeIcon }}"></span>
+                  <sc-if value="{{ m.sanitized }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:8px;left:8px;font-size:10px;font-weight:700;color:var(--ok);background:var(--ok-soft);padding:2px 8px;border-radius:999px;display:flex;align-items:center;gap:4px">✓ {{ sanitizedL }}</span></sc-if>
+                  <sc-if value="{{ m.referenced }}" hint-placeholder-val="{{ false }}"><span title="{{ m.refT }}" style="position:absolute;top:8px;right:8px;font-size:10px;font-weight:700;color:var(--warn);background:var(--warn-soft);padding:2px 8px;border-radius:999px">{{ m.refLabel }}</span></sc-if>
+                </div>
+                <div style="padding:10px 12px 12px">
+                  <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.name }}</div>
+                  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px">{{ m.meta }}</div>
+                  <sc-if value="{{ m.altMissing }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;font-weight:700;color:var(--warn);margin-top:6px">⚑ {{ altMissingL }}</div></sc-if>
+                  <div style="display:flex;gap:6px;margin-top:10px">
+                    <button onClick="{{ m.editAlt }}" class="btnh" style="flex:1;height:30px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink-soft);font-weight:700;font-size:12px;cursor:pointer">{{ altL }}</button>
+                    <button onClick="{{ m.del }}" class="btnh" title="{{ deleteL }}" style="width:32px;height:30px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel);color:{{ m.delColor }};cursor:{{ m.delCursor }};display:grid;place-items:center" dangerouslySetInnerHTML="{{ icTrash }}"></button>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== CONTACT INBOX ===== -->
+      <sc-if value="{{ vInbox }}" hint-placeholder-val="{{ false }}">
+        <div class="fade" style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ inboxFilters }}" as="f" hint-placeholder-count="5">
+              <button onClick="{{ f.go }}" class="btnh" style="height:34px;padding:0 14px;border-radius:999px;border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};font-weight:600;font-size:13px;cursor:pointer">{{ f.label }} <span style="opacity:.6;font-family:'Space Mono',monospace;font-size:11px">{{ f.count }}</span></button>
+            </sc-for>
+          </div>
+          <div style="background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)">
+            <sc-for list="{{ inbox }}" as="m" hint-placeholder-count="5">
+              <div class="rowh" style="display:flex;align-items:flex-start;gap:14px;padding:15px 16px;border-bottom:1px solid var(--line)">
+                <span style="width:9px;height:9px;border-radius:50%;background:{{ m.dot }};margin-top:6px;flex-shrink:0"></span>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                    <span style="font-weight:{{ m.weight }};font-size:15px;color:var(--ink)">{{ m.name }}</span>
+                    <span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted)">{{ m.email }}</span>
+                    <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:{{ m.tagBg }};color:{{ m.tagColor }}">{{ m.statusLabel }}</span>
+                  </div>
+                  <div style="font-weight:600;font-size:13px;color:var(--ink);margin-top:5px">{{ m.subject }}</div>
+                  <div style="font-size:13px;color:var(--ink-soft);margin-top:2px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ m.message }}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0">
+                  <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap">{{ m.date }}</span>
+                  <div style="display:flex;gap:6px">
+                    <sc-for list="{{ m.actions }}" as="a" hint-placeholder-count="3">
+                      <button onClick="{{ a.go }}" class="btnh" title="{{ a.title }}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel);color:{{ a.color }};cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ a.icon }}"></button>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== ARCADE MODERATION ===== -->
+      <sc-if value="{{ vArcade }}" hint-placeholder-val="{{ false }}">
+        <div class="fade" style="display:flex;flex-direction:column;gap:20px;max-width:820px">
+          <sc-for list="{{ arcadeGames }}" as="g" hint-placeholder-count="3">
+            <div style="background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm)">
+              <div style="display:flex;align-items:center;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line);background:var(--panel-2)">
+                <span style="font-size:22px">{{ g.icon }}</span>
+                <div style="flex:1">
+                  <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:17px">{{ g.name }}</div>
+                  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)">{{ g.key }} · {{ g.bound }}</div>
+                </div>
+                <button onClick="{{ g.reset }}" class="btnh" style="height:36px;padding:0 15px;border-radius:10px;border:1px solid var(--danger);background:var(--panel);color:var(--danger);font-weight:700;font-size:13px;cursor:pointer">{{ resetBoardL }}</button>
+              </div>
+              <sc-for list="{{ g.scores }}" as="s" hint-placeholder-count="4">
+                <div class="rowh" style="display:flex;align-items:center;gap:14px;padding:11px 18px;border-bottom:1px solid var(--line)">
+                  <span style="font-family:'Baloo 2',cursive;font-weight:800;font-size:16px;color:{{ s.rankColor }};width:30px">{{ s.rank }}</span>
+                  <span style="flex:1;font-weight:600;font-size:14px">{{ s.player }}</span>
+                  <span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted)">{{ s.date }}</span>
+                  <span style="font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;color:var(--ink);width:70px;text-align:right">{{ s.score }}</span>
+                  <button onClick="{{ s.del }}" class="btnh" title="{{ deleteL }}" style="width:32px;height:32px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel);color:var(--danger);cursor:pointer;display:grid;place-items:center" dangerouslySetInnerHTML="{{ icTrash }}"></button>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+    </div>
+  </main>
+</div>
+</sc-if>
+
+<!-- ============================ CONFIRM DIALOG ============================ -->
+<sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeConfirm }}" style="position:fixed;inset:0;z-index:80;background:rgba(30,20,12,.42);backdrop-filter:blur(3px);display:grid;place-items:center;padding:24px">
+  <div onClick="{{ stop }}" style="width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow);animation:pop .18s ease both">
+    <div style="width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:{{ confirmIconBg }};color:{{ confirmIconColor }};margin-bottom:14px" dangerouslySetInnerHTML="{{ confirmIcon }}"></div>
+    <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:20px;color:var(--ink)">{{ confirmTitle }}</div>
+    <p style="font-size:14px;color:var(--ink-soft);line-height:1.55;margin:8px 0 22px">{{ confirmBody }}</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onClick="{{ closeConfirm }}" class="btnh" style="height:44px;padding:0 18px;border-radius:11px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);font-weight:700;font-size:14px;cursor:pointer">{{ cancelL }}</button>
+      <button onClick="{{ runConfirm }}" class="btnh" style="height:44px;padding:0 20px;border-radius:11px;border:none;background:{{ confirmBtnBg }};color:#fff;font-weight:700;font-size:14px;cursor:pointer">{{ confirmCta }}</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============================ MEDIA PICKER ============================ -->
+<sc-if value="{{ pickerOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closePicker }}" style="position:fixed;inset:0;z-index:80;background:rgba(30,20,12,.42);backdrop-filter:blur(3px);display:grid;place-items:center;padding:24px">
+  <div onClick="{{ stop }}" style="width:100%;max-width:620px;max-height:80vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow);animation:pop .18s ease both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:19px">{{ pickerTitle }}</div>
+      <button onClick="{{ closePicker }}" style="width:32px;height:32px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink-soft);cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px">
+      <sc-for list="{{ media }}" as="m" hint-placeholder-count="6">
+        <button onClick="{{ closePicker }}" class="btnh" style="border:1px solid var(--line-2);border-radius:12px;overflow:hidden;background:{{ m.bg }};cursor:pointer;aspect-ratio:1;position:relative;display:grid;place-items:center;color:var(--muted);padding:0">
+          <span style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(46,33,22,.06) 0 10px,transparent 10px 20px)"></span>
+          <span dangerouslySetInnerHTML="{{ m.typeIcon }}"></span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============================ LINK / SKILL EDITOR ============================ -->
+<sc-if value="{{ edOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeEditor }}" style="position:fixed;inset:0;z-index:82;background:rgba(30,20,12,.42);backdrop-filter:blur(3px);display:grid;place-items:center;padding:24px">
+  <div onClick="{{ stop }}" style="width:100%;max-width:460px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow);animation:pop .18s ease both">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-family:'Baloo 2',cursive;font-weight:700;font-size:19px">{{ edTitle }}</div>
+      <button onClick="{{ closeEditor }}" style="width:32px;height:32px;border-radius:9px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink-soft);cursor:pointer;font-size:16px">✕</button>
+    </div>
+
+    <sc-if value="{{ edIsLink }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:15px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ labelL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3)">CS</span></span>
+            <input value="{{ ed_label_cs }}" onInput="{{ on_ed_label_cs }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:15px" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="display:flex;align-items:center;gap:7px;font-weight:700;font-size:12px;color:var(--ink-soft)">{{ labelL }} <span style="font-family:'Space Mono',monospace;font-size:10px;padding:1px 6px;border-radius:5px;background:var(--panel-3)">EN</span></span>
+            <input value="{{ ed_label_en }}" onInput="{{ on_ed_label_en }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:15px" />
+          </label>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">{{ urlL }}</span>
+          <input value="{{ ed_url }}" onInput="{{ on_ed_url }}" placeholder="https://" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-family:'Space Mono',monospace;font-size:13px" />
+        </label>
+        <div style="display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:end">
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">{{ iconL }}</span>
+            <input value="{{ ed_icon }}" onInput="{{ on_ed_icon }}" maxlength="4" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:20px;text-align:center" />
+          </label>
+          <button onClick="{{ toggleEdVisible }}" style="height:44px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 14px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);cursor:pointer">
+            <span style="font-weight:700;font-size:13px;color:var(--ink-soft)">{{ visibleL }}</span>
+            <span style="position:relative;width:40px;height:22px;border-radius:999px;background:{{ edVisBg }};flex-shrink:0;transition:background .15s"><span style="position:absolute;top:3px;left:{{ edVisX }};width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span></span>
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ edIsSkill }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:15px">
+        <label style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">{{ skillNameL }}</span>
+          <input value="{{ ed_name }}" onInput="{{ on_ed_name }}" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:15px" />
+        </label>
+        <div style="display:grid;grid-template-columns:110px 1fr;gap:12px">
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">{{ iconL }}</span>
+            <input value="{{ ed_icon }}" onInput="{{ on_ed_icon }}" maxlength="4" style="height:44px;padding:0 13px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:20px;text-align:center" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">{{ groupL }}</span>
+            <select value="{{ ed_group }}" onChange="{{ on_ed_group }}" style="height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:14px">
+              <sc-for list="{{ edGroupOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+            </select>
+          </label>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-weight:700;font-size:12px;color:var(--ink-soft)">{{ levelL }}</span>
+          <select value="{{ ed_level }}" onChange="{{ on_ed_level }}" style="height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:14px">
+            <sc-for list="{{ edLevelOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+          </select>
+        </label>
+      </div>
+    </sc-if>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px">
+      <button onClick="{{ closeEditor }}" class="btnh" style="height:44px;padding:0 18px;border-radius:11px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink);font-weight:700;font-size:14px;cursor:pointer">{{ cancelL }}</button>
+      <button onClick="{{ saveEditor }}" class="btnh" style="height:44px;padding:0 20px;border-radius:11px;border:none;background:var(--accent);color:#fff;font-weight:700;font-size:14px;cursor:pointer">{{ saveL2 }}</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============================ TOAST ============================ -->
+<sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:90;display:flex;align-items:center;gap:11px;padding:13px 18px;border-radius:13px;background:var(--ink);color:#fff;box-shadow:var(--shadow);animation:pop .2s ease both;max-width:90vw">
+  <span style="color:{{ toastIconColor }};flex-shrink:0" dangerouslySetInnerHTML="{{ toastIcon }}"></span>
+  <span style="font-weight:600;font-size:14px">{{ toastMsg }}</span>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:960},&quot;view&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;projects&quot;,&quot;projectEditor&quot;,&quot;categories&quot;,&quot;links&quot;,&quot;sections&quot;,&quot;skills&quot;,&quot;business&quot;,&quot;media&quot;,&quot;inbox&quot;,&quot;arcade&quot;,&quot;login&quot;],&quot;default&quot;:&quot;login&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Screen&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;cs&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;'en'|'cs'&quot;,&quot;section&quot;:&quot;Screen&quot;},&quot;authState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;idle&quot;,&quot;submitting&quot;,&quot;invalid&quot;,&quot;unreachable&quot;,&quot;mfa&quot;],&quot;default&quot;:&quot;idle&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Login demo&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Projects state&quot;}}">
+class Component extends DCLogic {
+  // ---------- icons (minimal stroke set) ----------
+  IC(name){
+    const s='width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+    const P={
+      projects:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+      tag:'<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0l-6.2-6.2a2 2 0 0 1-.6-1.4V5a2 2 0 0 1 2-2h7.9a2 2 0 0 1 1.4.6l6.1 6.1a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/>',
+      link:'<path d="M9 15 15 9"/><path d="M11 6.5 12.5 5a4 4 0 0 1 5.7 5.7l-1.5 1.5"/><path d="M13 17.5 11.5 19a4 4 0 0 1-5.7-5.7L7.3 11.8"/>',
+      sections:'<path d="M4 5h16"/><path d="M4 12h10"/><path d="M4 19h7"/><circle cx="18" cy="16" r="3"/>',
+      skills:'<path d="M5 21V9"/><path d="M12 21V4"/><path d="M19 21v-8"/>',
+      menu:'<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
+      media:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m21 16-4.5-4.5L7 21"/>',
+      inbox:'<path d="M4 5h16v14H4z"/><path d="m4 7 8 6 8-6"/>',
+      arcade:'<rect x="2" y="7" width="20" height="12" rx="3"/><path d="M7 12h3M8.5 10.5v3"/><circle cx="16" cy="11.5" r="1"/><circle cx="18" cy="14" r="1"/>',
+      business:'<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/>',
+      trash:'<path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6 7v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7"/><path d="M10 11v6M14 11v6"/>',
+      pencil:'<path d="M4 20h4l10-10a2.8 2.8 0 0 0-4-4L4 16v4Z"/><path d="M13.5 6.5 17.5 10.5"/>',
+      eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+      eyeoff:'<path d="M9.9 5.2A9.7 9.7 0 0 1 12 5c6.5 0 10 7 10 7a15.6 15.6 0 0 1-3.4 4.1"/><path d="M6.1 6.1A15.5 15.5 0 0 0 2 12s3.5 7 10 7a9.4 9.4 0 0 0 4-.9"/><path d="M3 3l18 18"/>',
+      check:'<path d="m20 6-11 11-5-5"/>',
+      checkc:'<circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+      alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>',
+      info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+      shield:'<path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3Z"/><path d="m9.5 12 1.8 1.8L15 10"/>',
+      logout:'<path d="M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4"/><path d="M9 16 5 12l4-4"/><path d="M5 12h11"/>',
+      upload:'<path d="M12 15V4"/><path d="m7 9 5-5 5 5"/><path d="M5 20h14"/>',
+      archive:'<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/>',
+      svg:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 9.5A1.5 1.5 0 1 0 6.5 12"/><path d="M11 8v8l2.5-4L16 16V8"/>',
+      spam:'<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
+      reply:'<path d="M9 7 4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 6 6v1"/>',
+    };
+    return {__html:`<svg ${s}>${P[name]||''}</svg>`};
+  }
+
+  _meter(level){
+    if(level==null) return {__html:`<span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted)">\u2014</span>`};
+    let h='';
+    for(let i=0;i<5;i++){ const on=i<level; h+=`<span style="width:11px;height:11px;border-radius:50%;background:${on?'var(--accent)':'var(--line-2)'};display:inline-block"></span>`; }
+    return {__html:h};
+  }
+
+  // ---------- copy dictionary [en, cs] ----------
+  L={
+    projects:['Projects','Projekty'], categories:['Categories','Kategorie'], links:['Links','Odkazy'],
+    sections:['About & Hero','O mn\u011b a Hero'], skills:['Skills','Dovednosti'], media:['Media library','Knihovna m\u00e9di\u00ed'],
+    inbox:['Contact inbox','Zpr\u00e1vy'], arcade:['Arcade scores','Ark\u00e1da'], business:['Business info','Pr\u00e1vn\u00ed \u00fadaje'],
+    gContent:['Content','Obsah'], gComm:['Communication','Komunikace'], gSettings:['Settings','Nastaven\u00ed'],
+    save:['Save','Ulo\u017eit'], saveChanges:['Save changes','Ulo\u017eit zm\u011bny'], cancel:['Cancel','Zru\u0161it'], add:['Add','P\u0159idat'],
+    delete:['Delete','Smazat'], edit:['Edit','Upravit'], change:['Change','Zm\u011bnit'],
+    editLink:['Edit link','Upravit odkaz'], editSkill:['Edit skill','Upravit dovednost'],
+    linkLabelL:['Label','Popisek'], urlL:['URL','URL'], iconL:['Icon (emoji)','Ikona (emoji)'], visibleL:['Visible on site','Viditeln\u00e9 na webu'],
+    skillNameL:['Skill name','N\u00e1zev dovednosti'], groupL:['Group','Skupina'], levelL:['Level','\u00darove\u0148'],
+    newProject:['New project','Nov\u00fd projekt'], newCategory:['New category','Nov\u00e1 kategorie'], newLink:['New link','Nov\u00fd odkaz'], newSkill:['New skill','Nov\u00e1 dovednost'],
+    saved:['All changes saved','V\u0161e ulo\u017eeno'],
+    missing:['missing','chyb\u00ed'], featured:['Featured','Vybran\u00fd'], hidden:['Hidden','Skryto'],
+    draft:['Draft','Koncept'], published:['Published','Publikov\u00e1no'], publish:['Publish','Publikovat'], unpublish:['Move to draft','Do konceptu'],
+    clicks:['clicks','klik\u016f'],
+    title:['Title','N\u00e1zev'], slug:['URL slug','URL slug'], summary:['Summary','Shrnut\u00ed'], body:['Body','Text'],
+    category:['Category','Kategorie'], date:['Project date','Datum projektu'], status:['Status','Stav'],
+    cover:['Cover image','Tituln\u00ed obr\u00e1zek'], gallery:['Gallery','Galerie'], outLinks:['Out-links','Odkazy ven'],
+    basics:['Basics','Z\u00e1klad'], addFirstLink:['No out-links yet.','Zat\u00edm \u017e\u00e1dn\u00e9 odkazy.'],
+    heading:['Heading','Nadpis'], photo:['Photo','Fotka'], photoHint:['About photo, shown beside the bio.','Fotka u bia.'],
+    catNote:['A category in use can\u2019t be deleted \u2014 reassign its projects first.','Pou\u017e\u00edvanou kategorii nelze smazat \u2014 nejd\u0159\u00edve p\u0159e\u0159a\u010fte projekty.'],
+    inUse:['in use','pou\u017e\u00edv\u00e1no'],
+    // login
+    loginTitle:['Admin sign in','P\u0159ihl\u00e1\u0161en\u00ed do administrace'], loginSub:['Manage karel.tilcer.cz','Spr\u00e1va karel.tilcer.cz'],
+    email:['Email','E-mail'], password:['Password','Heslo'], signIn:['Sign in','P\u0159ihl\u00e1sit'],
+    modeNote:['Mode B \u00b7 self-hosted session \u00b7 site: karel','Mode B \u00b7 vlastn\u00ed relace \u00b7 web: karel'],
+    invalidTitle:['Invalid email or password','\u0160patn\u00fd e-mail nebo heslo'],
+    invalidBody:['Check your details and try again.','Zkontroluj \u00fadaje a zkus to znovu.'],
+    unreachTitle:['Sign-in service unreachable','Slu\u017eba p\u0159ihl\u00e1\u0161en\u00ed nedostupn\u00e1'],
+    unreachBody:['We couldn\u2019t reach auth.tilcer.cz. Try again shortly.','Nepoda\u0159ilo se spojit s auth.tilcer.cz. Zkus to za chv\u00edli.'],
+    mfaTitle:['Two-factor required','Vy\u017eadov\u00e1no dvoufaktorov\u00e9 ov\u011b\u0159en\u00ed'],
+    mfaBody:['Finish signing in on the auth server, then return here.','Dokon\u010di p\u0159ihl\u00e1\u0161en\u00ed na auth serveru a vra\u0165 se sem.'],
+    mfaCta:['Continue on auth.tilcer.cz','Pokra\u010dovat na auth.tilcer.cz'],
+    backToLogin:['\u2190 Back to sign in','\u2190 Zp\u011bt na p\u0159ihl\u00e1\u0161en\u00ed'],
+    signOut:['Sign out','Odhl\u00e1sit'],
+    // states
+    emptyProjTitle:['No projects yet','Zat\u00edm \u017e\u00e1dn\u00e9 projekty'],
+    emptyProjBody:['Create your first project to show it on the site.','Vytvo\u0159 prvn\u00ed projekt, aby se objevil na webu.'],
+    errTitle:['Couldn\u2019t load projects','Nepoda\u0159ilo se na\u010d\u00edst projekty'],
+    errBody:['Something went wrong reaching the API.','P\u0159i spojen\u00ed s API do\u0161lo k chyb\u011b.'],
+    retry:['Retry','Zkusit znovu'],
+    allCat:['All','V\u0161e'],
+    // business
+    bizPrivacy:['The registered seat is Karel\u2019s home address. It appears only on the public legal page \u2014 never on the homepage, hero, or contact.','S\u00eddlo je domovsk\u00e1 adresa Karla. Zobrazuje se pouze na pr\u00e1vn\u00ed str\u00e1nce \u2014 nikdy na \u00favodu, hero ani v kontaktu.'],
+    legalName:['Legal name (jm\u00e9no a p\u0159\u00edjmen\u00ed)','Jm\u00e9no a p\u0159\u00edjmen\u00ed'],
+    dicHidden:['hidden \u2014 nepl\u00e1tce','skryto \u2014 nepl\u00e1tce'], dicPh:['empty \u2014 not a VAT payer','pr\u00e1zdn\u00e9 \u2014 nepl\u00e1tce DPH'],
+    seat:['Registered seat (s\u00eddlo)','S\u00eddlo'], addr:['Street and number','Ulice a \u010d\u00edslo'], city:['City','M\u011bsto'], country:['Country','Zem\u011b'],
+    register:['\u017divnostensk\u00fd rejst\u0159\u00edk statement','Z\u00e1pis v \u017eivnostensk\u00e9m rejst\u0159\u00edku'], contactEmail:['Contact email','Kontaktn\u00ed e-mail'],
+    // media
+    upload:['Upload media','Nahr\u00e1t m\u00e9dia'], sanitized:['SVG sanitized','SVG o\u0161et\u0159eno'], altBadge:['Alt CZ/EN','Alt CZ/EN'],
+    altMissing:['Alt text missing','Chyb\u00ed alt text'], referenced:['in use','pou\u017e\u00edv\u00e1no'],
+    // inbox
+    fNew:['New','Nov\u00e9'], fRead:['Read','P\u0159e\u010dten\u00e9'], fArchived:['Archived','Archiv'], fSpam:['Spam','Spam'], fAll:['All','V\u0161e'],
+    markRead:['Mark read','Ozna\u010dit p\u0159e\u010dten\u00e9'], archive:['Archive','Archivovat'], markSpam:['Mark spam','Ozna\u010dit spam'], reply:['Reply','Odpov\u011bd\u011bt'],
+    // arcade
+    resetBoard:['Reset board','Vymazat \u017eeb\u0159\u00ed\u010dek'],
+    // toasts/confirm
+    tSaved:['Saved.','Ulo\u017eeno.'], tPublished:['Project published.','Projekt publikov\u00e1n.'], tDrafted:['Moved to draft.','P\u0159esunuto do konceptu.'],
+    tDeleted:['Deleted.','Smaz\u00e1no.'], tCatInUse:['Category in use (409) \u2014 reassign its projects first.','Kategorie se pou\u017e\u00edv\u00e1 (409) \u2014 nejd\u0159\u00edve p\u0159e\u0159a\u010fte projekty.'],
+    tMediaRef:['Media still referenced (409) \u2014 remove it from projects first.','M\u00e9dium se pou\u017e\u00edv\u00e1 (409) \u2014 nejd\u0159\u00edve ho odeber z projekt\u016f.'],
+    tReset:['Leaderboard reset.','\u017deb\u0159\u00ed\u010dek vymaz\u00e1n.'], tArchived:['Archived.','Archivov\u00e1no.'], tSpam:['Marked as spam.','Ozna\u010deno jako spam.'], tRead:['Marked as read.','Ozna\u010deno jako p\u0159e\u010dten\u00e9.'],
+    tUpload:['Upload opens a file picker in the real app.','Nahr\u00e1n\u00ed otev\u0159e v\u00fdb\u011br souboru.'],
+    cDelProjT:['Delete this project?','Smazat tento projekt?'], cDelProjB:['This removes it from the site and detaches its gallery. This can\u2019t be undone.','Odstran\u00ed se z webu i galerie. Nelze vr\u00e1tit.'],
+    cDelCatT:['Delete this category?','Smazat tuto kategorii?'], cDelCatB:['It has no projects, so it\u2019s safe to remove.','Nem\u00e1 \u017e\u00e1dn\u00e9 projekty, lze bezpe\u010dn\u011b smazat.'],
+    cDelLinkT:['Delete this link?','Smazat tento odkaz?'], cDelLinkB:['It will disappear from the linktree.','Zmiz\u00ed z linktree.'],
+    cDelSkillT:['Delete this skill?','Smazat tuto dovednost?'], cDelSkillB:['It will be removed from the skills section.','Odstran\u00ed se ze sekce dovednost\u00ed.'],
+    cDelMediaT:['Delete this media?','Smazat toto m\u00e9dium?'], cDelMediaB:['The file is removed from the S3 store and the library.','Soubor se odstran\u00ed z \u00falo\u017ei\u0161t\u011b i knihovny.'],
+    cDelScoreT:['Delete this score?','Smazat tento z\u00e1znam?'], cDelScoreB:['The entry is removed from the leaderboard.','Z\u00e1znam se odstran\u00ed ze \u017eeb\u0159\u00ed\u010dku.'],
+    cResetT:['Reset this leaderboard?','Vymazat cel\u00fd \u017eeb\u0159\u00ed\u010dek?'], cResetB:['Every score for this game is cleared. This can\u2019t be undone.','Sma\u017eou se v\u0161echna sk\u00f3re t\u00e9to hry. Nelze vr\u00e1tit.'],
+    editorNew:['New project','Nov\u00fd projekt'],
+  };
+  t(k){ return (this.L[k]||['',''])[this.state.lang==='cs'?1:0]; }
+  tn(o,b){ const l=this.state.lang; return o[b+'_'+l]!==undefined?o[b+'_'+l]:(o[b+'_en']||o[b+'_cs']); }
+
+  // ---------- seed data ----------
+  seedCategories(){ return [
+    {id:1,slug:'software',name_cs:'Software',name_en:'Software',visible:true,count:4},
+    {id:2,slug:'rucni-prace',name_cs:'Ru\u010dn\u00ed pr\u00e1ce',name_en:'Craft',visible:true,count:3},
+    {id:3,slug:'psani',name_cs:'Psan\u00ed a recepty',name_en:'Writing & recipes',visible:true,count:1},
+    {id:4,slug:'hudba',name_cs:'Hudba',name_en:'Music',visible:false,count:0},
+  ];}
+  seedProjects(){ return [
+    {id:1,slug:'yarnlog',title_cs:'YarnLog',title_en:'YarnLog',summary_cs:'Spole\u010dn\u00edk pro pleta\u0159ky a h\u00e1\u010dka\u0159ky.',summary_en:'A companion for knitters and crocheters.',body_cs:'YarnLog...',body_en:'YarnLog...',cat:1,featured:true,status:'published',date:'2026-03',cover:true,gallery:6},
+    {id:2,slug:'scoop-rush',title_cs:'Scoop Rush',title_en:'Scoop Rush',summary_cs:' Chytej padaj\u00edc\u00ed kope\u010dky, ne\u017e roztaj\u00ed.',summary_en:'Catch falling scoops before they melt.',body_cs:'...',body_en:'...',cat:1,featured:true,status:'published',date:'2026-01',cover:true,gallery:3},
+    {id:3,slug:'home-ops',title_cs:'Home Ops',title_en:'Home Ops',summary_cs:'Spr\u00e1va dom\u00e1cnosti, na kter\u00e9 nám v\u0161e b\u011b\u017e\u00ed.',summary_en:'',body_cs:'...',body_en:'...',cat:1,featured:false,status:'draft',date:'2025-11',cover:false,gallery:0},
+    {id:4,slug:'crochet-almanac',title_cs:'H\u00e1\u010dkovan\u00fd alman\u00e1ch',title_en:'Crochet Almanac',summary_cs:'Ro\u010dn\u00ed sada vzor\u016f a fotek.',summary_en:'A year of patterns and photos.',body_cs:'Dlouh\u00fd text...',body_en:'',cat:2,featured:false,status:'published',date:'2025-09',cover:true,gallery:12},
+    {id:5,slug:'amy-bandana',title_cs:'Amyiny \u0161\u00e1tky',title_en:'Amy\u2019s Bandanas',summary_cs:'Mal\u00e9 \u0161it\u00ed pro jednu malt\u00e9za\u010dku.',summary_en:'Small sewing for one maltese.',body_cs:'...',body_en:'...',cat:2,featured:false,status:'draft',date:'2025-07',cover:false,gallery:2},
+    {id:6,slug:'lemon-yuzu',title_cs:'Citr\u00f3n-yuzu sorbet',title_en:'Lemon-Yuzu Sorbet',summary_cs:'Recept, kter\u00fd v\u017edy vyjde.',summary_en:'The recipe that always works.',body_cs:'...',body_en:'...',cat:3,featured:false,status:'published',date:'2025-06',cover:true,gallery:4},
+  ];}
+  seedLinks(){ return [
+    {id:1,label_cs:'GitHub',label_en:'GitHub',url:'https://github.com/kareltilcer',icon:'\uD83D\uDC19',visible:true,clicks:1284},
+    {id:2,label_cs:'YarnLog \u2014 \u017eiv\u011b',label_en:'YarnLog \u2014 live',url:'https://yarnlog.app',icon:'\uD83E\uDDF6',visible:true,clicks:642},
+    {id:3,label_cs:'LinkedIn',label_en:'LinkedIn',url:'https://linkedin.com/in/karel',icon:'\uD83D\uDCBC',visible:true,clicks:318},
+    {id:4,label_cs:'Instagram',label_en:'Instagram',url:'https://instagram.com/karel.scoops',icon:'\uD83D\uDCF8',visible:true,clicks:509},
+    {id:5,label_cs:'Kup mi zmrzlinu',label_en:'Buy me an ice-cream',url:'https://ko-fi.com/karel',icon:'\uD83C\uDF66',visible:false,clicks:73},
+    {id:6,label_cs:'Napi\u0161 mi',label_en:'Email me',url:'mailto:ahoj@karel.tilcer.cz',icon:'\u2709\uFE0F',visible:true,clicks:201},
+  ];}
+  seedSkills(){ return [
+    {id:1,group:'languages',name:'TypeScript',icon:'\uD83D\uDD37',level:5},
+    {id:2,group:'languages',name:'Go',icon:'\uD83D\uDC39',level:4},
+    {id:3,group:'languages',name:'Python',icon:'\uD83D\uDC0D',level:3},
+    {id:4,group:'tools',name:'React',icon:'\u269B\uFE0F',level:5},
+    {id:5,group:'tools',name:'Vite',icon:'\u26A1',level:4},
+    {id:6,group:'tools',name:'Docker',icon:'\uD83D\uDC33',level:3},
+    {id:7,group:'craft',name:'Crochet',icon:'\uD83E\uDDF6',level:4},
+    {id:8,group:'craft',name:'Baking',icon:'\uD83E\uDDC1',level:null},
+  ];}
+  seedMedia(){ return [
+    {id:1,name:'yarnlog-cover.webp',mime:'webp',w:1600,h:1000,size:'184 kB',alt:true,refCount:1},
+    {id:2,name:'scoop-rush-hero.png',mime:'png',w:1920,h:1080,size:'420 kB',alt:true,refCount:1},
+    {id:3,name:'crochet-01.jpg',mime:'jpeg',w:1400,h:1400,size:'298 kB',alt:false,refCount:1},
+    {id:4,name:'sprinkle-icon.svg',mime:'svg',w:64,h:64,size:'3 kB',alt:true,refCount:0,sanitized:true},
+    {id:5,name:'amy-bandana.jpg',mime:'jpeg',w:1200,h:1600,size:'256 kB',alt:false,refCount:0},
+    {id:6,name:'karel-portrait.webp',mime:'webp',w:1000,h:1250,size:'142 kB',alt:true,refCount:1},
+    {id:7,name:'sorbet-01.jpg',mime:'jpeg',w:1500,h:1000,size:'312 kB',alt:true,refCount:0},
+  ];}
+  seedInbox(){ return [
+    {id:1,name:'Petra Nov\u00e1kov\u00e1',email:'petra@studio.cz',subject:'Spolupr\u00e1ce na webu',message:'Ahoj Karle, l\u00edb\u00ed se mi tv\u016fj p\u0159\u00edstup. R\u00e1di bychom probrali men\u0161\u00ed projekt \u2014 m\u00e1\u0161 v \u010dervenci kapacitu?',status:'new',date:'5. 8.',locale:'cs'},
+    {id:2,name:'James Whitfield',email:'james@indiegames.io',subject:'Scoop Rush on our showcase?',message:'Loved Scoop Rush! Would you be up for featuring it in our summer indie showcase next month?',status:'new',date:'5. 8.',locale:'en'},
+    {id:3,name:'Tom\u00e1\u0161 Havel',email:'tomas.h@gmail.com',subject:'',message:'Kde se d\u00e1 koupit ta h\u00e1\u010dkovan\u00e1 \u0161\u00e1tka pro psa? Amy je super :)',status:'read',date:'4. 8.',locale:'cs'},
+    {id:4,name:'Recruiter Bot',email:'noreply@fasthire.biz',subject:'AMAZING OPPORTUNITY!!!',message:'CONGRATULATIONS you have been selected click here to claim your reward now limited time...',status:'spam',date:'3. 8.',locale:'en'},
+    {id:5,name:'Klára Dvořáková',email:'klara@czechitas.cz',subject:'Workshop na podzim',message:'Zdrav\u00edm! M\u011bl bys z\u00e1jem vést podzimn\u00ed workshop o Reactu? R\u00e1di bychom t\u011b zase p\u0159iv\u00edtali.',status:'archived',date:'1. 8.',locale:'cs'},
+  ];}
+  seedArcade(){ return [
+    {key:'scoop-rush',name:'Scoop Rush',icon:'\uD83C\uDF66',bound:'0\u201399 999',scores:[
+      {id:1,player:'ZmrzkaKr\u00e1l',score:24850,date:'5. 8. 2026'},{id:2,player:'melty_max',score:22100,date:'4. 8. 2026'},{id:3,player:'Amy\uD83D\uDC36',score:19740,date:'4. 8. 2026'},{id:4,player:'aaaaaaaa',score:99999,date:'3. 8. 2026'}]},
+    {key:'melt-timer',name:'Melt Timer',icon:'\u23F1\uFE0F',bound:'0\u20139 999',scores:[
+      {id:5,player:'coolhand',score:8420,date:'5. 8. 2026'},{id:6,player:'Petra',score:7010,date:'2. 8. 2026'}]},
+    {key:'cone-stack',name:'Cone Stack',icon:'\uD83C\uDF67',bound:'0\u2013500',scores:[
+      {id:7,player:'stackizzle',score:312,date:'5. 8. 2026'},{id:8,player:'karel',score:288,date:'1. 8. 2026'}]},
+  ];}
+
+  state={
+    lang:this.props.lang||'en',
+    view:this.props.view||'projects',
+    navOpen:false,
+    authState:this.props.authState||'idle',
+    dataState:this.props.dataState||'ready',
+    liEmail:'', liPass:'',
+    categories:this.seedCategories(), projects:this.seedProjects(), links:this.seedLinks(),
+    skills:this.seedSkills(), media:this.seedMedia(), inbox:this.seedInbox(), arcade:this.seedArcade(),
+    inboxFilter:'new', projFilter:0, sectionTab:'about', editingProjectId:null,
+    pForm:null, biz:{name:'Karel T\u00edlcer',ico:'123 45 678',dic:'',addr:'Slune\u010dn\u00ed 12',city:'Praha 1',zip:'110 00',country:'\u010cesk\u00e1 republika',reg_cs:'Fyzick\u00e1 osoba podnikaj\u00edc\u00ed dle \u017eivnostensk\u00e9ho z\u00e1kona, nezapsan\u00e1 v obchodn\u00edm rejst\u0159\u00edku. Zaps\u00e1no v \u017eivnostensk\u00e9m rejst\u0159\u00edku, \u00da\u0159ad m\u011bstsk\u00e9 \u010d\u00e1sti Praha 1.',reg_en:'Sole trader under the Czech Trade Licensing Act, not entered in the Commercial Register. Registered in the Trade Register, Prague 1 Municipal Office.',email:'ahoj@karel.tilcer.cz'},
+    sec:{about:{heading_cs:'Uk\u00e1zka m\u011b',heading_en:'Showcase of me',body_cs:'Jsem Karel \u2014 v\u00fdvoj\u00e1\u0159 z \u010cesk\u00e9 republiky...',body_en:'I\u2019m Karel \u2014 a developer from the Czech Republic...'},hero:{heading_cs:'V\u00fdvoj\u00e1\u0159, kter\u00fd by radši d\u011blal hry.',heading_en:'A developer who\u2019d rather be making games.',body_cs:'L\u00e9to, zmrzlina a k\u00f3d.',body_en:'Summer, ice-cream, and code.'}},
+    confirm:null, toast:null, toastKind:'ok', picker:null, editor:null,
+  };
+
+  // ---------- helpers ----------
+  move(list,id,dir){ this.setState(s=>{ const a=[...s[list]]; const i=a.findIndex(x=>x.id===id); const j=i+dir; if(j<0||j>=a.length)return{}; const t=a[i];a[i]=a[j];a[j]=t; return {[list]:a}; }); }
+  toast(msg,kind){ this.setState({toast:msg,toastKind:kind||'ok'}); setTimeout(()=>this.setState(s=>s.toast===msg?{toast:null}:{}),2400); }
+  ask(cfg){ this.setState({confirm:cfg}); }
+  go(view){ return ()=>this.setState({view,editingProjectId:null}); }
+
+  blankProject(){ return {id:null,slug:'',title_cs:'',title_en:'',summary_cs:'',summary_en:'',body_cs:'',body_en:'',cat:this.state.categories[0]?.id,featured:false,status:'draft',date:'',cover:false,gallery:0,links:[]}; }
+  openEditor(p){ const src=p||this.blankProject(); const links = src.links || (p? [{type:'repo',url:'https://github.com/kareltilcer/'+src.slug},{type:'live',url:'https://'+src.slug+'.app'}] : []); this.setState({view:'projectEditor',editingProjectId:src.id,pForm:{...src,links}}); }
+  setP(k,v){ this.setState(s=>({pForm:{...s.pForm,[k]:v}})); }
+
+  // ---- link & skill inline editor ----
+  openLinkEditor(l){ this.setState({editor:{kind:'link',isNew:!l,form:l?{...l}:{id:null,label_cs:'',label_en:'',url:'https://',icon:'\uD83D\uDD17',visible:true,clicks:0}}}); }
+  openSkillEditor(s){ this.setState({editor:{kind:'skill',isNew:!s,form:s?{...s}:{id:null,group:'languages',name:'',icon:'\u2B50',level:3}}}); }
+  setEd(k,v){ this.setState(st=>({editor:{...st.editor,form:{...st.editor.form,[k]:v}}})); }
+  saveEditor(){ const ed=this.state.editor; if(!ed)return; const f=ed.form;
+    if(ed.kind==='link'){
+      if(ed.isNew){ const id=Math.max(0,...this.state.links.map(x=>x.id))+1; this.setState(s=>({links:[...s.links,{...f,id}]})); }
+      else { this.setState(s=>({links:s.links.map(x=>x.id===f.id?{...x,...f}:x)})); }
+    } else {
+      if(ed.isNew){ const id=Math.max(0,...this.state.skills.map(x=>x.id))+1; this.setState(s=>({skills:[...s.skills,{...f,id}]})); }
+      else { this.setState(s=>({skills:s.skills.map(x=>x.id===f.id?{...x,...f}:x)})); }
+    }
+    this.setState({editor:null}); this.toast(this.t('tSaved')); }
+
+  renderVals(){
+    const S=this.state, cs=S.lang==='cs';
+    const isLogin=S.view==='login';
+    const V={
+      isLogin, isApp:!isLogin,
+    };
+
+    // ---- login ----
+    const busy=S.authState==='submitting';
+    const err = S.authState==='invalid'||S.authState==='unreachable';
+    V.loginTitle=this.t('loginTitle'); V.loginSub=this.t('loginSub');
+    V.loginMfa=S.authState==='mfa'; V.loginForm=S.authState!=='mfa';
+    V.loginError=err;
+    V.loginErrTitle=S.authState==='unreachable'?this.t('unreachTitle'):this.t('invalidTitle');
+    V.loginErrBody=S.authState==='unreachable'?this.t('unreachBody'):this.t('invalidBody');
+    V.emailL=this.t('email'); V.passL=this.t('password'); V.loginBtn=busy?(cs?'P\u0159ihla\u0161uji\u2026':'Signing in\u2026'):this.t('signIn');
+    V.liEmail=S.liEmail; V.liPass=S.liPass; V.onLiEmail=e=>this.setState({liEmail:e.target.value}); V.onLiPass=e=>this.setState({liPass:e.target.value});
+    V.liBusy=busy; V.liCursor=busy?'wait':'pointer'; V.liOpacity=busy?'.75':'1';
+    V.doLogin=()=>{ if(busy)return; this.setState({authState:'submitting'}); setTimeout(()=>this.setState({authState:'invalid'}),1100); };
+    V.modeNote=this.t('modeNote');
+    V.mfaTitle=this.t('mfaTitle'); V.mfaBody=this.t('mfaBody'); V.mfaCta=this.t('mfaCta'); V.backToLogin=this.t('backToLogin');
+    V.resetAuth=()=>this.setState({authState:'idle'});
+    V.icShield=this.IC('shield'); V.icAlert=this.IC('alert');
+    const AS=[['idle','Idle'],['submitting','Sending'],['invalid','Invalid'],['unreachable','Down'],['mfa','MFA']];
+    V.authStates=AS.map(([k,label])=>{ const on=S.authState===k; return {label, go:()=>this.setState({authState:k}), border:on?'var(--accent)':'var(--line-2)', bg:on?'var(--accent)':'var(--panel)', color:on?'#fff':'var(--ink-soft)'}; });
+
+    // ---- nav ----
+    const groups=[
+      {heading:this.t('gContent'), items:['projects','categories','links','sections','skills']},
+      {heading:this.t('media'), items:['media']},
+      {heading:this.t('gComm'), items:['inbox','arcade']},
+      {heading:this.t('gSettings'), items:['business']},
+    ];
+    const iconFor={projects:'projects',categories:'tag',links:'link',sections:'sections',skills:'skills',media:'media',inbox:'inbox',arcade:'arcade',business:'business'};
+    const activeView = S.view==='projectEditor'?'projects':S.view;
+    const newCount = S.inbox.filter(m=>m.status==='new').length;
+    V.navGroups=groups.map(g=>({ heading:g.heading, items:g.items.map(k=>{
+      const on=activeView===k;
+      const badge = k==='inbox' && newCount>0 ? String(newCount) : '';
+      return { label:this.t(k), icon:this.IC(iconFor[k]), go:()=>{ this.go(k)(); this.setState({navOpen:false}); },
+        bg:on?'var(--accent)':'transparent', color:on?'#fff':'var(--side-soft)', weight:on?'700':'500', iconColor:on?'#fff':'var(--side-muted)',
+        badge, badgeBg:on?'rgba(255,255,255,.24)':'var(--accent)', badgeColor:'#fff' };
+    })}));
+    V.icMenu=this.IC('menu'); V.sideOpenClass=S.navOpen?'open':''; V.toggleNav=()=>this.setState(s=>({navOpen:!s.navOpen})); V.closeNav=()=>this.setState({navOpen:false});
+
+    V.langBtns=[['EN','en'],['CS','cs']].map(([label,code])=>{ const on=S.lang===code; return {label, go:()=>this.setState({lang:code}), border:on?'var(--accent)':'var(--side-line)', bg:on?'var(--accent)':'var(--side-2)', color:on?'#fff':'var(--side-soft)'}; });
+    V.signOut=()=>this.setState({view:'login',authState:'idle'}); V.signOutT=this.t('signOut'); V.icLogout=this.IC('logout');
+
+    // ---- topbar ----
+    const titleMap={projects:this.t('projects'),categories:this.t('categories'),links:this.t('links'),sections:this.t('sections'),skills:this.t('skills'),media:this.t('media'),inbox:this.t('inbox'),arcade:this.t('arcade'),business:this.t('business')};
+    const isEditor=S.view==='projectEditor';
+    V.showBack=isEditor;
+    V.topTitle=isEditor ? (S.editingProjectId ? (this.tn(S.pForm,'title')||this.t('newProject')) : this.t('newProject')) : titleMap[S.view];
+    V.goBackList=this.go('projects');
+    V.savedLabel=this.t('saved');
+    const actionMap={projects:['newProject',()=>this.openEditor(null)],categories:['newCategory',()=>this.toast(this.t('tSaved'))],links:['newLink',()=>this.openLinkEditor(null)],skills:['newSkill',()=>this.openSkillEditor(null)]};
+    if(actionMap[S.view] && !isEditor){ V.topActionShow=true; V.topActionLabel=this.t(actionMap[S.view][0]); V.onTopAction=actionMap[S.view][1]; }
+    else { V.topActionShow=false; V.onTopAction=()=>{}; V.topActionLabel=''; }
+    V.topHint=false;
+
+    // view flags
+    V.vProjects=S.view==='projects'; V.vProjectEditor=isEditor; V.vCategories=S.view==='categories'; V.vLinks=S.view==='links';
+    V.vSections=S.view==='sections'; V.vSkills=S.view==='skills'; V.vBusiness=S.view==='business'; V.vMedia=S.view==='media'; V.vInbox=S.view==='inbox'; V.vArcade=S.view==='arcade';
+
+    // common icons/labels
+    V.icTrash=this.IC('trash'); V.icPencil=this.IC('pencil'); V.icInfo=this.IC('info'); V.icUpload=this.IC('upload');
+    V.deleteL=this.t('delete'); V.featuredL=this.t('featured'); V.hiddenL=this.t('hidden'); V.missingL=this.t('missing');
+    V.cancelL=this.t('cancel'); V.saveL=this.t('save'); V.saveChangesL=this.t('saveChanges'); V.addL=this.t('add'); V.changeL=this.t('change');
+    V.stop=e=>{ if(e)e.stopPropagation(); };
+
+    // ---- projects list ----
+    const ds=S.dataState;
+    V.projLoading=V.vProjects&&ds==='loading'; V.projError=V.vProjects&&ds==='error'; V.projEmpty=V.vProjects&&ds==='empty';
+    V.projReady=V.vProjects&&ds==='ready';
+    V.skelRows=[1,2,3,4,5].map(k=>({k}));
+    V.errTitle=this.t('errTitle'); V.errBody=this.t('errBody'); V.retry=this.t('retry'); V.retryData=()=>this.setState({dataState:'ready'});
+    V.emptyProjTitle=this.t('emptyProjTitle'); V.emptyProjBody=this.t('emptyProjBody'); V.newProjectLabel=this.t('newProject'); V.newProject=()=>this.openEditor(null);
+    V.icProjects=this.IC('projects');
+    const catById=id=>S.categories.find(c=>c.id===id);
+    const filters=[{id:0,label:this.t('allCat'),count:S.projects.length}].concat(S.categories.map(c=>({id:c.id,label:this.tn(c,'name'),count:S.projects.filter(p=>p.cat===c.id).length})));
+    V.projFilters=filters.map(f=>{ const on=S.projFilter===f.id; return {label:f.label,count:f.count, go:()=>this.setState({projFilter:f.id}), border:on?'var(--accent)':'var(--line-2)', bg:on?'var(--accent)':'var(--panel)', color:on?'#fff':'var(--ink-soft)'}; });
+    const shownProjects=S.projects.filter(p=>S.projFilter===0||p.cat===S.projFilter);
+    V.projects=shownProjects.map(p=>{
+      const missEn=!p.title_en||!p.body_en||!p.summary_en; const cat=catById(p.cat);
+      const pub=p.status==='published';
+      return {
+        title:this.tn(p,'title'), slug:p.slug, catName:cat?this.tn(cat,'name'):'\u2014', date:p.date||'\u2014',
+        featured:p.featured, missing:missEn, missingL:'EN '+this.t('missing'), missingT:(cs?'Chyb\u00ed p\u0159eklad EN':'Missing EN translation'),
+        coverBg:p.cover?'color-mix(in srgb,var(--accent) 12%,var(--panel-2))':'var(--panel-3)', coverIcon:p.cover?{__html:''}:this.IC('media'),
+        statusLabel:pub?this.t('published'):this.t('draft'), statusBg:pub?'var(--ok-soft)':'var(--draft-soft)', statusColor:pub?'var(--ok)':'var(--draft)',
+        edit:()=>this.openEditor(p), stop:V.stop,
+        up:e=>{V.stop(e);this.move('projects',p.id,-1);}, down:e=>{V.stop(e);this.move('projects',p.id,1);},
+        togglePub:()=>{ this.setState(s=>({projects:s.projects.map(x=>x.id===p.id?{...x,status:pub?'draft':'published'}:x)})); this.toast(pub?this.t('tDrafted'):this.t('tPublished')); },
+        pubIcon:pub?this.IC('eyeoff'):this.IC('check'), pubT:pub?this.t('unpublish'):this.t('publish'),
+        del:()=>this.ask({title:this.t('cDelProjT'),body:this.t('cDelProjB'),cta:this.t('delete'),danger:true,run:()=>{ this.setState(s=>({projects:s.projects.filter(x=>x.id!==p.id)})); this.toast(this.t('tDeleted')); }}),
+      };
+    });
+
+    // ---- project editor ----
+    if(isEditor && S.pForm){
+      const f=S.pForm;
+      V.secBasics=this.t('basics'); V.secSummary=this.t('summary'); V.secBody=this.t('body'); V.secLinks=this.t('outLinks');
+      V.titleL=this.t('title'); V.slugL=this.t('slug'); V.summaryL=this.t('summary'); V.bodyL=this.t('body');
+      V.statusL=this.t('status'); V.categoryL=this.t('category'); V.dateL=this.t('date'); V.coverL=this.t('cover'); V.galleryL=this.t('gallery');
+      V.f_title_cs=f.title_cs; V.f_title_en=f.title_en; V.on_title_cs=e=>this.setP('title_cs',e.target.value); V.on_title_en=e=>this.setP('title_en',e.target.value);
+      V.miss_title_en=!f.title_en; V.b_title_en=!f.title_en?'var(--warn)':'var(--line-2)';
+      V.f_slug=f.slug; V.on_slug=e=>this.setP('slug',e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,'-'));
+      V.f_sum_cs=f.summary_cs; V.f_sum_en=f.summary_en; V.on_sum_cs=e=>this.setP('summary_cs',e.target.value); V.on_sum_en=e=>this.setP('summary_en',e.target.value);
+      V.f_body_cs=f.body_cs; V.f_body_en=f.body_en; V.on_body_cs=e=>this.setP('body_cs',e.target.value); V.on_body_en=e=>this.setP('body_en',e.target.value);
+      V.miss_body_en=!f.body_en; V.b_body_en=!f.body_en?'var(--warn)':'var(--line-2)';
+      V.linkTypes=[['repo','Repo'],['live','Live'],['demo','Demo'],['other','Other']].map(([v,label])=>({v,label}));
+      V.outLinks=(f.links||[]).map((ol,i)=>({ type:ol.type, url:ol.url,
+        onType:e=>this.setState(s=>{ const links=[...s.pForm.links]; links[i]={...links[i],type:e.target.value}; return {pForm:{...s.pForm,links}}; }),
+        onUrl:e=>this.setState(s=>{ const links=[...s.pForm.links]; links[i]={...links[i],url:e.target.value}; return {pForm:{...s.pForm,links}}; }),
+        remove:()=>this.setState(s=>({pForm:{...s.pForm,links:s.pForm.links.filter((_,j)=>j!==i)}})) }));
+      V.noOutLinks=!(f.links&&f.links.length); V.noLinksL=this.t('addFirstLink');
+      V.addOutLink=()=>this.setState(s=>({pForm:{...s.pForm,links:[...(s.pForm.links||[]),{type:'repo',url:''}]}}));
+      V.statusSeg=[['draft',this.t('draft')],['published',this.t('published')]].map(([k,label])=>{ const on=f.status===k; return {label, go:()=>this.setP('status',k), bg:on?'var(--panel)':'transparent', color:on?'var(--ink)':'var(--ink-soft)', shadow:on?'var(--shadow-sm)':'none'}; });
+      V.toggleFeatured=()=>this.setP('featured',!f.featured); V.featBg=f.featured?'var(--accent)':'var(--line-2)'; V.featX=f.featured?'21px':'3px';
+      V.categoryOpts=S.categories.map(c=>({id:String(c.id),label:this.tn(c,'name')})); V.f_category=String(f.cat); V.on_category=e=>this.setP('cat',Number(e.target.value));
+      V.f_date=f.date; V.on_date=e=>this.setP('date',e.target.value);
+      V.hasCover=f.cover; V.coverBg=f.cover?'color-mix(in srgb,var(--accent) 12%,var(--panel-2))':'var(--panel-3)'; V.coverCta=f.cover?(cs?'Zm\u011bnit titulku':'Change cover'):(cs?'Vybrat titulku':'Choose cover');
+      V.pickCover=()=>this.setState({picker:{title:cs?'Vybrat tituln\u00ed obr\u00e1zek':'Choose cover image'}});
+      V.pickGallery=()=>this.setState({picker:{title:cs?'P\u0159idat do galerie':'Add to gallery'}});
+      V.galleryThumbs=Array.from({length:Math.min(f.gallery||0,8)}).map((_,i)=>({bg:i%2?'var(--panel-3)':'color-mix(in srgb,var(--accent) 8%,var(--panel-2))'}));
+      V.saveProject=()=>{ this.setState(s=>{ const exists=s.projects.some(p=>p.id===f.id); const proj={...f,id:f.id||Date.now()}; return {projects: exists? s.projects.map(p=>p.id===f.id?proj:p):[...s.projects,proj], view:'projects', editingProjectId:null}; }); this.toast(this.t('tSaved')); };
+    }
+
+    // ---- categories ----
+    V.categories=S.categories.map(c=>{ const inUse=c.count>0; return {
+      name_cs:c.name_cs, name_en:c.name_en, slug:c.slug, hidden:!c.visible,
+      usage: cs? (c.count+' '+(c.count===1?'projekt':(c.count>=2&&c.count<=4?'projekty':'projekt\u016f'))) : (c.count+' '+(c.count===1?'project':'projects')),
+      up:()=>this.move('categories',c.id,-1), down:()=>this.move('categories',c.id,1),
+      toggle:()=>this.setState(s=>({categories:s.categories.map(x=>x.id===c.id?{...x,visible:!x.visible}:x)})), visT:c.visible?this.t('hidden'):this.t('featured'), visIcon:c.visible?this.IC('eye'):this.IC('eyeoff'),
+      edit:()=>this.toast(this.t('tSaved')),
+      delColor:inUse?'var(--muted)':'var(--danger)', delCursor:inUse?'not-allowed':'pointer',
+      del:()=>{ if(inUse){ this.toast(this.t('tCatInUse'),'err'); return; } this.ask({title:this.t('cDelCatT'),body:this.t('cDelCatB'),cta:this.t('delete'),danger:true,run:()=>{ this.setState(s=>({categories:s.categories.filter(x=>x.id!==c.id)})); this.toast(this.t('tDeleted')); }}); },
+    };});
+    V.catDeleteNote=this.t('catNote');
+
+    // ---- links ----
+    V.clicksL=this.t('clicks');
+    V.links=S.links.map(l=>({
+      label_cs:l.label_cs, label_en:l.label_en, url:l.url, icon:l.icon, clicks:l.clicks.toLocaleString(cs?'cs-CZ':'en-US'),
+      up:()=>this.move('links',l.id,-1), down:()=>this.move('links',l.id,1),
+      toggle:()=>this.setState(s=>({links:s.links.map(x=>x.id===l.id?{...x,visible:!x.visible}:x)})),
+      visIcon:l.visible?this.IC('eye'):this.IC('eyeoff'), visT:l.visible?this.t('hidden'):this.t('featured'),
+      visBg:l.visible?'var(--panel)':'var(--draft-soft)', visColor:l.visible?'var(--ink-soft)':'var(--draft)',
+      edit:()=>this.openLinkEditor(l),
+      del:()=>this.ask({title:this.t('cDelLinkT'),body:this.t('cDelLinkB'),cta:this.t('delete'),danger:true,run:()=>{ this.setState(s=>({links:s.links.filter(x=>x.id!==l.id)})); this.toast(this.t('tDeleted')); }}),
+    }));
+
+    // ---- sections ----
+    V.sectionTabs=[['about',cs?'O mn\u011b':'About'],['hero','Hero']].map(([k,label])=>{ const on=S.sectionTab===k; return {label, go:()=>this.setState({sectionTab:k}), bg:on?'var(--panel)':'transparent', color:on?'var(--ink)':'var(--ink-soft)', shadow:on?'var(--shadow-sm)':'none'}; });
+    const sc=S.sec[S.sectionTab];
+    V.headingL=this.t('heading'); V.photoL=this.t('photo'); V.photoHint=this.t('photoHint');
+    V.sec_heading_cs=sc.heading_cs; V.sec_heading_en=sc.heading_en; V.sec_body_cs=sc.body_cs; V.sec_body_en=sc.body_en;
+    const setSec=(k,v)=>this.setState(s=>({sec:{...s.sec,[s.sectionTab]:{...s.sec[s.sectionTab],[k]:v}}}));
+    V.on_sec_heading_cs=e=>setSec('heading_cs',e.target.value); V.on_sec_heading_en=e=>setSec('heading_en',e.target.value);
+    V.on_sec_body_cs=e=>setSec('body_cs',e.target.value); V.on_sec_body_en=e=>setSec('body_en',e.target.value);
+    V.pickSectionPhoto=()=>this.setState({picker:{title:cs?'Vybrat fotku':'Choose photo'}}); V.saveSection=()=>this.toast(this.t('tSaved'));
+
+    // ---- skills ----
+    const groupsSk=[['languages',cs?'Jazyky':'Languages','\uD83D\uDCBB'],['tools',cs?'N\u00e1stroje':'Tools','\uD83D\uDEE0\uFE0F'],['craft',cs?'Ru\u010dn\u00ed pr\u00e1ce':'Hand-made','\uD83E\uDDF6']];
+    V.skillGroups=groupsSk.map(([key,title,icon])=>({ title, icon, key, items:S.skills.filter(s=>s.group===key).map(s=>({
+      icon:s.icon, name:s.name, meter:this._meter(s.level),
+      up:()=>this.move('skills',s.id,-1), down:()=>this.move('skills',s.id,1),
+      edit:()=>this.openSkillEditor(s),
+      del:()=>this.ask({title:this.t('cDelSkillT'),body:this.t('cDelSkillB'),cta:this.t('delete'),danger:true,run:()=>{ this.setState(st=>({skills:st.skills.filter(x=>x.id!==s.id)})); this.toast(this.t('tDeleted')); }}),
+    }))}));
+
+    // ---- link & skill edit modal ----
+    const ed=S.editor; const ef=ed?ed.form:{};
+    V.edOpen=!!ed; V.edIsLink=!!(ed&&ed.kind==='link'); V.edIsSkill=!!(ed&&ed.kind==='skill');
+    V.closeEditor=()=>this.setState({editor:null}); V.saveEditor=()=>this.saveEditor();
+    V.edTitle=ed?(ed.kind==='link'?(ed.isNew?this.t('newLink'):this.t('editLink')):(ed.isNew?this.t('newSkill'):this.t('editSkill'))):'';
+    V.labelL=this.t('linkLabelL'); V.urlL=this.t('urlL'); V.iconL=this.t('iconL'); V.visibleL=this.t('visibleL');
+    V.skillNameL=this.t('skillNameL'); V.groupL=this.t('groupL'); V.levelL=this.t('levelL');
+    V.saveL2=this.t('save'); V.cancelL=this.t('cancel');
+    V.ed_label_cs=ef.label_cs||''; V.on_ed_label_cs=e=>this.setEd('label_cs',e.target.value);
+    V.ed_label_en=ef.label_en||''; V.on_ed_label_en=e=>this.setEd('label_en',e.target.value);
+    V.ed_url=ef.url||''; V.on_ed_url=e=>this.setEd('url',e.target.value);
+    V.ed_icon=ef.icon||''; V.on_ed_icon=e=>this.setEd('icon',e.target.value);
+    V.ed_visible=!!ef.visible; V.toggleEdVisible=()=>this.setEd('visible',!ef.visible);
+    V.edVisBg=ef.visible?'var(--accent)':'var(--line-2)'; V.edVisX=ef.visible?'21px':'3px';
+    V.ed_name=ef.name||''; V.on_ed_name=e=>this.setEd('name',e.target.value);
+    V.ed_group=ef.group||'languages'; V.on_ed_group=e=>this.setEd('group',e.target.value);
+    V.edGroupOpts=groupsSk.map(([key,title])=>({v:key,label:title}));
+    V.ed_level=ef.level==null?'':String(ef.level); V.on_ed_level=e=>this.setEd('level',e.target.value===''?null:Number(e.target.value));
+    V.edLevelOpts=[{v:'',label:cs?'\u2014 (bez \u00farovn\u011b)':'\u2014 (no level)'},{v:'1',label:'1'},{v:'2',label:'2'},{v:'3',label:'3'},{v:'4',label:'4'},{v:'5',label:'5'}];
+
+    // ---- business ----
+    const b=S.biz; const setB=(k,v)=>this.setState(s=>({biz:{...s.biz,[k]:v}}));
+    V.bizPrivacy=this.t('bizPrivacy'); V.legalNameL=this.t('legalName'); V.dicHidden=this.t('dicHidden'); V.dicPh=this.t('dicPh');
+    V.seatL=this.t('seat'); V.addrPh=this.t('addr'); V.cityPh=this.t('city'); V.countryPh=this.t('country'); V.registerL=this.t('register'); V.contactEmailL=this.t('contactEmail');
+    V.biz_name=b.name; V.biz_ico=b.ico; V.biz_dic=b.dic; V.biz_addr=b.addr; V.biz_city=b.city; V.biz_zip=b.zip; V.biz_country=b.country; V.biz_reg_cs=b.reg_cs; V.biz_reg_en=b.reg_en; V.biz_email=b.email;
+    V.on_biz_name=e=>setB('name',e.target.value); V.on_biz_ico=e=>setB('ico',e.target.value); V.on_biz_dic=e=>setB('dic',e.target.value);
+    V.on_biz_addr=e=>setB('addr',e.target.value); V.on_biz_city=e=>setB('city',e.target.value); V.on_biz_zip=e=>setB('zip',e.target.value); V.on_biz_country=e=>setB('country',e.target.value);
+    V.on_biz_reg_cs=e=>setB('reg_cs',e.target.value); V.on_biz_reg_en=e=>setB('reg_en',e.target.value); V.on_biz_email=e=>setB('email',e.target.value);
+    V.saveBusiness=()=>this.toast(this.t('tSaved'));
+
+    // ---- media ----
+    V.uploadL=this.t('upload'); V.sanitizedL=this.t('sanitized'); V.altL=this.t('altBadge'); V.altMissingL=this.t('altMissing');
+    V.uploadMedia=()=>this.toast(this.t('tUpload'));
+    V.media=S.media.map(m=>({
+      name:m.name, meta:m.mime.toUpperCase()+' \u00b7 '+m.w+'\u00d7'+m.h+' \u00b7 '+m.size, bg:'var(--panel-2)',
+      typeIcon:m.mime==='svg'?this.IC('svg'):this.IC('media'),
+      sanitized:!!m.sanitized, referenced:m.refCount>0, refLabel:m.refCount+'\u00d7 '+this.t('referenced'), refT:cs?'Pou\u017e\u00edv\u00e1no v projektech':'Used in projects',
+      altMissing:!m.alt,
+      editAlt:()=>this.toast(this.t('tSaved')),
+      delColor:m.refCount>0?'var(--muted)':'var(--danger)', delCursor:m.refCount>0?'not-allowed':'pointer',
+      del:()=>{ if(m.refCount>0){ this.toast(this.t('tMediaRef'),'err'); return; } this.ask({title:this.t('cDelMediaT'),body:this.t('cDelMediaB'),cta:this.t('delete'),danger:true,run:()=>{ this.setState(s=>({media:s.media.filter(x=>x.id!==m.id)})); this.toast(this.t('tDeleted')); }}); },
+    }));
+
+    // ---- inbox ----
+    const statuses=[['new','fNew'],['read','fRead'],['archived','fArchived'],['spam','fSpam'],['all','fAll']];
+    V.inboxFilters=statuses.map(([k,lk])=>{ const on=S.inboxFilter===k; const count=k==='all'?S.inbox.length:S.inbox.filter(m=>m.status===k).length; return {label:this.t(lk),count, go:()=>this.setState({inboxFilter:k}), border:on?'var(--accent)':'var(--line-2)', bg:on?'var(--accent)':'var(--panel)', color:on?'#fff':'var(--ink-soft)'}; });
+    const dotColor={new:'var(--accent)',read:'var(--line-2)',archived:'var(--muted)',spam:'var(--warn)'};
+    const tagStyle={new:['var(--accent-soft)','var(--accent)'],read:['var(--panel-3)','var(--ink-soft)'],archived:['var(--panel-3)','var(--muted)'],spam:['var(--warn-soft)','var(--warn)']};
+    const stLabel={new:this.t('fNew'),read:this.t('fRead'),archived:this.t('fArchived'),spam:this.t('fSpam')};
+    const setStatus=(id,st,msg)=>{ this.setState(s=>({inbox:s.inbox.map(m=>m.id===id?{...m,status:st}:m)})); this.toast(msg); };
+    V.inbox=S.inbox.filter(m=>S.inboxFilter==='all'||m.status===S.inboxFilter).map(m=>{
+      const actions=[];
+      if(m.status!=='read') actions.push({icon:this.IC('check'),title:this.t('markRead'),color:'var(--ink-soft)',go:()=>setStatus(m.id,'read',this.t('tRead'))});
+      actions.push({icon:this.IC('archive'),title:this.t('archive'),color:'var(--ink-soft)',go:()=>setStatus(m.id,'archived',this.t('tArchived'))});
+      if(m.status!=='spam') actions.push({icon:this.IC('spam'),title:this.t('markSpam'),color:'var(--warn)',go:()=>setStatus(m.id,'spam',this.t('tSpam'))});
+      actions.push({icon:this.IC('trash'),title:this.t('delete'),color:'var(--danger)',go:()=>this.setState(s=>({inbox:s.inbox.filter(x=>x.id!==m.id)}))|this.toast(this.t('tDeleted'))});
+      return { name:m.name, email:m.email, subject:m.subject||(cs?'(bez p\u0159edm\u011btu)':'(no subject)'), message:m.message, date:m.date,
+        dot:dotColor[m.status], weight:m.status==='new'?'800':'600', statusLabel:stLabel[m.status], tagBg:tagStyle[m.status][0], tagColor:tagStyle[m.status][1], actions };
+    });
+
+    // ---- arcade ----
+    V.resetBoardL=this.t('resetBoard');
+    V.arcadeGames=S.arcade.map((g,gi)=>({
+      name:g.name, icon:g.icon, key:g.key, bound:(cs?'rozsah ':'range ')+g.bound,
+      reset:()=>this.ask({title:this.t('cResetT'),body:this.t('cResetB'),cta:this.t('resetBoard'),danger:true,run:()=>{ this.setState(s=>({arcade:s.arcade.map(x=>x.key===g.key?{...x,scores:[]}:x)})); this.toast(this.t('tReset')); }}),
+      scores:g.scores.map((sc,i)=>({ rank:'#'+(i+1), player:sc.player, score:sc.score.toLocaleString(cs?'cs-CZ':'en-US'), date:sc.date,
+        rankColor:i===0?'var(--accent)':(i===1?'var(--warn)':'var(--muted)'),
+        del:()=>this.ask({title:this.t('cDelScoreT'),body:this.t('cDelScoreB'),cta:this.t('delete'),danger:true,run:()=>{ this.setState(s=>({arcade:s.arcade.map(x=>x.key===g.key?{...x,scores:x.scores.filter(y=>y.id!==sc.id)}:x)})); this.toast(this.t('tDeleted')); }}),
+      })),
+    }));
+
+    // ---- confirm ----
+    const c=S.confirm;
+    V.confirmOpen=!!c; V.closeConfirm=()=>this.setState({confirm:null});
+    V.confirmTitle=c?c.title:''; V.confirmBody=c?c.body:''; V.confirmCta=c?c.cta:'';
+    V.confirmIcon=this.IC(c&&c.danger?'trash':'info'); V.confirmIconBg=c&&c.danger?'var(--danger-soft)':'var(--panel-3)'; V.confirmIconColor=c&&c.danger?'var(--danger)':'var(--ink-soft)';
+    V.confirmBtnBg=c&&c.danger?'var(--danger)':'var(--accent)';
+    V.runConfirm=()=>{ if(c&&c.run)c.run(); this.setState({confirm:null}); };
+
+    // ---- picker ----
+    V.pickerOpen=!!S.picker; V.pickerTitle=S.picker?S.picker.title:''; V.closePicker=()=>this.setState({picker:null});
+
+    // ---- toast ----
+    V.toastOpen=!!S.toast; V.toastMsg=S.toast||''; V.toastIcon=this.IC(S.toastKind==='err'?'alert':'checkc'); V.toastIconColor=S.toastKind==='err'?'#FF8FA3':'#8BE0A0';
+
+    return V;
+  }
+}
+</script>
+</body>
+</html>

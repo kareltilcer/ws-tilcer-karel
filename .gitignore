@@ -1,0 +1,21 @@
+# Go
+*.exe
+*.test
+/data/
+*.db
+*.db-shm
+*.db-wal
+
+# Node / Vite
+node_modules/
+frontend/dist/
+.vite/
+
+# Env / secrets (never commit real values)
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db

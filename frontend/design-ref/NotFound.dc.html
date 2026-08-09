@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --sky-1:#9FE3FF; --sky-2:#FFE7BE; --bg:#FFF6E9; --surface:#FFFFFF; --surface-2:#FFF0DD;
+    --ink:#3A2416; --ink-soft:#8A6A50; --cream-line:#EBD9BE;
+    --mango:#FF9F1C; --tanger:#FF7A1A; --cherry:#EF476F; --cherry-strong:#D62A54;
+    --pistachio:#7FC85F; --sky:#37B6EF; --yuzu:#F2CE2E; --poppy:#B4A2F0; --sun:#FFD23F;
+    --shadow: 0 14px 30px -12px rgba(58,36,22,.32); --ring: rgba(214,42,84,.5);
+  }
+  [data-theme="night"]{
+    --sky-1:#241E48; --sky-2:#5A2E5E; --bg:#1B1530; --surface:#2A2340; --surface-2:#241E3A;
+    --ink:#FDF3E7; --ink-soft:#C6B4D6; --cream-line:#3B3358;
+    --mango:#FFB24D; --tanger:#FF9350; --cherry:#FF6B90; --cherry-strong:#FF6B90;
+    --pistachio:#9BE07A; --sky:#66D0FF; --yuzu:#FFE06A; --poppy:#C9BAFF; --sun:#FFE9A8;
+    --shadow: 0 18px 40px -14px rgba(0,0,0,.6); --ring: rgba(255,107,144,.6);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--cherry);color:#fff}
+  a{color:var(--cherry-strong);text-decoration:none} a:hover{color:var(--tanger)}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  @keyframes bob2{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-13px) rotate(5deg)}}
+  @keyframes drip{0%{transform:scaleY(.85);opacity:.9}50%{transform:scaleY(1.15);opacity:1}100%{transform:scaleY(.85);opacity:.9}}
+  @keyframes floaty{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-16px) rotate(6deg)}}
+  .om-bob{animation:bob 3s ease-in-out infinite}
+  .om-bob2{animation:bob2 3.6s ease-in-out infinite}
+  .om-drip{animation:drip 2.4s ease-in-out infinite;transform-origin:top}
+  .om-float{animation:floaty 5s ease-in-out infinite}
+  @media (prefers-reduced-motion:reduce){.om-bob,.om-bob2,.om-drip,.om-float{animation:none !important}html{scroll-behavior:auto !important}}
+  .navlink{position:relative}
+  .navlink::after{content:"";position:absolute;left:0;right:100%;bottom:-4px;height:3px;border-radius:3px;background:var(--cherry);transition:right .25s}
+  .navlink:hover::after{right:0}
+  .cta{transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s}
+  .cta:hover{transform:translateY(-3px)}
+  @media (max-width:900px){ .hero-nav{display:none !important} }
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="position:relative;min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);transition:background .5s,color .3s;overflow:hidden">
+
+  <header style="position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px clamp(18px,5vw,64px);background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);border-bottom:2px solid var(--cream-line)">
+    <a href="#" onClick="{{ goHome }}" style="display:flex;align-items:center;gap:12px;color:var(--ink)">
+      <span style="display:grid;place-items:center;width:42px;height:42px;border-radius:15px 15px 15px 5px;background:var(--cherry-strong);color:#fff;font-family:'Baloo 2',cursive;font-weight:800;font-size:22px;box-shadow:var(--shadow);transform:rotate(-6deg)">k</span>
+      <span style="font-family:'Baloo 2',cursive;font-weight:700;font-size:21px">karel<span style="color:var(--cherry-strong)">.</span></span>
+    </a>
+    <nav class="hero-nav" style="display:flex;align-items:center;gap:24px">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="6">
+        <a href="{{ item.href }}" class="navlink" style="font-weight:600;font-size:16px;color:var(--ink)">{{ item.label }}</a>
+      </sc-for>
+    </nav>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <button onClick="{{ toggleLang }}" title="Language" style="height:40px;padding:0 13px;border:2px solid var(--cream-line);background:var(--surface);color:var(--ink);border-radius:13px;font-family:'Baloo 2',cursive;font-weight:700;font-size:14px;cursor:pointer">{{ langLabel }}</button>
+      <button onClick="{{ toggleTheme }}" title="Theme" style="width:40px;height:40px;border:2px solid var(--cream-line);background:var(--surface);border-radius:13px;cursor:pointer;font-size:17px">{{ themeIcon }}</button>
+    </div>
+  </header>
+
+  <!-- decorative floating scoops -->
+  <div class="om-float" aria-hidden="true" style="position:absolute;top:16%;left:7%;font-size:46px;opacity:.5;pointer-events:none">🍧</div>
+  <div class="om-float" aria-hidden="true" style="position:absolute;top:64%;left:12%;font-size:38px;opacity:.4;animation-delay:1.2s;pointer-events:none">🍬</div>
+  <div class="om-float" aria-hidden="true" style="position:absolute;top:24%;right:9%;font-size:42px;opacity:.45;animation-delay:.6s;pointer-events:none">☀️</div>
+  <div class="om-float" aria-hidden="true" style="position:absolute;top:70%;right:8%;font-size:40px;opacity:.4;animation-delay:1.8s;pointer-events:none">🍒</div>
+
+  <main style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:22px;padding:clamp(40px,8vh,90px) clamp(20px,5vw,64px);max-width:720px;margin:0 auto;position:relative;z-index:2">
+
+    <!-- the dropped scoop -->
+    <div style="position:relative;display:flex;flex-direction:column;align-items:center">
+      <div class="om-bob2" style="font-size:clamp(80px,16vw,132px);line-height:1;filter:drop-shadow(0 14px 16px rgba(58,36,22,.28))">🍦</div>
+      <div class="om-drip" aria-hidden="true" style="width:14px;height:34px;border-radius:0 0 8px 8px;background:var(--cherry);margin-top:-4px;opacity:.8"></div>
+    </div>
+
+    <div style="font-family:'Space Mono',monospace;font-weight:700;font-size:clamp(60px,13vw,120px);line-height:.9;letter-spacing:-.03em;color:var(--cherry-strong)">404</div>
+
+    <h1 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(30px,5.5vw,52px);line-height:1.05;letter-spacing:-.02em;margin:0;color:var(--ink);text-wrap:balance">{{ title }}</h1>
+    <p style="font-size:clamp(16px,1.9vw,20px);color:var(--ink-soft);margin:0;line-height:1.55;max-width:46ch;text-wrap:pretty">{{ body }}</p>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+      <a href="#" onClick="{{ goHome }}" class="cta" style="display:inline-flex;align-items:center;gap:9px;padding:15px 28px;border-radius:16px;background:var(--cherry-strong);color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:17px;box-shadow:var(--shadow)">🏠 {{ homeCta }}</a>
+      <a href="#projects" class="cta" style="display:inline-flex;align-items:center;gap:9px;padding:15px 26px;border-radius:16px;background:var(--surface);color:var(--ink);border:2px solid var(--cream-line);font-family:'Baloo 2',cursive;font-weight:700;font-size:17px">{{ projectsCta }}</a>
+      <a href="#arcade" class="cta" style="display:inline-flex;align-items:center;gap:9px;padding:15px 26px;border-radius:16px;background:var(--surface);color:var(--ink);border:2px solid var(--cream-line);font-family:'Baloo 2',cursive;font-weight:700;font-size:17px">🕹️ {{ arcadeCta }}</a>
+    </div>
+
+    <p style="font-family:'Space Mono',monospace;font-size:13px;color:var(--ink-soft);margin-top:10px;opacity:.85">{{ easterEgg }}</p>
+  </main>
+
+  <footer style="position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:8px;padding:22px;border-top:2px solid var(--cream-line);color:var(--ink-soft);font-size:14px;flex-wrap:wrap;text-align:center">
+    <span>© {{ year }} Karel Tilcer</span><span style="opacity:.5">·</span>
+    <a href="#legal" style="color:var(--ink-soft)">{{ legalLink }}</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180,&quot;height&quot;:760},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;cs&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;'en'|'cs'&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;day&quot;,&quot;night&quot;],&quot;default&quot;:&quot;day&quot;,&quot;tsType&quot;:&quot;'day'|'night'&quot;,&quot;section&quot;:&quot;Appearance&quot;}}">
+class Component extends DCLogic {
+  state = { lang:this.props.lang||'en', theme:this.props.theme||'day' };
+
+  UI = {
+    en:{
+      nav:['Projects','About','Skills','Arcade','Links','Contact'],
+      title:'This scoop hit the floor.',
+      body:'The page you were after melted away — or never existed. No worries, there\u2019s plenty more in the freezer.',
+      homeCta:'Back home', projectsCta:'See projects', arcadeCta:'Play the arcade',
+      easterEgg:'// tip: the five-second rule does not apply to URLs',
+      legalLink:'Impressum',
+    },
+    cs:{
+      nav:['Projekty','O mn\u011b','Dovednosti','Ark\u00e1da','Odkazy','Kontakt'],
+      title:'Tenhle kope\u010dek spadl na zem.',
+      body:'Str\u00e1nka, kterou jsi hledal, se rozpustila \u2014 nebo nikdy neexistovala. Nic se ned\u011bje, v mraz\u00e1ku je toho spousta dal\u0161\u00edho.',
+      homeCta:'Zp\u011bt dom\u016f', projectsCta:'Prohl\u00e9dnout projekty', arcadeCta:'Hr\u00e1t ark\u00e1du',
+      easterEgg:'// tip: pravidlo p\u011bti vte\u0159in na URL neplat\u00ed',
+      legalLink:'Impressum',
+    },
+  };
+
+  renderVals(){
+    const S=this.state, U=this.UI[S.lang];
+    const stop=(e)=>{ if(e&&e.preventDefault)e.preventDefault(); };
+    return {
+      theme:S.theme,
+      navItems:U.nav.map((label,i)=>({label,href:['#projects','#about','#skills','#arcade','#links','#contact'][i]})),
+      title:U.title, body:U.body, homeCta:U.homeCta, projectsCta:U.projectsCta, arcadeCta:U.arcadeCta,
+      easterEgg:U.easterEgg, legalLink:U.legalLink, year:2026,
+      goHome:stop,
+      langLabel:S.lang==='en'?'CS':'EN', themeIcon:S.theme==='day'?'🌙':'☀️',
+      toggleLang:()=>this.setState(s=>({lang:s.lang==='en'?'cs':'en'})),
+      toggleTheme:()=>this.setState(s=>({theme:s.theme==='day'?'night':'day'})),
+    };
+  }
+}
+</script>
+</body>
+</html>
