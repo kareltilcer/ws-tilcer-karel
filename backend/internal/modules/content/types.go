@@ -193,7 +193,8 @@ type SectionUpdate struct {
 
 type Skill struct {
 	ID        int64   `json:"id"`
-	Name      string  `json:"name"`
+	NameCS    string  `json:"name_cs"`
+	NameEN    string  `json:"name_en"`
 	Category  string  `json:"category"`
 	Icon      *string `json:"icon"`
 	Level     *int64  `json:"level"`
@@ -202,7 +203,8 @@ type Skill struct {
 }
 
 type SkillCreate struct {
-	Name      string  `json:"name"`
+	NameCS    string  `json:"name_cs"`
+	NameEN    string  `json:"name_en"`
 	Category  string  `json:"category"`
 	Icon      *string `json:"icon"`
 	Level     *int64  `json:"level"`
@@ -211,7 +213,8 @@ type SkillCreate struct {
 }
 
 type SkillUpdate struct {
-	Name      *string        `json:"name"`
+	NameCS    *string        `json:"name_cs"`
+	NameEN    *string        `json:"name_en"`
 	Category  *string        `json:"category"`
 	Icon      *string        `json:"icon"`
 	Level     OptionalNullID `json:"level"`

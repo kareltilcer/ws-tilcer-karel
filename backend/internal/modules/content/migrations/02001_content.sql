@@ -114,7 +114,8 @@ CREATE TABLE page_section (
 -- +goose StatementBegin
 CREATE TABLE skill (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    name       TEXT NOT NULL,
+    name_cs    TEXT NOT NULL,          -- bilingual label (public site falls back
+    name_en    TEXT NOT NULL,          -- to the other language when one is empty)
     category   TEXT NOT NULL,          -- grouping (languages/tools/craft)
     icon       TEXT,
     level      INTEGER,                -- 1..5, optional
