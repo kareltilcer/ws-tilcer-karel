@@ -84,7 +84,7 @@ services:
     image: tilcer-karel-frontend:dev
     container_name: tilcer-karel-frontend
     ports:
-      - "2001:80"
+      - "2001:2001"
     depends_on:
       - backend
     restart: unless-stopped
