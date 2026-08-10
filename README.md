@@ -84,9 +84,12 @@ still enforced) + frontend build arg `VITE_TURNSTILE_SITE_KEY`; `CONTACT_RATE`
 (`5/min`), `SCORE_RATE` (`20/min`), `CLICK_RATE` (`60/min`), `MAX_CONTACT_BYTES`,
 `MAX_MEDIA_BYTES`.
 
-**Media S3 (self-hosted):** `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`,
-`S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_FORCE_PATH_STYLE=true`, `S3_MEDIA_PREFIX`
-(`media/`), `MEDIA_PUBLIC_BASE_URL`. Uploads return **503** until configured.
+**Media S3 (Cloudflare R2):** `S3_ENDPOINT` (R2 API host
+`https://<account-id>.r2.cloudflarestorage.com`), `S3_REGION=auto`, `S3_BUCKET`,
+`S3_ACCESS_KEY`, `S3_SECRET_KEY` (an R2 API token), `S3_FORCE_PATH_STYLE=true`,
+`S3_MEDIA_PREFIX` (`media/`), `MEDIA_PUBLIC_BASE_URL` (the bucket's **public** read
+host — a custom domain or `pub-*.r2.dev`, *not* the R2 API host, which needs signed
+requests). Uploads return **503** until configured.
 
 **DB backup (Litestream → R2):** `LITESTREAM_ENABLED=true`,
 `LITESTREAM_R2_ENDPOINT`, `LITESTREAM_R2_BUCKET`, `LITESTREAM_ACCESS_KEY_ID`,
@@ -114,25 +117,16 @@ volume the entrypoint restores the DB from R2 first (`-if-db-not-exists
 migration never double-seeds. **Fresh-build restore drill:** delete the `/data`
 volume and redeploy — the DB should restore from R2 and the site serve prior data.
 
-**Media (separate — not in the DB backup).** The DB stores only object keys/URLs,
-so the media bucket needs its own protection:
-
-1. Enable **object versioning** on the media bucket (guards overwrite/delete).
-2. **Nightly off-site mirror** to R2 `karel-media/` via a Coolify scheduled task
-   or droplet cron:
-   ```bash
-   rclone sync s3-media:$S3_BUCKET/media r2-backup:karel-media --fast-list
-   ```
-   (`s3-media` = the self-hosted store, `r2-backup` = the same R2 account as the DB
-   backup, distinct bucket/prefix.)
-
-**Media restore drill:** re-provision the media bucket, `rclone sync
-r2-backup:karel-media` back into it, repoint `MEDIA_PUBLIC_BASE_URL` — the DB's
-stored `public_url`s then resolve.
+**Media (not backed up).** Media lives in **Cloudflare R2** and relies on R2's own
+durability — there is **no separate media backup**, and it is not in the DB backup
+(the DB holds only object keys/URLs). Consequence: if the R2 media bucket is ever
+lost, the DB's stored `public_url`s stop resolving and the images must be
+re-uploaded. This is an accepted risk — media is non-critical relative to the DB.
 
 ## Ops prerequisites (before/with deploy)
 
-Provision the Coolify S3 media bucket (+ versioning + R2 mirror); create the
+Provision the Cloudflare R2 media bucket (+ public access via a custom domain);
+create the
 Cloudflare Turnstile site + secret keys; set up the Resend sender domain for
 `CONTACT_FROM`; enter the real OSVČ business-disclosure values in the CMS after
 first deploy (the seed leaves them blank).

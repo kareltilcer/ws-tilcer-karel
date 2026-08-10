@@ -14,7 +14,7 @@
   - **Visitors** (anonymous public) — browse the site, follow links, play minigames, send a contact message.
   - **Karel** (single admin) — edits all content via the CMS.
   - No other droplet service depends on this one; this service depends only on `auth`.
-- **Depends on:** `auth` (site id `karel`, **Mode B**); **Resend** for contact-form email; **self-hosted S3 (Coolify)** for media/image storage; **Cloudflare R2** for DB backup (Litestream, prefix `karel/`); **Cloudflare Turnstile** for public-form spam protection.
+- **Depends on:** `auth` (site id `karel`, **Mode B**); **Resend** for contact-form email; **Cloudflare R2** for media/image storage; **Cloudflare R2** for DB backup (Litestream, prefix `karel/`); **Cloudflare Turnstile** for public-form spam protection.
 
 ### Modules
 
@@ -37,7 +37,7 @@ Shared: `logging`, health probes, **Mode B** auth, S3 media storage, and the bil
 - **Bilingual CZ/EN** throughout, with an instant in-page language switch; Czech is the default/primary.
 - The **legally required Czech business disclosure** (povinně zveřejněné informace o podnikateli — OSVČ: jméno+příjmení, IČO, sídlo/místo podnikání, zápis v živnostenském rejstříku), editable and always reachable.
 - A **contact form** that reliably reaches Karel by email, resistant to spam.
-- **Cheap to run:** single droplet, embedded SQLite, media on self-hosted S3, no heavy runtime.
+- **Cheap to run:** single droplet, embedded SQLite, media on Cloudflare R2, no heavy runtime.
 
 **Non-Goals (v1)**
 
@@ -130,7 +130,7 @@ Shared: `logging`, health probes, **Mode B** auth, S3 media storage, and the bil
 - **Errors:** `422`; `401` on admin route.
 
 ### FR-9: Media upload & management (admin)
-- **Description:** Upload images for project covers/galleries and the About photo; store on the **self-hosted S3 (Coolify)** store, keep only metadata in SQLite.
+- **Description:** Upload images for project covers/galleries and the About photo; store on **Cloudflare R2** (S3-compatible), keep only metadata in SQLite.
 - **Trigger:** `POST /api/admin/media` (upload), `GET /api/admin/media`, `DELETE /api/admin/media/{id}`.
 - **Inputs:** image file (`image/png|jpeg|webp|gif`, and **`image/svg+xml` accepted but sanitized** — see below), size-capped (`MAX_MEDIA_BYTES`), optional `alt_cs/en`.
 - **Behaviour:** Validate mime + size. **SVG uploads are run through a sanitizer** (strip `<script>`, event handlers, external refs) before storage, and served with a restrictive `Content-Security-Policy` / `Content-Disposition` so they can't execute inline. Store the object in the S3 bucket under the media prefix; persist `{ s3_key, public_url, mime, width, height, size_bytes, alt_cs/en }`. Public URLs are served from `MEDIA_PUBLIC_BASE_URL` (the S3 store's public base), not proxied through the API. Delete removes the S3 object and the row; deleting media still referenced by a project is blocked (`409`) — reassign first.
@@ -367,9 +367,9 @@ Behind Mode B auth at `/admin` (lazy-loaded within the same SPA), in a **deliber
 - **Performance:** read-heavy and tiny. Public reads are cacheable and served from SQLite in one query each; images come from the S3 store's public URL, not the API. The only bursty paths are the public POSTs, guarded by rate limits + size caps + Turnstile.
 - **Security:** all admin routes require Mode B auth; strict input validation (slugs, URLs, emails, score bounds); Markdown sanitized (no script injection); **SVG uploads sanitized** and served with restrictive CSP/`Content-Disposition`; public forms protected by honeypot + Turnstile + rate limit; media uploads mime/size-checked; secrets only via Coolify env; no secrets or real business-disclosure PII committed to the repo.
 - **Accessibility:** WCAG-minded; **`prefers-reduced-motion` honored as the motion-safety path** (ambient animation + hero physics stilled; functional motion preserved) — this replaces the removed calm mode (§10); all content reachable without playing a game; alt text on media (`alt_cs/en`); keyboard-navigable.
-- **Backup:** two independent backup paths — the DB and the media bucket.
+- **Backup:** the DB is backed up; media is not.
   - **DB:** Litestream → **Cloudflare R2** under prefix `karel/`; a fresh build restores the DB from R2.
-  - **Media:** the media bucket lives in the self-hosted S3 (Coolify) store and is **not** in the DB backup (the DB holds only keys/URLs), so it gets its own protection: (a) **object versioning enabled** on the media bucket (guards against overwrite / accidental delete), and (b) a **nightly off-site mirror to Cloudflare R2** — `rclone sync` (or MinIO bucket replication) from the media bucket → R2 bucket/prefix `karel-media/`, run as a scheduled job (droplet cron or Coolify scheduled task). Same R2 account as the DB backup, distinct bucket/prefix. **Restore drill:** re-provision the S3 media bucket and `rclone sync` `karel-media/` back into it, then point `MEDIA_PUBLIC_BASE_URL` at the restored bucket — the DB's stored `public_url`s then resolve. So a full rebuild restores the DB from R2 (`karel/`) and media from the R2 mirror (`karel-media/`).
+  - **Media:** media lives in **Cloudflare R2** and relies on R2's own durability — there is **no separate media backup**, and it is not in the DB backup (the DB holds only keys/URLs). Consequence: if the R2 media bucket is lost, the DB's stored `public_url`s stop resolving and images must be re-uploaded — an accepted risk (media is non-critical relative to the DB). So a full rebuild restores the DB from R2 (`karel/`); media persists independently in R2 with no restore path of its own.
 
 ## 9. Configuration
 
@@ -380,9 +380,9 @@ All via Coolify env vars (no secrets in repo):
 - `RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM` — contact-form email.
 - `TURNSTILE_SECRET` (+ frontend Turnstile site key) — public-form spam protection (contact + score submit).
 - `CONTACT_RATE` (e.g. `5/min`/IP), `SCORE_RATE`, `CLICK_RATE`, `MAX_CONTACT_BYTES`, `MAX_MEDIA_BYTES` — anti-abuse/size caps.
-- **Media S3 (self-hosted, Coolify):** `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_FORCE_PATH_STYLE` (true for MinIO-style), `MEDIA_PUBLIC_BASE_URL`.
+- **Media S3 (Cloudflare R2):** `S3_ENDPOINT` (R2 API host `https://<account-id>.r2.cloudflarestorage.com`), `S3_REGION=auto`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` (an R2 API token), `S3_FORCE_PATH_STYLE=true`, `MEDIA_PUBLIC_BASE_URL` (public read host — a custom domain or `pub-*.r2.dev`, *not* the API host, which needs signed requests).
 - **DB backup:** `LITESTREAM_*` / Cloudflare R2 creds — prefix `karel/`.
-- **Media backup:** `MEDIA_BACKUP_R2_*` (R2 endpoint/bucket + creds; prefix `karel-media/`) and `MEDIA_BACKUP_SCHEDULE` (cron, e.g. nightly) for the `rclone sync` / replication mirror of the media bucket. Same R2 account as the DB backup, distinct bucket/prefix. (Not needed if the mirror is configured purely at the ops/cron layer rather than in-app.)
+- **Media backup:** none — media relies on R2 durability (no env vars; see §8).
 - `PORT` — backend listen port **`2002`** (frontend static app **`2001`**). (home `7999`, fin `8999`, status `112`/`155`.)
 - No BE→BE `X-Service-Secret` in v1.
 
@@ -407,12 +407,13 @@ All via Coolify env vars (no secrets in repo):
 12. **Calm mode removed** (2026-08-06, Karel's explicit request). The site ships a **single full-experience register**; the calm/full toggle, the `prefers-reduced-motion`→calm auto-switch, and the Arcade calm opt-in gate are all gone. **Motion safety is instead met by honoring `prefers-reduced-motion` directly** (2026-08-07 design pass): ambient CSS loops and the Home hero physics/sprinkles are stilled under the query; functional motion (loaders, skeletons, active gameplay) is preserved. This supersedes the original "calm mode — non-negotiable" hard constraint in `HANDOFF-design.md`.
 13. **Themes** → the design ships a **day theme (canonical) + a "night" variant** (the optional dark direction was taken up).
 14. **Arcade roster** → the delivered design has a **4-game roster with 2 games fully playable** (Catch-the-scoop, Scoop Match), satisfying the "≥2 minigames" bar; the rest can be filled in later (games remain code-defined).
+15. **Media storage → Cloudflare R2** (2026-08-10, production) — **supersedes decision #3**. Media objects live in **Cloudflare R2** rather than the self-hosted Coolify S3 store. The S3 client is unchanged (R2 is S3-compatible: custom endpoint, `region=auto`, static keys, no object ACLs), with checksum calculation pinned to `WhenRequired` for provider compatibility. Public serving is via an R2 custom domain (R2 has no per-object ACLs); media is **not** separately backed up — it relies on R2 durability (see §8).
 
 **Remaining (not blockers for the spec):**
 
 - **Specific minigame designs** for the remaining roster slots — mechanics/theming; the backend registry just needs their keys + score bounds once chosen.
 - **Real business-disclosure values** (IČO, sídlo, živnostenský-úřad wording) — entered by Karel in the CMS; not needed to build.
-- **Ops:** provision the Coolify S3 media bucket **with object versioning enabled + a nightly `rclone`/replication mirror to Cloudflare R2 (`karel-media/`)** (see §8 Backup); create the Turnstile site/secret keys; Resend domain/sender for `CONTACT_FROM`.
+- **Ops:** provision the Cloudflare R2 media bucket **with public access (a custom domain)** — no media backup (see §8 Backup); create the Turnstile site/secret keys; Resend domain/sender for `CONTACT_FROM`.
 
 ## 11. Acceptance Criteria
 
@@ -432,6 +433,6 @@ All via Coolify env vars (no secrets in repo):
 - [ ] Per-route meta/OG tags, canonical URL, `sitemap.xml`, and `robots.txt` are present (v1 client-side SEO).
 - [ ] Observability baseline works (`/healthz`, `/readyz` w/ SQLite check, structured + request logs).
 - [ ] Litestream replicates the DB to R2 prefix `karel/`; a fresh build restores the DB from R2.
-- [ ] **Media backup:** the media bucket has object versioning enabled and a scheduled off-site mirror to Cloudflare R2 (`karel-media/`); a restore drill (`rclone sync` R2 → a fresh bucket) brings back all images and the DB's `public_url`s resolve.
+- [ ] **Media:** stored in Cloudflare R2 and served via `MEDIA_PUBLIC_BASE_URL`; **not** separately backed up (relies on R2 durability) — no media backup/restore path.
 - [ ] Backend on port **2002**, frontend on **2001**; admin uses **Mode B** against `auth` site `karel`.
 - [ ] OpenAPI 3.1 spec matches the implemented surface.
