@@ -1467,9 +1467,7 @@ components:
           type: integer
     SkillCreate:
       type: object
-      # At least one of name_cs/name_en must be non-empty (server-enforced; the
-      # public site falls back to the other language when one is blank).
-      required: [category]
+      required: [name_cs, name_en, category]
       properties:
         name_cs:
           type: string

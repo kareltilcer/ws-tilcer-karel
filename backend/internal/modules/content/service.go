@@ -577,8 +577,8 @@ func (s *Service) UpsertSection(ctx context.Context, key string, in SectionUpdat
 // ==================================================================== skills (admin)
 
 func (s *Service) CreateSkill(ctx context.Context, in SkillCreate) (*Skill, error) {
-	if (in.NameCS == "" && in.NameEN == "") || in.Category == "" {
-		return nil, httpx.ErrUnprocessable("at least one of name_cs/name_en, and category, are required")
+	if in.NameCS == "" || in.NameEN == "" || in.Category == "" {
+		return nil, httpx.ErrUnprocessable("name_cs, name_en and category are required")
 	}
 	if in.Level != nil && (*in.Level < 1 || *in.Level > 5) {
 		return nil, httpx.ErrUnprocessable("level must be 1..5")
