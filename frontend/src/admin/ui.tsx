@@ -97,19 +97,32 @@ export function ConfirmButton({ label, onConfirm, small }: { label: string; onCo
 }
 
 // runAction wraps a mutation with success/error toasts (surfaces 409s etc.).
+// Single bilingual code→message table for API errors, shared by runAction (toasts)
+// and the media batch uploader (per-item text) so both stay in sync.
+export function apiErrorText(err: unknown): string {
+  if (!(err instanceof ApiError)) return 'Chyba / Error'
+  if (err.detail) return err.detail
+  switch (err.status) {
+    case 409:
+      return 'Konflikt / Conflict (still referenced)'
+    case 413:
+      return 'Příliš velké / Too large'
+    case 415:
+      return 'Nepodporovaný typ / Unsupported type'
+    case 422:
+      return 'Neplatné údaje / Invalid input'
+    default:
+      return err.code
+  }
+}
+
 export async function runAction(fn: () => Promise<unknown>, successMsg?: string) {
   try {
     await fn()
     if (successMsg) toast.success(successMsg)
     return true
   } catch (err) {
-    if (err instanceof ApiError) {
-      if (err.status === 409) toast.error(err.detail || 'Konflikt / Conflict (still referenced)')
-      else if (err.status === 422) toast.error(err.detail || 'Neplatné údaje / Invalid input')
-      else toast.error(err.detail || err.code)
-    } else {
-      toast.error('Chyba / Error')
-    }
+    toast.error(apiErrorText(err))
     return false
   }
 }

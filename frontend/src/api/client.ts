@@ -4,9 +4,19 @@
 // readable `csrf` cookie. On 401 the admin app routes to the login screen.
 
 let onUnauthorized: (() => void) | null = null
+let authRedirected = false
 
 export function setUnauthorizedHandler(fn: (() => void) | null): void {
   onUnauthorized = fn
+}
+
+// Fire the 401 handler at most once until the next successful response. A burst
+// of concurrent requests that all 401 (e.g. a batch upload after the session
+// expires) then triggers a single redirect instead of one per in-flight request.
+function handleUnauthorized(): void {
+  if (authRedirected) return
+  authRedirected = true
+  onUnauthorized?.()
 }
 
 function csrfToken(): string {
@@ -54,7 +64,7 @@ export async function apiFetch<T>(path: string, opts: RequestOptions = {}): Prom
   })
 
   if (res.status === 401 && !opts.skipAuthRedirect) {
-    onUnauthorized?.()
+    handleUnauthorized()
     throw new ApiError(401, 'unauthorized')
   }
   if (!res.ok) {
@@ -69,6 +79,7 @@ export async function apiFetch<T>(path: string, opts: RequestOptions = {}): Prom
     }
     throw new ApiError(res.status, code, detail)
   }
+  authRedirected = false // a successful response means auth is valid again
   if (res.status === 204) return undefined as T
   return (await res.json()) as T
 }
@@ -80,7 +91,7 @@ export async function postForm<T>(path: string, form: FormData): Promise<T> {
   if (t) headers['X-CSRF-Token'] = t
   const res = await fetch(path, { method: 'POST', credentials: 'include', headers, body: form })
   if (res.status === 401) {
-    onUnauthorized?.()
+    handleUnauthorized()
     throw new ApiError(401, 'unauthorized')
   }
   if (!res.ok) {
@@ -95,5 +106,6 @@ export async function postForm<T>(path: string, form: FormData): Promise<T> {
     }
     throw new ApiError(res.status, code, detail)
   }
+  authRedirected = false // a successful response means auth is valid again
   return (await res.json()) as T
 }

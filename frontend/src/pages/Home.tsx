@@ -325,7 +325,7 @@ export default function Home() {
           </div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, marginTop: 22, fontSize: 14, color: 'var(--ink-soft)', fontWeight: 500 }}>
             <span
-              style={{ display: 'grid', placeItems: 'center', width: 26, height: 26, borderRadius: '50%', background: 'var(--yuzu)', color: 'var(--ink)', fontWeight: 800 }}
+              style={{ display: 'grid', placeItems: 'center', width: 26, height: 26, borderRadius: '50%', background: 'var(--yuzu)', color: 'var(--on-yuzu)', fontWeight: 800 }}
             >
               ✱
             </span>

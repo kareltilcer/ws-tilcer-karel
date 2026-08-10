@@ -165,14 +165,13 @@ export function useAdminMedia(cursor = '') {
   const qs = cursor ? `?cursor=${cursor}` : ''
   return useQuery({ queryKey: qk.adminMedia(cursor), queryFn: () => apiFetch<Page<Media>>(`/api/admin/media${qs}`) })
 }
-export const uploadMedia = async (form: FormData) => {
-  const r = await postForm<Media>('/api/admin/media', form)
-  invalidate([['admin', 'media']])
-  return r
-}
+// Upload one file (the backend takes a single `file` field per request). Batch
+// callers upload each file with this and invalidate once via invalidateMedia().
+export const uploadMediaFile = (form: FormData) => postForm<Media>('/api/admin/media', form)
+export const invalidateMedia = () => invalidate([['admin', 'media']])
 export const deleteMedia = async (id: number) => {
   await apiFetch<void>(`/api/admin/media/${id}`, { method: 'DELETE' })
-  invalidate([['admin', 'media']])
+  invalidateMedia()
 }
 
 // ---- contact inbox ----
