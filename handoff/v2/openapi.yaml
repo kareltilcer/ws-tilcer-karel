@@ -770,7 +770,7 @@ paths:
       tags: [admin-media]
       summary: Upload an image (SVG accepted, sanitized)
       description: >-
-        Stores the object in the self-hosted S3 store under the media prefix and
+        Stores the object in the Cloudflare R2 bucket under the media prefix and
         returns metadata + public URL. SVGs are sanitized (scripts/handlers
         stripped) before storage and served with restrictive headers.
       requestBody:

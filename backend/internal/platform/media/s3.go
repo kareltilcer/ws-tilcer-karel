@@ -1,6 +1,6 @@
 // Package media holds the S3-compatible object store client and the SVG
 // sanitizer. The media module (internal/modules/media) uses these to store
-// uploads in the self-hosted S3 (Coolify/MinIO) bucket and serve them from the
+// uploads in the Cloudflare R2 (S3-compatible) bucket and serve them from the
 // public base URL — the API never proxies the bytes.
 package media
 
@@ -45,6 +45,13 @@ func NewS3Store(cfg S3Config) *S3Store {
 		BaseEndpoint: aws.String(cfg.Endpoint),
 		UsePathStyle: cfg.ForcePathStyle,
 		Credentials:  credentials.NewStaticCredentialsProvider(cfg.AccessKey, cfg.SecretKey, ""),
+		// Pin checksums to the pre-2025 SDK behaviour. aws-sdk-go-v2 defaults to
+		// computing a CRC32 checksum on every PutObject (WhenSupported), which
+		// several S3-compatible providers (incl. Cloudflare R2) mishandle. Our
+		// bodies are seekable byte slices of known length, so no checksum is
+		// required for integrity, and dropping it avoids provider friction.
+		RequestChecksumCalculation: aws.RequestChecksumCalculationWhenRequired,
+		ResponseChecksumValidation: aws.ResponseChecksumValidationWhenRequired,
 	})
 	return &S3Store{client: client, bucket: cfg.Bucket}
 }
