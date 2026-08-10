@@ -1,0 +1,56 @@
+# Offline end-to-end run of the karel services on your machine, mirroring the
+# fleet layout: a Go JSON API backend and (from M5) an Nginx-served SPA.
+#   - backend  : Go API on http://localhost:2002
+#   - frontend : Nginx-served SPA on http://localhost:2001 (added in M5),
+#                reverse-proxying /api to the backend (same-origin).
+# Both run with the dev auth bypass and no R2 replication — a smoke test of the
+# images and entrypoint, not a real deploy (real deploys go through Coolify).
+#
+# Build + run:  docker compose up --build
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: tilcer-karel-backend:dev
+    container_name: tilcer-karel-backend
+    environment:
+      KAREL_ENV: ${KAREL_ENV:-development}
+      KAREL_ADDR: ${KAREL_ADDR:-:2002}
+      KAREL_DEV_AUTH_BYPASS: ${KAREL_DEV_AUTH_BYPASS:-true}
+      KAREL_DEV_ACTOR_ROLES: ${KAREL_DEV_ACTOR_ROLES:-admin}
+      # Real auth — required only when the dev bypass is OFF (a real Coolify
+      # deploy). The defaults below are intentionally NONSENSE so a forgotten
+      # override fails loudly: REPLACE all three in Coolify with the auth service
+      # URL and the shared secrets. With the bypass on they are ignored.
+      AUTH_BASE_URL: ${AUTH_BASE_URL:-https://REPLACE-ME.auth.invalid}
+      KAREL_AUTH_SERVICE_SECRET: ${KAREL_AUTH_SERVICE_SECRET:-REPLACE_ME_shared_auth_secret}
+      KAREL_AUTH_JWT_SECRET: ${KAREL_AUTH_JWT_SECRET:-REPLACE_ME_shared_jwt_secret}
+      KAREL_AUTH_JWT_ISSUER: ${KAREL_AUTH_JWT_ISSUER:-}
+      LITESTREAM_ENABLED: ${LITESTREAM_ENABLED:-false}
+      KAREL_DB_PATH: ${KAREL_DB_PATH:-/data/karel.db}
+    volumes:
+      - karel-data:/data
+    ports:
+      - "2002:2002"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # No Traefik locally, so bake the harness config that proxies /api to the
+        # `backend` service — keeps the SPA same-origin on :2001.
+        NGINX_CONF: nginx.harness.conf
+        VITE_TURNSTILE_SITE_KEY: ${VITE_TURNSTILE_SITE_KEY:-}
+    image: tilcer-karel-frontend:dev
+    container_name: tilcer-karel-frontend
+    ports:
+      - "2001:2001"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  karel-data:

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --sky-1:#9FE3FF; --sky-2:#FFE7BE; --bg:#FFF6E9; --surface:#FFFFFF; --surface-2:#FFF0DD;
+    --ink:#3A2416; --ink-soft:#8A6A50; --cream-line:#EBD9BE;
+    --mango:#FF9F1C; --tanger:#FF7A1A; --cherry:#EF476F; --cherry-strong:#D62A54;
+    --pistachio:#7FC85F; --sky:#37B6EF; --yuzu:#F2CE2E; --poppy:#B4A2F0; --sun:#FFD23F;
+    --shadow: 0 14px 30px -12px rgba(58,36,22,.32); --ring: rgba(214,42,84,.5);
+  }
+  [data-theme="night"]{
+    --sky-1:#241E48; --sky-2:#5A2E5E; --bg:#1B1530; --surface:#2A2340; --surface-2:#241E3A;
+    --ink:#FDF3E7; --ink-soft:#C6B4D6; --cream-line:#3B3358;
+    --mango:#FFB24D; --tanger:#FF9350; --cherry:#FF6B90; --cherry-strong:#FF6B90;
+    --pistachio:#9BE07A; --sky:#66D0FF; --yuzu:#FFE06A; --poppy:#C9BAFF; --sun:#FFE9A8;
+    --shadow: 0 18px 40px -14px rgba(0,0,0,.6); --ring: rgba(255,107,144,.6);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--cherry);color:#fff}
+  a{color:var(--cherry-strong);text-decoration:none} a:hover{color:var(--tanger)}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes bob2{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-11px) rotate(4deg)}}
+  @keyframes spins{to{transform:rotate(360deg)}}
+  @keyframes pop{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
+  @keyframes glowpulse{0%,100%{box-shadow:0 0 0 0 var(--ring)}50%{box-shadow:0 0 0 12px transparent}}
+  .om-bob{animation:bob 3s ease-in-out infinite}
+  .om-bob2{animation:bob2 3.6s ease-in-out infinite}
+  .gcard{transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
+  .gcard:hover{transform:translateY(-8px) rotate(-.8deg)}
+  .spin{animation:spins 1s linear infinite}
+  @media (prefers-reduced-motion:reduce){.om-bob,.om-bob2{animation:none !important}html{scroll-behavior:auto !important}}
+  .navlink{position:relative}
+  .navlink::after{content:"";position:absolute;left:0;right:100%;bottom:-4px;height:3px;border-radius:3px;background:var(--cherry);transition:right .25s}
+  .navlink:hover::after,.navlink[data-active="1"]::after{right:0}
+  @media (max-width:900px){ .hero-nav{display:none !important} }
+  @media (max-width:760px){ .ghub{grid-template-columns:1fr !important} .gplay-wrap{grid-template-columns:1fr !important} }
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="position:relative;min-height:100vh;background:var(--bg);color:var(--ink);transition:background .5s,color .3s">
+
+  <header style="position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px clamp(18px,5vw,64px);background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);border-bottom:2px solid var(--cream-line)">
+    <a href="#" onClick="{{ goHub }}" style="display:flex;align-items:center;gap:12px;color:var(--ink)">
+      <span style="display:grid;place-items:center;width:42px;height:42px;border-radius:15px 15px 15px 5px;background:var(--cherry-strong);color:#fff;font-family:'Baloo 2',cursive;font-weight:800;font-size:22px;box-shadow:var(--shadow);transform:rotate(-6deg)">k</span>
+      <span style="font-family:'Baloo 2',cursive;font-weight:700;font-size:21px">karel<span style="color:var(--cherry-strong)">.</span></span>
+    </a>
+    <nav class="hero-nav" style="display:flex;align-items:center;gap:24px">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="6">
+        <a href="{{ item.href }}" class="navlink" data-active="{{ item.active }}" style="font-weight:600;font-size:16px;color:var(--ink)">{{ item.label }}</a>
+      </sc-for>
+    </nav>
+    <div class="ctrls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <button onClick="{{ toggleLang }}" title="Language" style="height:40px;padding:0 13px;border:2px solid var(--cream-line);background:var(--surface);color:var(--ink);border-radius:13px;font-family:'Baloo 2',cursive;font-weight:700;font-size:14px;cursor:pointer">{{ langLabel }}</button>
+      <button onClick="{{ toggleTheme }}" title="Theme" style="width:40px;height:40px;border:2px solid var(--cream-line);background:var(--surface);border-radius:13px;cursor:pointer;font-size:17px">{{ themeIcon }}</button>
+      <button onClick="{{ toggleSound }}" title="Sound" style="width:40px;height:40px;border:2px solid {{ soundBorder }};background:{{ soundBg }};border-radius:13px;cursor:pointer;font-size:15px">{{ soundIcon }}</button>
+    </div>
+  </header>
+
+  <!-- ===================== HUB ===================== -->
+  <sc-if value="{{ isHub }}" hint-placeholder-val="{{ true }}">
+  <main style="max-width:1180px;margin:0 auto;padding:clamp(24px,4vw,52px) clamp(18px,5vw,64px) 96px">
+    <div style="text-align:center;max-width:660px;margin:0 auto">
+      <div style="display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:999px;background:var(--surface);border:2px solid var(--cream-line);font-weight:600;font-size:13px;color:var(--ink-soft)"><span class="om-bob" style="font-size:18px">🕹️</span>{{ eyebrow }}</div>
+      <h1 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(40px,7vw,76px);line-height:1.02;letter-spacing:-.02em;margin:16px 0 0;color:var(--ink)">{{ hubTitle }}</h1>
+      <p style="font-size:clamp(16px,1.7vw,20px);color:var(--ink-soft);margin:14px 0 0;line-height:1.5">{{ hubSub }}</p>
+    </div>
+
+    <div class="ghub" style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:44px">
+      <sc-for list="{{ games }}" as="g" hint-placeholder-count="4">
+        <div class="gcard" style="position:relative;display:flex;flex-direction:column;border-radius:26px;overflow:hidden;border:2px solid var(--cream-line);background:var(--surface);box-shadow:var(--shadow)">
+          <div style="position:relative;height:150px;background:{{ g.bg }};overflow:hidden;display:grid;place-items:center">
+            <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.13) 0 14px,transparent 14px 28px)"></div>
+            <div class="om-bob2" style="font-size:60px;filter:drop-shadow(0 8px 10px rgba(58,36,22,.25))">{{ g.icon }}</div>
+            <sc-if value="{{ g.soon }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:12px;right:12px;padding:5px 12px;border-radius:999px;background:var(--surface);color:var(--ink-soft);font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.05em">{{ soonLabel }}</div></sc-if>
+          </div>
+          <div style="padding:20px;display:flex;flex-direction:column;gap:8px;flex:1">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:23px;margin:0;color:var(--ink)">{{ g.title }}</h3>
+              <span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-soft);white-space:nowrap">{{ g.topLabel }}</span>
+            </div>
+            <p style="color:var(--ink-soft);font-size:15px;line-height:1.5;margin:0;flex:1">{{ g.desc }}</p>
+            <div style="display:flex;gap:10px;margin-top:6px">
+              <button onClick="{{ g.play }}" disabled="{{ g.soon }}" style="flex:1;padding:13px;border-radius:14px;border:none;background:{{ g.playBg }};color:{{ g.playColor }};font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;cursor:{{ g.cursor }};opacity:{{ g.playOpacity }}">{{ g.playLabel }}</button>
+              <button onClick="{{ g.board }}" style="padding:13px 16px;border-radius:14px;border:2px solid var(--cream-line);background:var(--surface-2);color:var(--ink);font-weight:700;font-size:15px;cursor:pointer">🏆</button>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </main>
+  </sc-if>
+
+  <!-- ===================== GAME / BOARD ===================== -->
+  <sc-if value="{{ isGame }}" hint-placeholder-val="{{ false }}">
+  <main style="max-width:1080px;margin:0 auto;padding:clamp(18px,3vw,36px) clamp(18px,5vw,64px) 90px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap">
+      <button onClick="{{ goHub }}" style="display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:13px;border:2px solid var(--cream-line);background:var(--surface);color:var(--ink);font-weight:700;font-size:15px;cursor:pointer">← {{ backLabel }}</button>
+      <div style="display:flex;align-items:center;gap:10px">
+        <h2 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(24px,3vw,34px);margin:0;color:var(--ink)">{{ cur.title }}</h2>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onClick="{{ showPlay }}" style="height:38px;padding:0 15px;border-radius:11px;border:2px solid {{ tabPlayBorder }};background:{{ tabPlayBg }};color:{{ tabPlayColor }};font-weight:700;font-size:14px;cursor:pointer">{{ playTab }}</button>
+        <button onClick="{{ showBoard }}" style="height:38px;padding:0 15px;border-radius:11px;border:2px solid {{ tabBoardBorder }};background:{{ tabBoardBg }};color:{{ tabBoardColor }};font-weight:700;font-size:14px;cursor:pointer">🏆 {{ boardTab }}</button>
+      </div>
+    </div>
+
+    <!-- PLAY AREA -->
+    <sc-if value="{{ showField }}" hint-placeholder-val="{{ false }}">
+    <div class="gplay-wrap" style="display:grid;grid-template-columns:1fr;gap:16px">
+      <div style="position:relative">
+        <!-- HUD -->
+        <div style="position:absolute;top:14px;left:14px;right:14px;z-index:5;display:flex;align-items:center;justify-content:space-between;pointer-events:none">
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="padding:8px 14px;border-radius:12px;background:var(--surface);border:2px solid var(--cream-line);font-family:'Space Mono',monospace;font-weight:700;font-size:16px;color:var(--ink);box-shadow:var(--shadow)">{{ scoreLabel }} {{ score }}</div>
+          </div>
+          <div style="display:flex;gap:5px" dangerouslySetInnerHTML="{{ livesEl }}"></div>
+        </div>
+        <div data-field="1" ref="{{ fieldRef }}" style="position:relative;width:100%;height:clamp(380px,54vh,520px);border-radius:24px;overflow:hidden;border:2px solid var(--cream-line);background:linear-gradient(180deg,var(--sky-1),var(--sky-2));box-shadow:var(--shadow);touch-action:none;cursor:none"></div>
+
+        <!-- attract overlay -->
+        <sc-if value="{{ isAttract }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;inset:0;border-radius:24px;background:rgba(27,21,48,.34);backdrop-filter:blur(3px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:24px">
+            <div class="om-bob2" style="font-size:66px">🍦</div>
+            <h3 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(26px,4vw,40px);margin:0;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.15)">{{ cur.title }}</h3>
+            <p style="color:#fff;margin:0;max-width:36ch;font-size:16px;line-height:1.5;opacity:.95">{{ howto }}</p>
+            <button onClick="{{ startGame }}" style="margin-top:6px;padding:16px 34px;border-radius:16px;border:none;background:var(--yuzu);color:#3A2416;font-family:'Baloo 2',cursive;font-weight:800;font-size:20px;cursor:pointer;box-shadow:0 12px 0 rgba(0,0,0,.18)">{{ startLabel }} ▶</button>
+          </div>
+        </sc-if>
+
+        <!-- game over overlay -->
+        <sc-if value="{{ isOver }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;border-radius:24px;background:rgba(27,21,48,.52);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto">
+            <div style="width:min(440px,94%);background:var(--surface);border:2px solid var(--cream-line);border-radius:24px;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,.4)">
+              <sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
+                <div style="text-align:center">
+                  <div class="" style="font-size:52px">🫠</div>
+                  <h3 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:28px;margin:8px 0 2px;color:var(--ink)">{{ overTitle }}</h3>
+                  <p style="color:var(--ink-soft);margin:0">{{ finalScoreLabel }}</p>
+                  <div style="font-family:'Baloo 2',cursive;font-weight:800;font-size:56px;color:var(--cherry-strong);line-height:1;margin:6px 0 4px">{{ score }}</div>
+                  <p style="color:var(--ink-soft);margin:0 0 16px;font-size:14px">{{ beatLabel }}</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:11px">
+                  <label style="font-weight:700;font-size:13px;color:var(--ink-soft)">{{ nameLabel }}</label>
+                  <input value="{{ subName }}" onInput="{{ onName }}" maxlength="32" placeholder="{{ namePlaceholder }}" style="height:46px;padding:0 14px;border-radius:13px;border:2px solid var(--cream-line);background:var(--surface-2);color:var(--ink);font-size:16px;font-family:inherit;outline:none" />
+                  <input value="{{ honeypot }}" onInput="{{ onHoney }}" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
+                  <!-- turnstile -->
+                  <button onClick="{{ turnstileClick }}" style="display:flex;align-items:center;gap:12px;height:56px;padding:0 16px;border-radius:12px;border:2px solid {{ tsBorder }};background:var(--surface-2);cursor:{{ tsCursor }};text-align:left">
+                    <span style="width:26px;height:26px;border-radius:7px;border:2px solid {{ tsBoxBorder }};display:grid;place-items:center;background:{{ tsBoxBg }};color:#fff;font-size:16px">{{ tsMark }}</span>
+                    <span style="font-weight:600;font-size:14px;color:var(--ink)">{{ tsLabel }}</span>
+                    <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;color:var(--ink-soft);line-height:1.1;text-align:right">Cloudflare<br/>Turnstile</span>
+                  </button>
+                  <button onClick="{{ submitScore }}" disabled="{{ submitDisabled }}" style="height:50px;border-radius:14px;border:none;background:{{ submitBg }};color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:17px;cursor:{{ submitCursor }};opacity:{{ submitOpacity }};box-shadow:var(--shadow)">{{ submitLabel }}</button>
+                  <button onClick="{{ startGame }}" style="height:44px;border-radius:14px;border:2px solid var(--cream-line);background:var(--surface);color:var(--ink);font-weight:700;font-size:15px;cursor:pointer">{{ againLabel }}</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+                <div style="text-align:center">
+                  <div class="" style="font-size:52px">🏆</div>
+                  <h3 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:26px;margin:8px 0 2px;color:var(--ink)">{{ placedTitle }}</h3>
+                  <p style="color:var(--ink-soft);margin:0 0 14px">{{ placedSub }}</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
+                  <sc-for list="{{ resultBoard }}" as="r" hint-placeholder-count="5">
+                    <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;background:{{ r.bg }};border:2px solid {{ r.border }}">
+                      <span style="font-family:'Space Mono',monospace;font-weight:700;font-size:15px;color:{{ r.rankColor }};width:28px">{{ r.rank }}</span>
+                      <span style="font-weight:700;font-size:15px;color:var(--ink);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</span>
+                      <span style="font-family:'Space Mono',monospace;font-weight:700;font-size:15px;color:var(--cherry-strong)">{{ r.score }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <button onClick="{{ startGame }}" style="width:100%;height:48px;border-radius:14px;border:none;background:var(--cherry-strong);color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:16px;cursor:pointer;box-shadow:var(--shadow)">{{ againLabel }} ▶</button>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- LEADERBOARD -->
+    <sc-if value="{{ showBoardView }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:640px;margin:0 auto">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div style="font-size:34px" class="om-bob">🏆</div>
+          <div>
+            <h3 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:26px;margin:0;color:var(--ink)">{{ boardTitle }}</h3>
+            <p style="color:var(--ink-soft);margin:2px 0 0;font-size:14px">{{ boardSub }}</p>
+          </div>
+        </div>
+        <sc-if value="{{ boardEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;padding:50px 20px;border-radius:24px;border:2px dashed var(--cream-line);background:var(--surface)">
+            <div style="font-size:48px">🍨</div>
+            <h4 style="font-family:'Baloo 2',cursive;font-weight:800;font-size:20px;margin:8px 0 4px;color:var(--ink)">{{ boardEmptyTitle }}</h4>
+            <p style="color:var(--ink-soft);margin:0">{{ boardEmptyBody }}</p>
+          </div>
+        </sc-if>
+        <sc-if value="{{ boardHas }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ board }}" as="r" hint-placeholder-count="8">
+              <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;background:var(--surface);border:2px solid {{ r.border }};box-shadow:var(--shadow)">
+                <span style="width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:{{ r.medalBg }};color:{{ r.medalColor }};font-family:'Baloo 2',cursive;font-weight:800;font-size:15px">{{ r.rank }}</span>
+                <span style="font-weight:700;font-size:16px;color:var(--ink);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</span>
+                <span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-soft);white-space:nowrap">{{ r.date }}</span>
+                <span style="font-family:'Space Mono',monospace;font-weight:700;font-size:18px;color:var(--cherry-strong);min-width:56px;text-align:right">{{ r.score }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <button onClick="{{ showPlay }}" style="margin-top:18px;width:100%;height:50px;border-radius:14px;border:none;background:var(--cherry-strong);color:#fff;font-family:'Baloo 2',cursive;font-weight:700;font-size:17px;cursor:pointer;box-shadow:var(--shadow)">{{ playCta }} ▶</button>
+      </div>
+    </sc-if>
+  </main>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1080,&quot;height&quot;:940},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;cs&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;'en'|'cs'&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;day&quot;,&quot;night&quot;],&quot;default&quot;:&quot;day&quot;,&quot;tsType&quot;:&quot;'day'|'night'&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;sound&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Appearance&quot;}}">
+class Component extends DCLogic {
+  state = {
+    lang:this.props.lang||'en', theme:this.props.theme||'day', sound:this.props.sound??false,
+    view:'hub', gameKey:null, tab:'play',
+    phase:'attract', score:0, lives:3,
+    subName:'', honeypot:'', ts:'idle', submit:'idle', rank:null,
+  };
+
+  GAMES = [
+    {key:'catch-the-scoop', icon:'🍦', bg:'--sky', playable:true},
+    {key:'scoop-match',     icon:'🍧', bg:'--poppy', playable:true},
+    {key:'stack-the-cones', icon:'🍨', bg:'--mango', playable:false},
+    {key:'sprinkle-flick',  icon:'✨', bg:'--pistachio', playable:false},
+  ];
+
+  GMETA = {
+    'catch-the-scoop':{
+      en:{howto:'Move your cone with the mouse, finger, or arrow keys. Catch the scoops \u2014 miss three and you\u2019re done.',over:'Splat!',final:'You caught'},
+      cs:{howto:'H\u00fdbej kornoutem my\u0161\u00ed, prstem nebo \u0161ipkami. Chytej kope\u010dky \u2014 t\u0159i minut\u00ed a kon\u010d\u00ed\u0161.',over:'\u017duch!',final:'Chytil jsi'},
+    },
+    'scoop-match':{
+      en:{howto:'Flip two cards and find the matching flavour. Clear all six pairs in as few moves as you can \u2014 fast combos score more.',over:'Board cleared!',final:'You scored'},
+      cs:{howto:'Ot\u00e1\u010dej dv\u011b karty a hledej stejnou p\u0159\u00edchu\u0165. Vy\u010disti v\u0161ech \u0161est p\u00e1r\u016f na co nejm\u00e9n\u011b tah\u016f \u2014 rychl\u00e1 komba d\u00e1vaj\u00ed v\u00edc.',over:'Deska \u010dist\u00e1!',final:'Nasb\u00edral jsi'},
+    },
+  };
+
+  UI = {
+    en:{ nav:['Projects','About','Skills','Arcade','Links','Contact'],
+      eyebrow:'The Arcade', hubTitle:'Play something sweet.', hubSub:'Four tiny summer games, real leaderboards, no account needed. Grab a cone and go.',
+      games:{
+        'catch-the-scoop':{title:'Catch the Scoop',desc:'Slide your cone, stack the falling scoops, don\u2019t let them splat. Three misses and it\u2019s over.'},
+        'scoop-match':{title:'Scoop Match',desc:'A flavour-matching memory game. Flip, remember, clear the board before you run out of moves.'},
+        'stack-the-cones':{title:'Cone Stacker',desc:'Balance a wobbling tower of cones. One shaky scoop too many and it all topples.'},
+        'sprinkle-flick':{title:'Sprinkle Flick',desc:'Flick sprinkles onto the scoop with real physics. Land the combo, rack up the multiplier.'},
+      },
+      play:'Play', soon:'Soon', top:'Best', backHub:'Arcade', playTab:'Play', boardTab:'Leaderboard',
+      howto:'Move your cone with the mouse, finger, or arrow keys. Catch the scoops \u2014 miss three and you\u2019re done.',
+      start:'Play', scoreW:'Score', overTitle:'Splat!', finalScore:'You caught', beat:'Add your name to the board below.',
+      name:'Your name', namePh:'e.g. Mango Master', submit:'Submit score', submitting:'Sending\u2026', again:'Play again',
+      ts:'I\u2019m not a melting robot', tsChecking:'Checking\u2026', tsOk:'Verified \u2014 you\u2019re human',
+      placed:'You placed #', placedSub:'Nice scooping. Here\u2019s the fresh board:',
+      boardTitle:'Leaderboard', boardSub:'Top scores \u2014 top 10, all time.',
+      boardEmptyT:'No scores yet', boardEmptyB:'Be the first to make the board.',
+      playCta:'Play now',
+      months:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] },
+    cs:{ nav:['Projekty','O mn\u011b','Dovednosti','Ark\u00e1da','Odkazy','Kontakt'],
+      eyebrow:'Ark\u00e1da', hubTitle:'Zahraj si n\u011bco slad\u00e9ho.', hubSub:'\u010cty\u0159i mal\u00e9 letn\u00ed hry, opravdov\u00e9 \u017eeb\u0159\u00ed\u010dky, \u017e\u00e1dn\u00fd \u00fa\u010det. Chy\u0165 kornout a jed\u016f.',
+      games:{
+        'catch-the-scoop':{title:'Chy\u0165 kope\u010dek',desc:'Posouvej kornout, skl\u00e1dej padaj\u00edc\u00ed kope\u010dky a nenech je \u017euchnout. T\u0159i minut\u00ed a kon\u010d\u00ed\u0161.'},
+        'scoop-match':{title:'P\u00e1ry kope\u010dk\u016f',desc:'Pexeso s p\u0159\u00edchut\u011bmi. Ot\u00e1\u010dej, pamatuj si a vy\u010disti desku, ne\u017e dojdou tahy.'},
+        'stack-the-cones':{title:'V\u011b\u017e z kornout\u016f',desc:'Balancuj kymácej\u00edc\u00ed se v\u011b\u017e z kornout\u016f. Jeden vratk\u00fd kope\u010dek nav\u00edc a je to dole.'},
+        'sprinkle-flick':{title:'Cvrnkni posyp',desc:'Cvrnkej posyp na kope\u010dek s opravdovou fyzikou. Tref kombo a nasb\u00edrej n\u00e1sobi\u010d.'},
+      },
+      play:'Hr\u00e1t', soon:'Brzy', top:'Nej', backHub:'Ark\u00e1da', playTab:'Hra', boardTab:'\u017deb\u0159\u00ed\u010dek',
+      howto:'H\u00fdbej kornoutem my\u0161\u00ed, prstem nebo \u0161ipkami. Chytej kope\u010dky \u2014 t\u0159i minut\u00ed a kon\u010d\u00ed\u0161.',
+      start:'Hr\u00e1t', scoreW:'Sk\u00f3re', overTitle:'\u017duch!', finalScore:'Chytil jsi', beat:'P\u0159idej sv\u00e9 jm\u00e9no do \u017eeb\u0159\u00ed\u010dku n\u00ed\u017ee.',
+      name:'Tv\u00e9 jm\u00e9no', namePh:'nap\u0159. Mistr Mango', submit:'Odeslat sk\u00f3re', submitting:'Odes\u00edl\u00e1m\u2026', again:'Hr\u00e1t znovu',
+      ts:'Nejsem taj\u00edc\u00ed robot', tsChecking:'Ov\u011b\u0159uji\u2026', tsOk:'Ov\u011b\u0159eno \u2014 jsi \u010dlov\u011bk',
+      placed:'Jsi na m\u00edst\u011b #', placedSub:'Pěkn\u00e9 nab\u00edr\u00e1n\u00ed. Tady je \u010derstv\u00fd \u017eeb\u0159\u00ed\u010dek:',
+      boardTitle:'\u017deb\u0159\u00ed\u010dek', boardSub:'Nejlep\u0161\u00ed sk\u00f3re \u2014 top 10, za celou dobu.',
+      boardEmptyT:'Zat\u00edm \u017e\u00e1dn\u00e9 sk\u00f3re', boardEmptyB:'Bu\u010f prvn\u00ed na desce.',
+      playCta:'Hr\u00e1t te\u010f',
+      months:['led','\u00fano','b\u0159e','dub','kv\u011b','\u010dvn','\u010dvc','srp','z\u00e1\u0159','\u0159\u00edj','lis','pro'] },
+  };
+
+  BOARDS = {
+    'catch-the-scoop':[
+      {player_name:'Zmrzka\u010dka Ver\u010da',score:2140,d:'2026-07-28T14:20'},
+      {player_name:'Mango Master',score:1980,d:'2026-07-30T09:05'},
+      {player_name:'Amy (the dog)',score:1710,d:'2026-08-01T18:44'},
+      {player_name:'Pep\u00edk Kornout',score:1520,d:'2026-07-22T11:12'},
+      {player_name:'yuzu_fan',score:1330,d:'2026-08-03T20:31'},
+      {player_name:'Tereza S.',score:1180,d:'2026-07-19T16:02'},
+      {player_name:'kaja',score:990,d:'2026-08-04T08:15'},
+      {player_name:'sorbetka',score:820,d:'2026-07-15T13:48'},
+    ],
+    'scoop-match':[
+      {player_name:'Pexeso Petra',score:1860,d:'2026-07-31T19:12'},
+      {player_name:'kaja',score:1720,d:'2026-08-02T10:40'},
+      {player_name:'flip_king',score:1540,d:'2026-07-26T21:03'},
+      {player_name:'Anet\u010dka',score:1310,d:'2026-08-04T15:27'},
+      {player_name:'dva kope\u010dky',score:1120,d:'2026-07-18T12:55'},
+      {player_name:'M\u00e1\u0165a',score:940,d:'2026-08-01T08:33'},
+    ],
+    'stack-the-cones':[], 'sprinkle-flick':[],
+  };
+
+  componentDidMount(){
+    this._keyHandler=(e)=>{ if(this.state.phase!=='playing')return; if(e.key==='ArrowLeft')this._coneVel=-1; else if(e.key==='ArrowRight')this._coneVel=1; };
+    this._keyUp=(e)=>{ if(e.key==='ArrowLeft'||e.key==='ArrowRight')this._coneVel=0; };
+    window.addEventListener('keydown',this._keyHandler); window.addEventListener('keyup',this._keyUp);
+  }
+
+  componentWillUnmount(){ this._stopLoop(); window.removeEventListener('keydown',this._keyHandler); window.removeEventListener('keyup',this._keyUp); }
+
+  _ac(){ try{ this._actx=this._actx||new (window.AudioContext||window.webkitAudioContext)(); return this._actx; }catch(e){ return null; } }
+  _tone(freq,dur,type,vol){ if(!this.state.sound)return; const ac=this._ac(); if(!ac)return; const o=ac.createOscillator(),g=ac.createGain(); o.type=type||'sine'; o.frequency.value=freq; o.connect(g); g.connect(ac.destination); const t=ac.currentTime; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vol||.15,t+.01); g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.15)); o.start(t); o.stop(t+(dur||.15)); }
+  _catchSound(){ this._tone(660,.1,'triangle',.16); setTimeout(()=>this._tone(880,.09,'triangle',.13),60); }
+  _missSound(){ this._tone(150,.22,'sawtooth',.14); }
+  _overSound(){ [520,400,300,220].forEach((f,i)=>setTimeout(()=>this._tone(f,.18,'square',.12),i*130)); }
+  _winSound(){ [523,659,784,1047].forEach((f,i)=>setTimeout(()=>this._tone(f,.16,'triangle',.14),i*90)); }
+
+  _scoopSVG(c){ return `<svg viewBox="0 0 60 70" width="100%" height="100%"><g stroke="#3A2416" stroke-width="4" stroke-linejoin="round"><circle cx="30" cy="34" r="22" fill="${c}"/><circle cx="21" cy="24" r="13" fill="${c}"/><circle cx="39" cy="24" r="13" fill="${c}"/><circle cx="30" cy="16" r="6" fill="#D62A54"/></g></svg>`; }
+  _coneSVG(){ return `<svg viewBox="0 0 90 96" width="100%" height="100%"><g stroke="#3A2416" stroke-width="4" stroke-linejoin="round"><path d="M45 92 L20 34 H70 Z" fill="#E7B26B"/><path d="M30 48 h30 M37 64 h16" stroke="#B9823C" stroke-width="3" fill="none"/><ellipse cx="45" cy="34" rx="27" ry="10" fill="#FFF0DD"/></g></svg>`; }
+
+  _cv(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+  _startLoop(){
+    if((this.state.gameKey||'catch-the-scoop')==='scoop-match') return this._startMatch();
+    return this._startCatch();
+  }
+  _startCatch(){
+    const f=(this._refs&&this._refs.fieldRef)||document.querySelector('[data-field]'); if(!f) return;
+    this._field=f; f.style.cursor='none';
+    f.innerHTML='';
+    const R=f.getBoundingClientRect(); this._W=R.width; this._H=R.height;
+    // cone
+    const cone=document.createElement('div');
+    cone.innerHTML=this._coneSVG();
+    cone.style.cssText=`position:absolute;width:82px;height:88px;bottom:8px;left:0;transform:translateX(${this._W/2-41}px);filter:drop-shadow(0 6px 8px rgba(58,36,22,.3));will-change:transform;z-index:3`;
+    f.appendChild(cone); this._coneEl=cone;
+    this._coneX=this._W/2; this._coneVel=0; this._coneW=82;
+    this._scoops=[]; this._spawnAcc=0; this._t=performance.now(); this._elapsed=0;
+    this._cols=[this._cv('--mango'),this._cv('--cherry'),this._cv('--pistachio'),this._cv('--poppy'),this._cv('--yuzu')];
+    // pointer control
+    this._onMove=(e)=>{ const rect=f.getBoundingClientRect(); const cx=(e.touches?e.touches[0].clientX:e.clientX)-rect.left; this._coneX=Math.max(this._coneW/2,Math.min(this._W-this._coneW/2,cx)); };
+    f.addEventListener('pointermove',this._onMove); f.addEventListener('touchmove',this._onMove,{passive:true});
+    this._raf=requestAnimationFrame(t=>this._tick(t));
+  }
+  _stopLoop(){ if(this._raf)cancelAnimationFrame(this._raf); this._raf=null; const f=this._field; if(f&&this._onMove){ f.removeEventListener('pointermove',this._onMove); f.removeEventListener('touchmove',this._onMove);} }
+
+  _tick(now){
+    if(this.state.phase!=='playing'){ return; }
+    this._raf=requestAnimationFrame(t=>this._tick(t));
+    const dt=Math.min(40, now-this._t); this._t=now; this._elapsed+=dt;
+    const W=this._W,H=this._H;
+    // cone keyboard velocity
+    this._coneX=Math.max(this._coneW/2,Math.min(W-this._coneW/2,this._coneX+this._coneVel*0.6*dt));
+    if(this._coneEl) this._coneEl.style.transform=`translateX(${this._coneX-this._coneW/2}px)`;
+    // difficulty ramp
+    const diff=1+this._elapsed/45000;
+    const spawnEvery=Math.max(560, 1050/diff);
+    this._spawnAcc+=dt;
+    if(this._spawnAcc>spawnEvery){ this._spawnAcc=0; this._spawn(diff); }
+    // move scoops
+    const coneTop=H-92, catchHalf=this._coneW/2+6;
+    for(let i=this._scoops.length-1;i>=0;i--){
+      const s=this._scoops[i]; s.y+=s.v*dt/16; s.rot+=s.vr;
+      s.el.style.transform=`translate(${s.x-22}px,${s.y-22}px) rotate(${s.rot}deg)`;
+      if(s.y>=coneTop && Math.abs(s.x-this._coneX)<catchHalf){
+        this._score+=10; this._catchSound(); s.el.remove(); this._scoops.splice(i,1);
+        this.setState({score:this._score});
+        const burst=document.createElement('div'); burst.textContent='+10';
+        burst.style.cssText=`position:absolute;left:${s.x-14}px;top:${coneTop-10}px;font-family:'Baloo 2',cursive;font-weight:800;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.2);z-index:4;pointer-events:none;transition:all .5s`;
+        this._field.appendChild(burst); requestAnimationFrame(()=>{burst.style.transform='translateY(-26px)';burst.style.opacity='0';}); setTimeout(()=>burst.remove(),520);
+      } else if(s.y>H+30){
+        s.el.remove(); this._scoops.splice(i,1); this._lives--; this._missSound(); this.setState({lives:this._lives});
+        if(this._lives<=0){ this._gameOver(); return; }
+      }
+    }
+  }
+  _spawn(diff){
+    const s={x:30+Math.random()*(this._W-60), y:-30, v:2.0+Math.random()*1.4+diff*0.7, rot:(Math.random()-.5)*30, vr:(Math.random()-.5)*4};
+    const el=document.createElement('div'); el.innerHTML=this._scoopSVG(this._cols[Math.floor(Math.random()*this._cols.length)]);
+    el.style.cssText='position:absolute;width:44px;height:52px;left:0;top:0;filter:drop-shadow(0 4px 5px rgba(58,36,22,.25));will-change:transform;z-index:2';
+    this._field.appendChild(el); s.el=el; this._scoops.push(s);
+  }
+  _gameOver(){ this._stopLoop(); this._overSound(); this.setState({phase:'over', submit:'idle', ts:'idle', subName:'', honeypot:'', rank:null}); }
+
+  // ---- Scoop Match (memory) ----
+  _coverHTML(){ return `<span style="font-family:'Baloo 2',cursive;font-weight:800;font-size:clamp(22px,5vw,36px);color:#3A2416;opacity:.45">?</span>`; }
+  _startMatch(){
+    const f=(this._refs&&this._refs.fieldRef)||document.querySelector('[data-field]'); if(!f) return;
+    this._field=f; f.style.cursor='default';
+    const cols=[this._cv('--mango'),this._cv('--cherry'),this._cv('--pistachio'),this._cv('--poppy'),this._cv('--yuzu'),this._cv('--sky')];
+    let deck=[]; cols.forEach((c,i)=>{ deck.push({id:i,c}); deck.push({id:i,c}); });
+    for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=deck[i]; deck[i]=deck[j]; deck[j]=t; }
+    this._m={flipped:[], matched:0, moves:0, lock:false, combo:0};
+    this._score=0; this.setState({score:0});
+    f.innerHTML='';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr);gap:clamp(6px,1.8%,12px);padding:clamp(10px,3%,22px);min-height:0';
+    deck.forEach((card,idx)=>{
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.style.cssText='position:relative;border:none;border-radius:16px;width:100%;height:100%;min-width:0;min-height:0;cursor:pointer;background:rgba(255,255,255,.55);box-shadow:0 6px 14px -6px rgba(58,36,22,.4);display:grid;place-items:center;transition:transform .16s,background .2s,box-shadow .2s;padding:8%';
+      btn.innerHTML=this._coverHTML();
+      btn.onclick=()=>this._flip(idx,card,btn);
+      wrap.appendChild(btn); card.el=btn;
+    });
+    f.appendChild(wrap);
+    this._deck=deck;
+  }
+  _flip(idx,card,btn){
+    const m=this._m; if(!m||m.lock||card.done||m.flipped.find(x=>x.idx===idx)) return;
+    btn.innerHTML=this._scoopSVG(card.c); btn.style.background='#fff'; btn.style.transform='scale(1.05)';
+    this._tone(500+card.id*45,.08,'triangle',.12);
+    m.flipped.push({idx,card,btn});
+    if(m.flipped.length===2){
+      m.moves++; m.lock=true;
+      const a=m.flipped[0], b=m.flipped[1];
+      if(a.card.id===b.card.id){
+        a.card.done=b.card.done=true; m.matched++; m.combo++;
+        this._score+=200+(m.combo-1)*60;
+        this._catchSound();
+        setTimeout(()=>{ [a.btn,b.btn].forEach(x=>{ x.style.background='color-mix(in srgb,var(--pistachio) 42%,#fff)'; x.style.boxShadow='0 0 0 3px var(--pistachio)'; x.style.transform='scale(1)'; }); },10);
+        m.flipped=[]; m.lock=false;
+        this.setState({score:this._score});
+        if(m.matched===6){ const bonus=Math.max(0,1000-m.moves*55); this._score+=bonus; setTimeout(()=>{ this.setState({score:this._score}); this._matchWin(); },460); }
+      } else {
+        m.combo=0; this._missSound();
+        setTimeout(()=>{ [a.btn,b.btn].forEach(x=>{ x.innerHTML=this._coverHTML(); x.style.background='rgba(255,255,255,.55)'; x.style.transform='scale(1)'; }); m.flipped=[]; m.lock=false; },720);
+      }
+    }
+  }
+  _matchWin(){ this._stopLoop(); this._winSound(); this.setState({phase:'over', submit:'idle', ts:'idle', subName:'', honeypot:'', rank:null}); }
+
+  _fmtDate(iso){ const [d,t]=iso.split('T'); const [y,m,day]=d.split('-'); const U=this.UI[this.state.lang]; return `${parseInt(day,10)}. ${m}. ${y}`; }
+
+  _ref(k){ return this._refs&&this._refs[k]; }
+
+  renderVals(){
+    const S=this.state, U=this.UI[S.lang];
+    this._refs=this._refs||{};
+    const setRef=k=>el=>{ if(el)this._refs[k]=el; };
+    const gmeta=k=>U.games[k];
+    const topScore=k=>{ const b=this.BOARDS[k]; return b&&b.length?b[0].score:null; };
+
+    // hub games
+    const games=this.GAMES.map(g=>{
+      const m=gmeta(g.key); const ts=topScore(g.key);
+      return { icon:g.icon, bg:`color-mix(in srgb, var(${g.bg}) 55%, var(--surface))`,
+        title:m.title, desc:m.desc, soon:!g.playable,
+        topLabel: g.playable? (ts?`${U.top} ${ts}`:'') : '',
+        playLabel: g.playable?U.play:U.soon,
+        playBg: g.playable?'var(--cherry-strong)':'var(--surface-2)',
+        playColor: g.playable?'#fff':'var(--ink-soft)',
+        playOpacity: g.playable?'1':'.7', cursor: g.playable?'pointer':'not-allowed',
+        play:(e)=>{ e.preventDefault(); if(!g.playable)return; this._enter(g.key); },
+        board:(e)=>{ e.preventDefault(); this._enter(g.key,'board'); },
+      };
+    });
+
+    // current game
+    const curKey=S.gameKey||'catch-the-scoop';
+    const cur={ title:(gmeta(curKey)||{}).title||'' };
+
+    // HUD (per game)
+    const gmx=(this.GMETA[curKey]||{})[S.lang]||{};
+    let livesEl;
+    if(curKey==='scoop-match'){
+      const found=(this._m&&this._m.matched)||0;
+      livesEl={__html:`<div style="padding:8px 14px;border-radius:12px;background:var(--surface);border:2px solid var(--cream-line);font-family:'Space Mono',monospace;font-weight:700;font-size:15px;color:var(--ink);box-shadow:var(--shadow)">🍧 ${found}/6</div>`};
+    } else {
+      livesEl={__html: Array.from({length:3}).map((_,i)=>`<span style="font-size:22px;filter:${i<S.lives?'none':'grayscale(1) opacity(.35)'}">🍦</span>`).join('')};
+    }
+
+    // board data
+    const rawBoard=(this.BOARDS[curKey]||[]).slice().sort((a,b)=>b.score-a.score);
+    const medal=(i)=>i===0?['var(--yuzu)','#3A2416']:(i===1?['#D9D2C4','#3A2416']:(i===2?['#E7B26B','#3A2416']:['var(--surface-2)','var(--ink-soft)']));
+    const board=rawBoard.slice(0,10).map((r,i)=>{ const [mb,mc]=medal(i); return { rank:i+1, name:r.player_name, score:r.score, date:this._fmtDate(r.d),
+      border: r.__me?'var(--cherry-strong)':'var(--cream-line)', medalBg:mb, medalColor:mc }; });
+
+    // result board (after submit) — top 5 around player
+    let resultBoard=[];
+    if(S.submit==='done'){
+      const sorted=rawBoard.slice(0,5);
+      resultBoard=sorted.map((r,i)=>({ rank:'#'+(i+1), name:r.player_name, score:r.score,
+        bg: r.__me?'color-mix(in srgb,var(--cherry) 18%,var(--surface))':'var(--surface-2)',
+        border: r.__me?'var(--cherry-strong)':'transparent',
+        rankColor: r.__me?'var(--cherry-strong)':'var(--ink-soft)' }));
+    }
+
+    const tsOk=S.ts==='ok';
+    const submitDisabled = !(tsOk && S.subName.trim().length>0 && S.submit==='idle');
+
+    return {
+      theme:S.theme,
+      isHub:S.view==='hub', isGame:S.view==='game',
+      navItems:U.nav.map((label,i)=>({label,href:['#projects','#about','#skills','#','#links','#contact'][i],active:(i===3&&S.view!=='')?'1':'0'})),
+      eyebrow:U.eyebrow, hubTitle:U.hubTitle, hubSub:U.hubSub, games, soonLabel:U.soon,
+      cur, backLabel:U.backHub, playTab:U.playTab, boardTab:U.boardTab,
+      tabPlayBorder:S.tab==='play'?'var(--cherry-strong)':'var(--cream-line)', tabPlayBg:S.tab==='play'?'var(--cherry-strong)':'var(--surface)', tabPlayColor:S.tab==='play'?'#fff':'var(--ink)',
+      tabBoardBorder:S.tab==='board'?'var(--cherry-strong)':'var(--cream-line)', tabBoardBg:S.tab==='board'?'var(--cherry-strong)':'var(--surface)', tabBoardColor:S.tab==='board'?'#fff':'var(--ink)',
+      showField: S.tab==='play',
+      showBoardView: S.tab==='board',
+      fieldRef:setRef('fieldRef'),
+      scoreLabel:U.scoreW, score:S.score, livesEl,
+      isAttract:S.phase==='attract', isOver:S.phase==='over',
+      howto:gmx.howto||U.howto, startLabel:U.start,
+      overTitle:gmx.over||U.overTitle, finalScoreLabel:gmx.final||U.finalScore, beatLabel:U.beat,
+      notSubmitted:S.submit!=='done', submitted:S.submit==='done',
+      nameLabel:U.name, namePlaceholder:U.namePh, subName:S.subName, honeypot:S.honeypot,
+      onName:(e)=>this.setState({subName:e.target.value}), onHoney:(e)=>this.setState({honeypot:e.target.value}),
+      tsLabel: S.ts==='ok'?U.tsOk:(S.ts==='checking'?U.tsChecking:U.ts),
+      tsMark: S.ts==='ok'?'✓':(S.ts==='checking'?'':''),
+      tsBorder: S.ts==='ok'?'var(--pistachio)':'var(--cream-line)',
+      tsBoxBorder: S.ts==='ok'?'var(--pistachio)':'var(--ink-soft)',
+      tsBoxBg: S.ts==='ok'?'var(--pistachio)':'transparent',
+      tsCursor: S.ts==='idle'?'pointer':'default',
+      turnstileClick:()=>{ if(S.ts!=='idle')return; this.setState({ts:'checking'}); setTimeout(()=>this.setState({ts:'ok'}),1100); },
+      submitDisabled, submitBg: submitDisabled?'var(--ink-soft)':'var(--cherry-strong)', submitCursor:submitDisabled?'not-allowed':'pointer', submitOpacity:submitDisabled?'.6':'1',
+      submitLabel: S.submit==='sending'?U.submitting:U.submit,
+      submitScore:()=>{ if(submitDisabled)return; if(S.honeypot){ return; } this.setState({submit:'sending'});
+        setTimeout(()=>{ const arr=this.BOARDS[curKey]; arr.forEach(x=>{delete x.__me;});
+          const entry={player_name:S.subName.trim(),score:S.score,d:new Date().toISOString().slice(0,16),__me:true}; arr.push(entry);
+          arr.sort((a,b)=>b.score-a.score); const rank=arr.findIndex(x=>x.__me)+1;
+          this._winSound(); this.setState({submit:'done', rank}); },900); },
+      placedTitle:U.placed+(S.rank||''), placedSub:U.placedSub, resultBoard,
+      againLabel:U.again,
+      startGame:()=>{ this._score=0; this._lives=3; this._stopLoop(); this.setState({phase:'playing', score:0, lives:3, submit:'idle', ts:'idle'}); clearTimeout(this._sgT); this._sgT=setTimeout(()=>this._startLoop(),60); },
+      showPlay:()=>this.setState({tab:'play'}),
+      showBoard:()=>this.setState({tab:'board'}),
+      boardTitle:(gmeta(curKey)||{}).title||U.boardTitle, boardSub:U.boardSub,
+      boardEmpty:rawBoard.length===0, boardHas:rawBoard.length>0, board,
+      boardEmptyTitle:U.boardEmptyT, boardEmptyBody:U.boardEmptyB, playCta:U.playCta,
+      goHub:(e)=>{ if(e)e.preventDefault(); this._stopLoop(); this.setState({view:'hub', phase:'attract', tab:'play'}); },
+      langLabel:S.lang==='en'?'CS':'EN', themeIcon:S.theme==='day'?'🌙':'☀️',
+      soundIcon:S.sound?'🔊':'🔇', soundBorder:S.sound?'var(--pistachio)':'var(--cream-line)', soundBg:S.sound?'color-mix(in srgb,var(--pistachio) 30%,var(--surface))':'var(--surface)',
+      toggleLang:()=>this.setState(s=>({lang:s.lang==='en'?'cs':'en'})),
+      toggleTheme:()=>this.setState(s=>({theme:s.theme==='day'?'night':'day'})),
+      toggleSound:()=>this.setState(s=>({sound:!s.sound}),()=>{ if(this.state.sound)this._tone(700,.12,'triangle',.14); }),
+    };
+  }
+  _enter(key,tab){ this.setState({view:'game', gameKey:key, tab:tab||'play', phase:'attract', score:0, lives:3, submit:'idle', ts:'idle', subName:'', honeypot:''}); window.scrollTo(0,0); }
+}
+</script>
+</body>
+</html>

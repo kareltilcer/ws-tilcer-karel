@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9FE3FF"/>
+      <stop offset="0.62" stop-color="#FFE7BE"/>
+      <stop offset="1" stop-color="#FFF6E9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <circle cx="1010" cy="150" r="90" fill="#FFD23F"/>
+  <g transform="translate(120,150)" font-family="'Baloo 2',sans-serif" fill="#3A2416">
+    <text x="0" y="120" font-size="96" font-weight="800">karel<tspan fill="#D62A54">.</tspan></text>
+    <text x="0" y="200" font-size="44" font-weight="700" fill="#D62A54">Developer · Game-maker · Ice-cream enthusiast</text>
+    <text x="0" y="270" font-size="34" fill="#8A6A50">karel.tilcer.cz — my sunny corner of the internet</text>
+  </g>
+  <g transform="translate(760,300)" stroke="#3A2416" stroke-width="8" stroke-linejoin="round">
+    <path d="M120 300 L60 130 H180 Z" fill="#E7B26B"/>
+    <circle cx="120" cy="120" r="60" fill="#FF9F1C"/>
+    <circle cx="82" cy="86" r="46" fill="#EF476F"/>
+    <circle cx="158" cy="86" r="46" fill="#7FC85F"/>
+    <circle cx="120" cy="56" r="44" fill="#37B6EF"/>
+    <circle cx="120" cy="24" r="16" fill="#D62A54"/>
+  </g>
+</svg>
