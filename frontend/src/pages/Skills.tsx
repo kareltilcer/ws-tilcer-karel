@@ -56,7 +56,7 @@ function groupEmoji(cat: string, skills: Skill[]): string {
 }
 
 export default function Skills() {
-  const { t } = useLang()
+  const { t, pick } = useLang()
   const { data, isLoading } = useSkills()
 
   // A Map (not a bare object) so a category literally named "constructor",
@@ -117,7 +117,7 @@ export default function Skills() {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <SkillIcon icon={s.icon} size={20} />
-                    <span style={{ fontWeight: 700, fontSize: 16 }}>{s.name}</span>
+                    <span style={{ fontWeight: 700, fontSize: 16 }}>{pick(s.name_cs, s.name_en)}</span>
                   </div>
                   <Meter level={s.level} />
                 </div>

@@ -769,14 +769,14 @@ func (s *Store) UpsertSection(ctx context.Context, q DBTX, key string, sets map[
 // skill
 // ==========================================================================
 
-const skillCols = `id, name, category, icon, level, visible, sort_order`
+const skillCols = `id, name_cs, name_en, category, icon, level, visible, sort_order`
 
 func scanSkill(r interface{ Scan(...any) error }) (Skill, error) {
 	var sk Skill
 	var icon sql.NullString
 	var level sql.NullInt64
 	var visible int
-	if err := r.Scan(&sk.ID, &sk.Name, &sk.Category, &icon, &level, &visible, &sk.SortOrder); err != nil {
+	if err := r.Scan(&sk.ID, &sk.NameCS, &sk.NameEN, &sk.Category, &icon, &level, &visible, &sk.SortOrder); err != nil {
 		return Skill{}, err
 	}
 	sk.Icon = nsPtr(icon)
@@ -830,8 +830,8 @@ func (s *Store) InsertSkill(ctx context.Context, q DBTX, in SkillCreate, sortOrd
 		level = *in.Level
 	}
 	res, err := q.ExecContext(ctx,
-		`INSERT INTO skill (name, category, icon, level, visible, sort_order) VALUES (?,?,?,?,?,?)`,
-		in.Name, in.Category, nullablePtr(in.Icon), level, boolInt(visible), sortOrder)
+		`INSERT INTO skill (name_cs, name_en, category, icon, level, visible, sort_order) VALUES (?,?,?,?,?,?,?)`,
+		in.NameCS, in.NameEN, in.Category, nullablePtr(in.Icon), level, boolInt(visible), sortOrder)
 	if err != nil {
 		return 0, err
 	}
@@ -841,8 +841,11 @@ func (s *Store) InsertSkill(ctx context.Context, q DBTX, in SkillCreate, sortOrd
 func (s *Store) UpdateSkill(ctx context.Context, q DBTX, id int64, in SkillUpdate) error {
 	var sets []string
 	var args []any
-	if in.Name != nil {
-		sets, args = append(sets, "name = ?"), append(args, *in.Name)
+	if in.NameCS != nil {
+		sets, args = append(sets, "name_cs = ?"), append(args, *in.NameCS)
+	}
+	if in.NameEN != nil {
+		sets, args = append(sets, "name_en = ?"), append(args, *in.NameEN)
 	}
 	if in.Category != nil {
 		sets, args = append(sets, "category = ?"), append(args, *in.Category)

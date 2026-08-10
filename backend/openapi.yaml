@@ -1444,11 +1444,13 @@ components:
 
     Skill:
       type: object
-      required: [id, name, category, visible, sort_order]
+      required: [id, name_cs, name_en, category, visible, sort_order]
       properties:
         id:
           type: integer
-        name:
+        name_cs:
+          type: string
+        name_en:
           type: string
         category:
           type: string
@@ -1465,9 +1467,11 @@ components:
           type: integer
     SkillCreate:
       type: object
-      required: [name, category]
+      required: [name_cs, name_en, category]
       properties:
-        name:
+        name_cs:
+          type: string
+        name_en:
           type: string
         category:
           type: string
@@ -1485,7 +1489,9 @@ components:
     SkillUpdate:
       type: object
       properties:
-        name:
+        name_cs:
+          type: string
+        name_en:
           type: string
         category:
           type: string

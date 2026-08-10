@@ -88,7 +88,8 @@ export interface Section {
 
 export interface Skill {
   id: number
-  name: string
+  name_cs: string
+  name_en: string
   category: string
   icon: string | null
   level: number | null
