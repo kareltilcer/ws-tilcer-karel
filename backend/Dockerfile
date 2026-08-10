@@ -19,8 +19,12 @@ ENV CGO_ENABLED=0 GOOS=linux GOFLAGS=-mod=readonly
 COPY backend/go.mod backend/go.sum ./
 RUN go mod download
 COPY backend/ ./
-# Pure-Go SQLite (modernc, CGO off).
-RUN go build -trimpath -ldflags="-s -w" -o /out/karel ./cmd/karel
+# Pure-Go SQLite (modernc, CGO off). Cap compiler parallelism (-p 1 / single
+# GOMAXPROCS) so the memory-hungry modernc.org/libc + sqlite compile doesn't get
+# OOM-killed on small build hosts, especially since Coolify builds --no-cache
+# with the frontend building in parallel. Trades a little build time for a much
+# lower peak RSS.
+RUN GOMAXPROCS=1 go build -p 1 -trimpath -ldflags="-s -w" -o /out/karel ./cmd/karel
 
 # ── Stage 2: pull the Litestream binary ────────────────────────────────
 FROM litestream/litestream:0.3.13 AS litestream
