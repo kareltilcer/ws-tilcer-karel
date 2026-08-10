@@ -29,6 +29,15 @@ services:
       KAREL_AUTH_JWT_ISSUER: ${KAREL_AUTH_JWT_ISSUER:-}
       LITESTREAM_ENABLED: ${LITESTREAM_ENABLED:-false}
       KAREL_DB_PATH: ${KAREL_DB_PATH:-/data/karel.db}
+      # DB backup (Litestream -> R2) — consumed by litestream.yml, NOT the app,
+      # and only when LITESTREAM_ENABLED=true. The local harness keeps that false,
+      # so these stay empty and unused here; set them in a real Coolify deploy.
+      #   LITESTREAM_R2_ENDPOINT  https://<account-id>.r2.cloudflarestorage.com
+      #   LITESTREAM_R2_BUCKET    the backup bucket (DB stored under prefix "karel")
+      LITESTREAM_R2_ENDPOINT: ${LITESTREAM_R2_ENDPOINT:-}
+      LITESTREAM_R2_BUCKET: ${LITESTREAM_R2_BUCKET:-}
+      LITESTREAM_ACCESS_KEY_ID: ${LITESTREAM_ACCESS_KEY_ID:-}
+      LITESTREAM_SECRET_ACCESS_KEY: ${LITESTREAM_SECRET_ACCESS_KEY:-}
       # Spam protection — the secret half of the Cloudflare Turnstile widget whose
       # site key is baked into the frontend below. Empty = verification disabled
       # (honeypot still enforced); set both from the SAME widget in a real deploy.
