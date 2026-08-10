@@ -3,6 +3,7 @@ import type { Skill } from '../../api/types'
 import { createSkill, deleteSkill, reorderSkills, updateSkill, useAdminSkills } from '../adminApi'
 import { AdminCard, ConfirmButton, Field, PageHeader, runAction } from '../ui'
 import { Spinner } from '../../components/states'
+import { IconPicker } from '../IconPicker'
 
 export default function SkillsAdmin() {
   const { data, isLoading } = useAdminSkills()
@@ -47,9 +48,12 @@ export default function SkillsAdmin() {
           <Field label="Úroveň 1–5">
             <input className="input" type="number" min={1} max={5} value={level} onChange={(e) => setLevel(e.target.value)} />
           </Field>
-          <Field label="Ikona">
-            <input className="input" value={icon} onChange={(e) => setIcon(e.target.value)} />
-          </Field>
+          {/* Not <Field>: its <label> would forward backdrop clicks back to the
+              picker's trigger, so the popover couldn't be dismissed by clicking out. */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--ink-soft)' }}>Ikona / Icon</span>
+            <IconPicker value={icon} onChange={setIcon} />
+          </div>
         </div>
         <button className="btn-primary" style={{ height: 42, marginTop: 12, padding: '0 20px' }} onClick={add}>
           + Přidat / Add
@@ -78,7 +82,7 @@ function Row({ s, onUp, onDown }: { s: Skill; onUp: () => void; onDown: () => vo
         <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
         <input className="input" value={category} onChange={(e) => setCategory(e.target.value)} />
         <input className="input" type="number" min={1} max={5} value={level} onChange={(e) => setLevel(e.target.value)} />
-        <input className="input" value={icon} onChange={(e) => setIcon(e.target.value)} />
+        <IconPicker value={icon} onChange={setIcon} />
       </div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 10, flexWrap: 'wrap' }}>
         <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 14 }}>

@@ -240,6 +240,18 @@ a:hover {
   border-radius: 20px;
   box-shadow: var(--shadow);
 }
+/* skill chip — springy lift on hover (design/v2 .schip) */
+.schip {
+  transition: transform 0.16s ease;
+}
+.schip:hover {
+  transform: translateY(-3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .schip:hover {
+    transform: none;
+  }
+}
 .btn-primary {
   background: var(--cherry-strong);
   color: #fff;
