@@ -20,6 +20,7 @@
   --pistachio: #7fc85f;
   --sky: #37b6ef;
   --yuzu: #f2ce2e;
+  --on-yuzu: #3a2416; /* foreground for text on the (always-light) yuzu fill */
   --poppy: #b4a2f0;
   --sun: #ffd23f;
   --shadow: 0 14px 30px -12px rgba(58, 36, 22, 0.32);
@@ -41,6 +42,7 @@
   --pistachio: #9be07a;
   --sky: #66d0ff;
   --yuzu: #ffe06a;
+  --on-yuzu: #3a2416; /* yuzu stays light at night, so keep dark ink on it */
   --poppy: #c9baff;
   --sun: #ffe9a8;
   --shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.6);
