@@ -38,6 +38,15 @@ services:
       LITESTREAM_R2_BUCKET: ${LITESTREAM_R2_BUCKET:-}
       LITESTREAM_ACCESS_KEY_ID: ${LITESTREAM_ACCESS_KEY_ID:-}
       LITESTREAM_SECRET_ACCESS_KEY: ${LITESTREAM_SECRET_ACCESS_KEY:-}
+      # Contact email (Resend) — the form still stores every message and returns
+      # 202 without these, but no notification email is sent until all three are
+      # set (see contact.sendEmail). Fill them in a real deploy:
+      #   RESEND_API_KEY  a Resend API key
+      #   CONTACT_TO      inbox that receives contact submissions
+      #   CONTACT_FROM    a verified Resend sender address
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      CONTACT_TO: ${CONTACT_TO:-}
+      CONTACT_FROM: ${CONTACT_FROM:-}
       # Spam protection — the secret half of the Cloudflare Turnstile widget whose
       # site key is baked into the frontend below. Empty = verification disabled
       # (honeypot still enforced); set both from the SAME widget in a real deploy.
