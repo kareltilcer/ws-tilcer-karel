@@ -28,12 +28,44 @@ export default function SkillsAdmin() {
   }
 
   const skills = data ?? []
-  const move = (i: number, dir: -1 | 1) => {
-    const next = [...skills]
+
+  // Group skills by category in first-appearance order (matches the public page).
+  // Each group's items keep their relative order; category order follows the
+  // order groups are first seen in the flat, sort_order-driven list.
+  const groups: { category: string; items: Skill[] }[] = []
+  const groupIndex = new Map<string, number>()
+  for (const s of skills) {
+    let gi = groupIndex.get(s.category)
+    if (gi === undefined) {
+      gi = groups.length
+      groupIndex.set(s.category, gi)
+      groups.push({ category: s.category, items: [] })
+    }
+    groups[gi].items.push(s)
+  }
+
+  // Flatten groups (in their current order, groups kept contiguous) to a flat id
+  // list and persist. Contiguity is what keeps the public page's groups clean.
+  const persist = (gs: { category: string; items: Skill[] }[]) =>
+    void runAction(() => reorderSkills(gs.flatMap((g) => g.items.map((s) => s.id))))
+
+  const clone = () => groups.map((g) => ({ category: g.category, items: [...g.items] }))
+
+  const moveGroup = (gi: number, dir: -1 | 1) => {
+    const j = gi + dir
+    if (j < 0 || j >= groups.length) return
+    const next = clone()
+    ;[next[gi], next[j]] = [next[j], next[gi]]
+    persist(next)
+  }
+
+  const moveInGroup = (gi: number, i: number, dir: -1 | 1) => {
+    const next = clone()
+    const items = next[gi].items
     const j = i + dir
-    if (j < 0 || j >= next.length) return
-    ;[next[i], next[j]] = [next[j], next[i]]
-    void runAction(() => reorderSkills(next.map((s) => s.id)))
+    if (j < 0 || j >= items.length) return
+    ;[items[i], items[j]] = [items[j], items[i]]
+    persist(next)
   }
 
   return (
@@ -63,16 +95,72 @@ export default function SkillsAdmin() {
       </AdminCard>
 
       {isLoading && <Spinner />}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {skills.map((s, i) => (
-          <Row key={s.id} s={s} onUp={() => move(i, -1)} onDown={() => move(i, 1)} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
+        {groups.map((g, gi) => (
+          <div key={g.category}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <h2 className="display" style={{ fontWeight: 700, fontSize: 20, margin: 0, textTransform: 'capitalize' }}>
+                {g.category}
+              </h2>
+              <span
+                style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-soft)', background: 'var(--cream-line)', borderRadius: 999, padding: '2px 9px' }}
+              >
+                {g.items.length}
+              </span>
+              <div style={{ flex: 1, height: 2, background: 'var(--cream-line)', borderRadius: 2 }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-soft)' }}>Skupina / Group</span>
+              <button className="btn-secondary" style={arrowBtn(gi === 0)} disabled={gi === 0} onClick={() => moveGroup(gi, -1)}>
+                ↑
+              </button>
+              <button
+                className="btn-secondary"
+                style={arrowBtn(gi === groups.length - 1)}
+                disabled={gi === groups.length - 1}
+                onClick={() => moveGroup(gi, 1)}
+              >
+                ↓
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {g.items.map((s, i) => (
+                <Row
+                  key={s.id}
+                  s={s}
+                  onUp={() => moveInGroup(gi, i, -1)}
+                  onDown={() => moveInGroup(gi, i, 1)}
+                  upDisabled={i === 0}
+                  downDisabled={i === g.items.length - 1}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>
   )
 }
 
-function Row({ s, onUp, onDown }: { s: Skill; onUp: () => void; onDown: () => void }) {
+// Shared style for the ↑/↓ reorder buttons; dims + disables at a list boundary.
+const arrowBtn = (disabled: boolean): React.CSSProperties => ({
+  height: 32,
+  padding: '0 10px',
+  opacity: disabled ? 0.35 : 1,
+  cursor: disabled ? 'default' : 'pointer',
+})
+
+function Row({
+  s,
+  onUp,
+  onDown,
+  upDisabled,
+  downDisabled,
+}: {
+  s: Skill
+  onUp: () => void
+  onDown: () => void
+  upDisabled: boolean
+  downDisabled: boolean
+}) {
   const [nameCs, setNameCs] = useState(s.name_cs)
   const [nameEn, setNameEn] = useState(s.name_en)
   const [category, setCategory] = useState(s.category)
@@ -93,10 +181,10 @@ function Row({ s, onUp, onDown }: { s: Skill; onUp: () => void; onDown: () => vo
             <input type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)} /> Viditelné / Visible
           </label>
           <div style={{ flex: 1 }} />
-          <button className="btn-secondary" style={{ height: 32, padding: '0 10px' }} onClick={onUp}>
+          <button className="btn-secondary" style={arrowBtn(upDisabled)} disabled={upDisabled} onClick={onUp}>
             ↑
           </button>
-          <button className="btn-secondary" style={{ height: 32, padding: '0 10px' }} onClick={onDown}>
+          <button className="btn-secondary" style={arrowBtn(downDisabled)} disabled={downDisabled} onClick={onDown}>
             ↓
           </button>
           <button
