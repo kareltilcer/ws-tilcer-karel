@@ -790,7 +790,10 @@ func (s *Store) ListSkills(ctx context.Context, visibleOnly bool) ([]Skill, erro
 	if visibleOnly {
 		where = " WHERE visible = 1"
 	}
-	rows, err := s.db.QueryContext(ctx, `SELECT `+skillCols+` FROM skill`+where+` ORDER BY category, sort_order, id`)
+	// sort_order is the single source of truth for both group order (a category's
+	// position = where its first skill lands) and within-group order. Ordering by
+	// category first would pin groups alphabetically and make them unreorderable.
+	rows, err := s.db.QueryContext(ctx, `SELECT `+skillCols+` FROM skill`+where+` ORDER BY sort_order, id`)
 	if err != nil {
 		return nil, err
 	}
