@@ -1444,7 +1444,7 @@ components:
 
     Skill:
       type: object
-      required: [id, name_cs, name_en, category, visible, sort_order]
+      required: [id, name_cs, name_en, category_cs, category_en, visible, sort_order]
       properties:
         id:
           type: integer
@@ -1452,7 +1452,10 @@ components:
           type: string
         name_en:
           type: string
-        category:
+        category_cs:
+          type: string
+          examples: ["jazyky", "nástroje", "řemeslo"]
+        category_en:
           type: string
           examples: ["languages", "tools", "craft"]
         icon:
@@ -1467,13 +1470,15 @@ components:
           type: integer
     SkillCreate:
       type: object
-      required: [name_cs, name_en, category]
+      required: [name_cs, name_en, category_cs, category_en]
       properties:
         name_cs:
           type: string
         name_en:
           type: string
-        category:
+        category_cs:
+          type: string
+        category_en:
           type: string
         icon:
           type: string
@@ -1493,7 +1498,9 @@ components:
           type: string
         name_en:
           type: string
-        category:
+        category_cs:
+          type: string
+        category_en:
           type: string
         icon:
           type: string

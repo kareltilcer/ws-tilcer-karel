@@ -192,34 +192,37 @@ type SectionUpdate struct {
 // ---- skill ----
 
 type Skill struct {
-	ID        int64   `json:"id"`
-	NameCS    string  `json:"name_cs"`
-	NameEN    string  `json:"name_en"`
-	Category  string  `json:"category"`
-	Icon      *string `json:"icon"`
-	Level     *int64  `json:"level"`
-	Visible   bool    `json:"visible"`
-	SortOrder int64   `json:"sort_order"`
+	ID         int64   `json:"id"`
+	NameCS     string  `json:"name_cs"`
+	NameEN     string  `json:"name_en"`
+	CategoryCS string  `json:"category_cs"`
+	CategoryEN string  `json:"category_en"`
+	Icon       *string `json:"icon"`
+	Level      *int64  `json:"level"`
+	Visible    bool    `json:"visible"`
+	SortOrder  int64   `json:"sort_order"`
 }
 
 type SkillCreate struct {
-	NameCS    string  `json:"name_cs"`
-	NameEN    string  `json:"name_en"`
-	Category  string  `json:"category"`
-	Icon      *string `json:"icon"`
-	Level     *int64  `json:"level"`
-	Visible   *bool   `json:"visible"`
-	SortOrder *int64  `json:"sort_order"`
+	NameCS     string  `json:"name_cs"`
+	NameEN     string  `json:"name_en"`
+	CategoryCS string  `json:"category_cs"`
+	CategoryEN string  `json:"category_en"`
+	Icon       *string `json:"icon"`
+	Level      *int64  `json:"level"`
+	Visible    *bool   `json:"visible"`
+	SortOrder  *int64  `json:"sort_order"`
 }
 
 type SkillUpdate struct {
-	NameCS    *string        `json:"name_cs"`
-	NameEN    *string        `json:"name_en"`
-	Category  *string        `json:"category"`
-	Icon      *string        `json:"icon"`
-	Level     OptionalNullID `json:"level"`
-	Visible   *bool          `json:"visible"`
-	SortOrder *int64         `json:"sort_order"`
+	NameCS     *string        `json:"name_cs"`
+	NameEN     *string        `json:"name_en"`
+	CategoryCS *string        `json:"category_cs"`
+	CategoryEN *string        `json:"category_en"`
+	Icon       *string        `json:"icon"`
+	Level      OptionalNullID `json:"level"`
+	Visible    *bool          `json:"visible"`
+	SortOrder  *int64         `json:"sort_order"`
 }
 
 // ---- business info ----
