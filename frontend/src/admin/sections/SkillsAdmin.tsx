@@ -5,23 +5,38 @@ import { AdminCard, BilingualField, ConfirmButton, Field, PageHeader, runAction 
 import { Spinner } from '../../components/states'
 import { IconPicker } from '../IconPicker'
 
+// Skills group by their bilingual label pair: two skills sit in the same group
+// when both category_cs and category_en match. This composite key threads through
+// grouping, React keys, and reorder — the analog of the old single category string.
+const groupKey = (s: { category_cs: string; category_en: string }) => `${s.category_cs} ${s.category_en}`
+
 export default function SkillsAdmin() {
   const { data, isLoading } = useAdminSkills()
   const [nameCs, setNameCs] = useState('')
   const [nameEn, setNameEn] = useState('')
-  const [category, setCategory] = useState('')
+  const [categoryCs, setCategoryCs] = useState('')
+  const [categoryEn, setCategoryEn] = useState('')
   const [level, setLevel] = useState('')
   const [icon, setIcon] = useState('')
 
   async function add() {
     const ok = await runAction(
-      () => createSkill({ name_cs: nameCs, name_en: nameEn, category, icon: icon || undefined, level: level ? Number(level) : undefined }),
+      () =>
+        createSkill({
+          name_cs: nameCs,
+          name_en: nameEn,
+          category_cs: categoryCs,
+          category_en: categoryEn,
+          icon: icon || undefined,
+          level: level ? Number(level) : undefined,
+        }),
       'Přidáno / Added',
     )
     if (ok) {
       setNameCs('')
       setNameEn('')
-      setCategory('')
+      setCategoryCs('')
+      setCategoryEn('')
       setLevel('')
       setIcon('')
     }
@@ -29,27 +44,28 @@ export default function SkillsAdmin() {
 
   const skills = data ?? []
 
-  // Group skills by category in first-appearance order (matches the public page).
-  // Each group's items keep their relative order; category order follows the
-  // order groups are first seen in the flat, sort_order-driven list.
-  const groups: { category: string; items: Skill[] }[] = []
+  // Group skills by their bilingual label in first-appearance order (matches the
+  // public page). Each group's items keep their relative order; group order
+  // follows the order groups are first seen in the flat, sort_order-driven list.
+  const groups: { cs: string; en: string; items: Skill[] }[] = []
   const groupIndex = new Map<string, number>()
   for (const s of skills) {
-    let gi = groupIndex.get(s.category)
+    const key = groupKey(s)
+    let gi = groupIndex.get(key)
     if (gi === undefined) {
       gi = groups.length
-      groupIndex.set(s.category, gi)
-      groups.push({ category: s.category, items: [] })
+      groupIndex.set(key, gi)
+      groups.push({ cs: s.category_cs, en: s.category_en, items: [] })
     }
     groups[gi].items.push(s)
   }
 
   // Flatten groups (in their current order, groups kept contiguous) to a flat id
   // list and persist. Contiguity is what keeps the public page's groups clean.
-  const persist = (gs: { category: string; items: Skill[] }[]) =>
+  const persist = (gs: { cs: string; en: string; items: Skill[] }[]) =>
     void runAction(() => reorderSkills(gs.flatMap((g) => g.items.map((s) => s.id))))
 
-  const clone = () => groups.map((g) => ({ category: g.category, items: [...g.items] }))
+  const clone = () => groups.map((g) => ({ cs: g.cs, en: g.en, items: [...g.items] }))
 
   const moveGroup = (gi: number, dir: -1 | 1) => {
     const j = gi + dir
@@ -74,10 +90,8 @@ export default function SkillsAdmin() {
       <AdminCard style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <BilingualField label="Název / Name" cs={nameCs} en={nameEn} onCs={setNameCs} onEn={setNameEn} />
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 8, alignItems: 'end' }}>
-            <Field label="Skupina / Group">
-              <input className="input" placeholder="languages" value={category} onChange={(e) => setCategory(e.target.value)} />
-            </Field>
+          <BilingualField label="Skupina / Group" cs={categoryCs} en={categoryEn} onCs={setCategoryCs} onEn={setCategoryEn} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, alignItems: 'end' }}>
             <Field label="Úroveň 1–5">
               <input className="input" type="number" min={1} max={5} value={level} onChange={(e) => setLevel(e.target.value)} />
             </Field>
@@ -97,10 +111,11 @@ export default function SkillsAdmin() {
       {isLoading && <Spinner />}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
         {groups.map((g, gi) => (
-          <div key={g.category}>
+          <div key={`${g.cs} ${g.en}`}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
               <h2 className="display" style={{ fontWeight: 700, fontSize: 20, margin: 0, textTransform: 'capitalize' }}>
-                {g.category}
+                {g.cs}
+                {g.en && <span style={{ color: 'var(--ink-soft)', fontWeight: 600 }}> / {g.en}</span>}
               </h2>
               <span
                 style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-soft)', background: 'var(--cream-line)', borderRadius: 999, padding: '2px 9px' }}
@@ -163,7 +178,8 @@ function Row({
 }) {
   const [nameCs, setNameCs] = useState(s.name_cs)
   const [nameEn, setNameEn] = useState(s.name_en)
-  const [category, setCategory] = useState(s.category)
+  const [categoryCs, setCategoryCs] = useState(s.category_cs)
+  const [categoryEn, setCategoryEn] = useState(s.category_en)
   const [level, setLevel] = useState(s.level != null ? String(s.level) : '')
   const [icon, setIcon] = useState(s.icon ?? '')
   const [visible, setVisible] = useState(s.visible)
@@ -171,8 +187,8 @@ function Row({
     <AdminCard>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <BilingualField label="Název / Name" cs={nameCs} en={nameEn} onCs={setNameCs} onEn={setNameEn} />
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 8 }}>
-          <input className="input" value={category} onChange={(e) => setCategory(e.target.value)} />
+        <BilingualField label="Skupina / Group" cs={categoryCs} en={categoryEn} onCs={setCategoryCs} onEn={setCategoryEn} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <input className="input" type="number" min={1} max={5} value={level} onChange={(e) => setLevel(e.target.value)} />
           <IconPicker value={icon} onChange={setIcon} />
         </div>
@@ -192,7 +208,16 @@ function Row({
             style={{ height: 32, padding: '0 14px', fontSize: 13 }}
             onClick={() =>
               runAction(
-                () => updateSkill(s.id, { name_cs: nameCs, name_en: nameEn, category, icon, visible, level: level ? Number(level) : null }),
+                () =>
+                  updateSkill(s.id, {
+                    name_cs: nameCs,
+                    name_en: nameEn,
+                    category_cs: categoryCs,
+                    category_en: categoryEn,
+                    icon,
+                    visible,
+                    level: level ? Number(level) : null,
+                  }),
                 'Uloženo / Saved',
               )
             }
