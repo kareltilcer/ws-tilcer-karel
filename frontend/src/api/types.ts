@@ -90,7 +90,8 @@ export interface Skill {
   id: number
   name_cs: string
   name_en: string
-  category: string
+  category_cs: string
+  category_en: string
   icon: string | null
   level: number | null
   visible: boolean

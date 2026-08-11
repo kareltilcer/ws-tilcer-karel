@@ -174,3 +174,34 @@ func TestBadLinkURLRejected(t *testing.T) {
 		t.Fatalf("bad url: want 422, got err=%v", err)
 	}
 }
+
+func TestSkillBilingualGroupRoundTrip(t *testing.T) {
+	s := newTestSvc(t)
+	ctx := context.Background()
+
+	// Both group labels are required, mirroring the bilingual name.
+	if _, err := s.CreateSkill(ctx, SkillCreate{NameCS: "Go", NameEN: "Go", CategoryCS: "jazyky"}); apiStatus(err) != 422 {
+		t.Fatalf("missing category_en: want 422, got err=%v", err)
+	}
+
+	sk, err := s.CreateSkill(ctx, SkillCreate{NameCS: "Go", NameEN: "Go", CategoryCS: "jazyky", CategoryEN: "languages"})
+	if err != nil {
+		t.Fatalf("CreateSkill: %v", err)
+	}
+	if sk.CategoryCS != "jazyky" || sk.CategoryEN != "languages" {
+		t.Fatalf("group = %q/%q, want jazyky/languages", sk.CategoryCS, sk.CategoryEN)
+	}
+
+	// Retitling the group in both languages survives a round-trip through the store.
+	cs, en := "nástroje", "tools"
+	if _, err := s.UpdateSkill(ctx, sk.ID, SkillUpdate{CategoryCS: &cs, CategoryEN: &en}); err != nil {
+		t.Fatalf("UpdateSkill: %v", err)
+	}
+	skills, err := s.ListAllSkills(ctx)
+	if err != nil {
+		t.Fatalf("list skills: %v", err)
+	}
+	if len(skills) != 1 || skills[0].CategoryCS != "nástroje" || skills[0].CategoryEN != "tools" {
+		t.Fatalf("after update: %+v", skills)
+	}
+}
